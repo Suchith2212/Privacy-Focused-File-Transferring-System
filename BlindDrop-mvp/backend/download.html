@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Download File</h2>
+
+<!-- STEP 1 -->
+<div id="step1">
+  <input type="text" id="outerToken" placeholder="Enter Outer Token" />
+  <button onclick="verifyOuter()">Verify</button>
+</div>
+
+<!-- METADATA -->
+<div id="meta" style="display:none;">
+  <h3>File Info</h3>
+  <p id="filename"></p>
+  <p id="uploadTime"></p>
+  <p id="expiryTime"></p>
+
+  <h3>Enter Inner Token</h3>
+  <input type="text" id="innerToken" />
+  <button onclick="downloadFile()">Download</button>
+</div>
+
+<script>
+async function verifyOuter() {
+  const outerToken = document.getElementById("outerToken").value;
+
+  const response = await fetch("/verify-outer", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ outerToken })
+  });
+
+  if (!response.ok) {
+    alert("Invalid token");
+    return;
+  }
+
+  const data = await response.json();
+
+  document.getElementById("filename").innerText =
+    "Filename: " + data.filename;
+
+  document.getElementById("uploadTime").innerText =
+    "Uploaded: " + data.uploadTime;
+
+  document.getElementById("expiryTime").innerText =
+    "Deletes: " + data.expiryTime;
+
+  document.getElementById("meta").style.display = "block";
+}
+
+async function downloadFile() {
+  const outerToken = document.getElementById("outerToken").value;
+  const innerToken = document.getElementById("innerToken").value;
+
+  const response = await fetch("/download", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ outerToken, innerToken })
+  });
+
+  if (response.ok) {
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "file";
+    a.click();
+  } else {
+    alert("Invalid inner token or expired file");
+  }
+}
+</script>
+
+</body>
+</html>
