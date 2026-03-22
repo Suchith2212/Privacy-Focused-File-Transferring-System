@@ -1,0 +1,49 @@
+# API Evidence Summary
+
+## Captured run context
+
+- Base URL: `http://localhost:4000`
+- Demo outer token: `OUTERDEMO7`
+- Admin role resolved as: `admin`
+- User role resolved as: `user`
+- Created portfolio entry ID: `9b889139-d22e-484e-8db3-6b2afdd2409f`
+- Denied-action proof captured: `True`
+
+## Captured files
+
+- `01_admin_login_request_response.txt`
+- `02_admin_isauth_response.txt`
+- `03_user_login_request_response.txt`
+- `04_portfolio_list_admin.txt`
+- `05_portfolio_create_admin.txt`
+- `06_portfolio_get_single.txt`
+- `07_portfolio_update.txt`
+- `08_portfolio_delete.txt`
+- `09_user_denied_action.txt`
+- `10_unauthorized_check.txt`
+- `11_module_b_evidence.txt`
+
+## Verified outcomes
+
+| Check | Result |
+| --- | --- |
+| Admin login successful | `True` |
+| User login successful | `True` |
+| User denied-action proof captured | `True` |
+| Unauthorized tampered count during this run | `0` |
+| Module B evidence route captured | `True` |
+| Reported portfolio index rows | `10` |
+| Reported audit event count | `18` |
+| Audit hash chain valid | `True` |
+
+## Why this set is strong
+
+This API evidence includes both positive and negative cases:
+
+- positive authentication
+- positive CRUD behavior
+- negative authorization behavior
+- active integrity-check route output
+- examiner-facing evidence route output
+
+That combination is stronger than success-only API screenshots because it proves the RBAC rules are actually enforced.

@@ -1,0 +1,4 @@
+stage,duration_ms,scan_type,key,rows,extra
+Baseline full scan,452.8318,ALL,none,4999,Using where; Using filesort
+Composite lookup index,40.0727,ref,idx_portfolio_benchmark_lookup,1,Backward index scan
+Composite + covering comparison,36.8205,ref,idx_portfolio_benchmark_lookup,1,Backward index scan

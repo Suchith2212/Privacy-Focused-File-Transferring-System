@@ -1,0 +1,46 @@
+Frontened:
+	[Logo] |  [Project-Name] | [Features] | [AboutUs] | [ContactUs]
+              
+	         [Upload File]   [Download File]
+
+                   [Highlights of our Website]  :- A short Summary
+         
+		
+		     [footer] :- Legal sodi
+
+upload file:
+	[Upload button] 
+          :- size, type (auto detect)
+	  :- Accepted
+		--> redirect to [Successful]
+		 	 :- No of days stored ~ size
+	  	  		 :-  500 MB -- 1 week
+		  	 	 :-  >500MB  -- 3 days 
+			 :- Inner Token(Length=6)  + Outer token(Length = 7) / [select] QR 
+			 :-
+			 
+		  
+
+	   / Not Accepted (reason)
+		:- do not accept APK file
+		:- MIME type mismatch
+		:- overload (>1GB)
+		:- Network error
+		:- 
+Download File:
+       [Outer Token | QR]
+	 :- Accepted
+		:- Show Meta Data
+		[Inner Token]
+			:- Accepted
+				--> redirect to Download page
+					:- Download: Confirm / Cancel--> redirect to download page 
+					:- if downloaded  -- delete all the data including metadata
+						
+			:- Not Accepted
+				:- Wrong Token 
+				:- Overloaded ( 5 requests per minute, 50 requests per day )
+         :- Not Accepted
+		:- Wrong Token
+		:- Overload 
+		:- 

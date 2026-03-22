@@ -1,0 +1,16 @@
+{
+    "response":  {
+                     "message":  "Vault session established.",
+                     "sessionToken":  "71c3dc16-54d4-4654-8b3b-c2537c00664b",
+                     "vaultId":  "91ff4e74-f0c4-43b9-ae76-78e0713fa802",
+                     "outerToken":  "OUTERDEMO7",
+                     "tokenType":  "MAIN",
+                     "role":  "admin",
+                     "expiresAt":  "2030-12-31T18:29:59.000Z",
+                     "remainingSeconds":  150928199
+                 },
+    "request":  {
+                    "outerToken":  "OUTERDEMO7",
+                    "innerToken":  "MainDemo1234"
+                }
+}

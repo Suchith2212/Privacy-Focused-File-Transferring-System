@@ -1,0 +1,4 @@
+# Module A Requirements
+matplotlib>=3.8.0
+graphviz>=0.20.3
+jupyter>=1.0.0
