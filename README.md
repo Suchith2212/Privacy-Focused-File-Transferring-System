@@ -4,6 +4,10 @@ This repository is organized for GitHub upload and submission review.
 
 The repository contains both `Ass1/` and the consolidated `Ass2/` submission package.
 
+## Repository Link
+
+GitHub Repository: https://github.com/Suchith2212/Privacy-Focused-File-Transferring-System
+
 ## Primary Entry Points
 
 - `Ass1/`

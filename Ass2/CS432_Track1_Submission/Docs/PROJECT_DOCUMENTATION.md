@@ -4,6 +4,10 @@
 
 This document is the **primary end-to-end technical explanation** for the combined `CS432_Track1_Submission` package. It is written so that the full submission can be understood without needing to reconstruct context from the original working repository.
 
+## Repository Link
+
+GitHub Repository: https://github.com/Suchith2212/Privacy-Focused-File-Transferring-System
+
 The package combines:
 
 - **Module A**
