@@ -21,8 +21,12 @@ This summary ties together the complete Module A evidence package.
 - `06_module_a_benchmark_console.txt`
 - `07_module_a_benchmark_results.json`
 - `08_module_a_benchmark_summary.md`
+- `09_module_a_plot_explanations.md`
 - `Module_A/integration/benchmark_blinddrop_paths_summary.md`
-- `Module_A/integration/benchmark_path_dashboard.png`
+- `Module_A/integration/benchmark_outer_lookup.png`
+- `Module_A/integration/benchmark_expiry_range.png`
+- `Module_A/integration/benchmark_file_range.png`
+- `Module_A/integration/benchmark_auth_range.png`
 - `Module_A/integration/benchmark_path_speedup.png`
 - `benchmark_operation_dashboard.png`
 - `benchmark_insertion.png`

@@ -160,6 +160,6 @@ This Module A package is stronger than a minimal submission because it provides:
 - parity/rollback/rebuild proof
 - multiple benchmark views and generated artifacts
 
-## 11. Viva explanation
+## 11. Explanation
 
 `For Module A, I implemented the B+ Tree and the lightweight database wrapper in Python as required, benchmarked it against a brute-force baseline, and then added a BlindDrop-specific integration layer so I could demonstrate exact lookups, range scans, parity validation, rollback, repair, rebuild, and Graphviz visualization on realistic project-shaped paths.`

@@ -48,6 +48,4 @@ This is stronger than a generic integer-key demonstration because it shows:
 - how a brute-force scan compares against indexed access on the same workload
 - how parity, rollback, and rebuild can be reasoned about when the database remains authoritative
 
-## One-line viva explanation
 
-`For Module A, I kept the custom Python B+ Tree as the assignment-facing index engine and integrated it through a BlindDrop-specific wrapper so I could demonstrate real project-shaped lookups, range scans, parity validation, and rebuild behavior without replacing the authoritative relational model.`

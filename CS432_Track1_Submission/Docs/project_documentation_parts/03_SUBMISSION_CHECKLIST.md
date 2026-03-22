@@ -1,11 +1,6 @@
 # Submission Checklist
 
-## 1. Cover page and identity
 
-- [ ] student details filled in `Docs/00_COVER_PAGE.md`
-- [ ] project title written consistently as `BlindDrop` / `Project_432`
-- [ ] course and assignment labels match instructor expectations
-- [ ] submission date verified
 
 ## 2. Root documentation package
 

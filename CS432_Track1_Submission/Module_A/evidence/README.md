@@ -21,6 +21,7 @@ This folder contains the packaged Module A evidence used to support the final su
 - `06_module_a_benchmark_console.txt`
 - `07_module_a_benchmark_results.json`
 - `08_module_a_benchmark_summary.md`
+- `09_module_a_plot_explanations.md`
 - `13_module_a_evidence_summary.md`
 - `benchmark_detailed.json`
 - `benchmark_operation_dashboard.png`
@@ -52,6 +53,7 @@ This evidence demonstrates that:
 1. `13_module_a_evidence_summary.md`
 2. `05_module_a_parity_summary.md`
 3. `08_module_a_benchmark_summary.md`
-4. `Module_A/integration/benchmark_blinddrop_paths_summary.md`
-5. the PNG plots in this folder
-6. `Module_A/integration/bptree_v2/render_manifest.json`
+4. `09_module_a_plot_explanations.md`
+5. `Module_A/integration/benchmark_blinddrop_paths_summary.md`
+6. the PNG plots in this folder
+7. `Module_A/integration/bptree_v2/render_manifest.json`

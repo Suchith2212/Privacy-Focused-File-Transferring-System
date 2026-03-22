@@ -128,11 +128,5 @@ Packaged benchmark evidence:
 
 The measured protected query uses `vault_id`, `owner_token_id`, `status`, and `updated_at`, which is why the composite lookup index follows that order.
 
-## 8. Submission cleanliness
 
-The final package should exclude transient dependency caches and local install artifacts. During cleanup, remove:
 
-- `app/backend/node_modules/`
-- `.npm-cache/`
-
-Those folders are not part of the graded source submission.

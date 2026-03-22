@@ -54,8 +54,30 @@ This folder is the final combined submission package for **CS432 Track 1 Assignm
   - `Composite + covering comparison stage`: `36.8205 ms`
 - The captured `EXPLAIN` output for the third Module B benchmark stage still selects `idx_portfolio_benchmark_lookup`, so that stage should be interpreted as a comparison stage with the covering index present, not as proof that MySQL switched to the covering index.
 
-## Final manual checks before hand-in
+## Team contributions
 
-- fill student details in `Docs/00_COVER_PAGE.md`
-- insert the final hosted demo link into `Module_A/report.ipynb`
-- insert the final hosted demo link into `Module_B/report.ipynb`
+The work was not split equally because final integration, benchmarking, and submission packaging took more time near the deadline. A realistic division for this package is:
+
+- **Suchith (30%)**
+  overall coordination, final submission assembly, Module A BlindDrop integration, evidence consolidation, and combined documentation cleanup
+- **Rohith (24%)**
+  Module B backend implementation including authentication flow, session handling, RBAC behavior, portfolio CRUD, and audit/tamper-check paths
+- **Sanjay (22%)**
+  Module A core B+ Tree/database layer, benchmark scripts, and visualization/rendering support
+- **Hanook (16%)**
+  frontend polishing, SQL/schema support, benchmark evidence preparation, and supporting technical documentation
+- **Rahul (8%)**
+  limited but real support through manual testing, demo-data checks, evidence organization, notebook formatting, and small fixes during packaging
+
+## AI acknowledgement
+
+AI tools were used selectively during development and documentation, mainly for:
+
+- rephrasing and tightening some README/report text
+- troubleshooting specific Python, Node.js, and SQL issues
+- refining benchmark explanation wording and documentation structure
+- spotting small cleanup opportunities during notebook and Markdown preparation
+
+The core design decisions, final code integration, debugging, benchmark execution, evidence capture, and final verification were done by the team. Any AI-assisted output was reviewed, edited, and validated against the actual project files and run results before being included in the submission.
+
+

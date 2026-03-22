@@ -7,6 +7,7 @@ This summary explains the benchmark evidence packaged in:
 - `benchmark_detailed.json`
 - the PNG plots in `evidence/`
 - `Module_A/integration/benchmark_blinddrop_paths_summary.md`
+- `09_module_a_plot_explanations.md`
 
 ## Source dataset
 
@@ -78,3 +79,5 @@ This benchmark package is stronger than the earlier lightweight draft because it
 - denser plots with 20-point and 22-point sweeps
 - dashboard visualizations that compare multiple operations in one figure
 - a refreshed aggregate JSON file, `07_module_a_benchmark_results.json`, that now matches the current detailed benchmark output
+
+For a figure-by-figure explanation of every packaged benchmark image, see `09_module_a_plot_explanations.md`.

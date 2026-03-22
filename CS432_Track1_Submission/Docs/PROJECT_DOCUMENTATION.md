@@ -467,11 +467,33 @@ This package is strong because it provides:
 - security controls backed by actual implementation
 - SQL optimization backed by real measurement
 
-## 12. Conclusion
+## 12. Team contributions
+
+The development effort was intentionally distributed by module ownership and final integration needs rather than equally. Because this package combines two modules, evidence folders, notebooks, and evaluator-facing documentation, the final assembly workload was concentrated on the members handling integration and packaging.
+
+| Team member | Contribution share | Primary work completed |
+| --- | ---: | --- |
+| Suchith | 30% | overall coordination, final submission packaging, Module A BlindDrop integration, evidence consolidation, and cross-module documentation cleanup |
+| Rohith | 24% | Module B backend implementation, authentication/session flow, RBAC, portfolio CRUD, and audit/tamper-detection integration |
+| Sanjay | 22% | Module A core B+ Tree/database layer, benchmark scripts, and visualization/rendering support |
+| Hanook | 16% | frontend polishing, SQL/schema support, benchmark evidence preparation, and supporting technical documentation |
+| Rahul | 8% | limited support through manual verification, demo-data checks, evidence organization, notebook formatting, and minor packaging fixes |
+
+This division reflects the actual shape of the submitted folder: Module A required custom data-structure and benchmark work, Module B required application and database work, and the final deliverable required a significant amount of integration, documentation, and evidence preparation.
+
+## 13. AI acknowledgement
+
+AI tools were used in a limited supporting role during the project. Their use was mainly confined to:
+
+- drafting or rephrasing parts of Markdown and notebook explanations
+- troubleshooting isolated implementation issues in Python, Node.js, and SQL
+- suggesting alternative wording for benchmark interpretation and report structure
+- helping identify small cleanup tasks during final packaging
+
+The project was not produced by AI end-to-end. The team selected the BlindDrop-based submission strategy, implemented and integrated the final code, ran the benchmarks, captured the evidence, verified the outputs, and edited the documentation manually. Any AI-assisted content was reviewed, revised, and checked against the actual repository state before inclusion.
+
+## 14. Conclusion
 
 The `CS432_Track1_Submission` package is an end-to-end submission built around the BlindDrop project. Module A demonstrates a from-scratch B+ Tree and its integration into realistic project-shaped indexing workloads. Module B demonstrates local authentication, RBAC CRUD, tamper-evident audit logging, unauthorized modification detection, and SQL optimization on a project-specific data model. Together they form one coherent technical submission rather than two unrelated deliverables.
 
-The only remaining manual items outside the Markdown package are:
 
-- filling in student details on the cover page
-- inserting the final hosted demo link into the two notebook reports

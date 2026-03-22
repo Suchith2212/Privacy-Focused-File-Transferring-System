@@ -22,8 +22,9 @@ The Module A evidence should demonstrate:
 4. `evidence/05_module_a_parity_summary.md`
 5. `integration/db_index_parity_demo_summary.md`
 6. `evidence/08_module_a_benchmark_summary.md`
-7. `integration/benchmark_blinddrop_paths_summary.md`
-8. the PNG plots in `evidence/` and `integration/`
+7. `evidence/09_module_a_plot_explanations.md`
+8. `integration/benchmark_blinddrop_paths_summary.md`
+9. the PNG plots in `evidence/` and `integration/`
 
 ## Evidence groups
 
@@ -59,6 +60,7 @@ These prove:
 - `06_module_a_benchmark_console.txt`
 - `07_module_a_benchmark_results.json`
 - `08_module_a_benchmark_summary.md`
+- `09_module_a_plot_explanations.md`
 - `integration/benchmark_blinddrop_paths_summary.md`
 - the four domain PNGs in `integration/`
 - the detailed benchmark PNGs in `evidence/`
