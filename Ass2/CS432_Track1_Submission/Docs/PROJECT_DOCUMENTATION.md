@@ -471,7 +471,32 @@ This package is strong because it provides:
 - security controls backed by actual implementation
 - SQL optimization backed by real measurement
 
-## 12. Conclusion
+## 12. Contribution statement
+
+This submission was prepared and consolidated as a single student project repository.
+
+The repository author was responsible for:
+
+- project design decisions and submission planning
+- implementation and integration work for Module A and Module B
+- benchmarking, evidence collection, and packaging
+- documentation preparation and final repository organization
+
+If the final submitted version needs a formal student name or ID declaration, it should also be added on the cover page.
+
+## 13. AI usage declaration
+
+AI tools were used as a support aid during the project workflow.
+
+Their use was limited to tasks such as:
+
+- refining documentation wording and structure
+- helping format repository and submission notes
+- assisting with debugging suggestions and code explanation
+
+All final code, documentation, testing decisions, and submitted outputs were reviewed, validated, and accepted by the student before inclusion in the repository.
+
+## 14. Conclusion
 
 The `CS432_Track1_Submission` package is an end-to-end submission built around the BlindDrop project. Module A demonstrates a from-scratch B+ Tree and its integration into realistic project-shaped indexing workloads. Module B demonstrates local authentication, RBAC CRUD, tamper-evident audit logging, unauthorized modification detection, and SQL optimization on a project-specific data model. Together they form one coherent technical submission rather than two unrelated deliverables.
 
