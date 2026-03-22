@@ -20,7 +20,7 @@
 
 - [ ] `Module_A/README.md` is current
 - [ ] `Module_A/report.ipynb` is present and opens correctly
-- [ ] final hosted demo video link added in `Module_A/report.ipynb`
+- [x] final hosted demo video link added in `Module_A/report.ipynb`
 - [ ] `Module_A/database/` contains the standalone B+ Tree engine files
 - [ ] `Module_A/integration/` contains the BlindDrop integration files
 - [ ] `Module_A/integration/bptree_v2/` contains the rendered tree PNGs
@@ -40,7 +40,7 @@
 
 - [ ] `Module_B/README.md` is current
 - [ ] `Module_B/report.ipynb` is present and opens correctly
-- [ ] final hosted demo video link added in `Module_B/report.ipynb`
+- [x] final hosted demo video link added in `Module_B/report.ipynb`
 - [ ] `Module_B/app/backend/` contains the backend source
 - [ ] `Module_B/app/frontend/` contains the frontend
 - [ ] `Module_B/sql/` contains the packaged schema copy

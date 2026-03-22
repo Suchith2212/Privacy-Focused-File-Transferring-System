@@ -110,7 +110,7 @@ This package now includes:
 
 Transient local-install artifacts such as `node_modules/`, `.npm-cache/`, and a live `.env` file are intentionally excluded from the cleaned submission package.
 
-The only manual item left before final hand-in is inserting the hosted video link into `report.ipynb`.
+Hosted demo video: https://youtu.be/FzY8OeX4d5E?si=ptfeexguYQ99MdmG
 
 Useful packaged verification commands from `app/backend`:
 

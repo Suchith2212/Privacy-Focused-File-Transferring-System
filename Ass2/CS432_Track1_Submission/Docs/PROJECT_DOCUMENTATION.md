@@ -500,7 +500,4 @@ The project was not produced by AI end-to-end. The team selected the BlindDrop-b
 
 The `CS432_Track1_Submission` package is an end-to-end submission built around the BlindDrop project. Module A demonstrates a from-scratch B+ Tree and its integration into realistic project-shaped indexing workloads. Module B demonstrates local authentication, RBAC CRUD, tamper-evident audit logging, unauthorized modification detection, and SQL optimization on a project-specific data model. Together they form one coherent technical submission rather than two unrelated deliverables.
 
-The only remaining manual items outside the Markdown package are:
-
-- filling in student details on the cover page
-- inserting the final hosted demo link into the two notebook reports
+The only remaining manual item outside the Markdown package is filling in student details on the cover page.

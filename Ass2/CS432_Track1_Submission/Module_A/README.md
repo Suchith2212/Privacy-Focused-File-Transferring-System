@@ -95,4 +95,4 @@ Notable generated artifacts include:
 - `evidence/benchmark_operation_dashboard.png`
 - `integration/bptree_v2/render_manifest.json`
 
-The only manual item still outside this Markdown pass is adding the final hosted video link into `report.ipynb`.
+Hosted demo video: https://youtu.be/T24vXjLI5dI?si=URhvw7nJmuug-nHH

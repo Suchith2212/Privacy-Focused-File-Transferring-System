@@ -54,8 +54,8 @@ This folder is the final combined submission package for **CS432 Track 1 Assignm
   - `Composite + covering comparison stage`: `36.8205 ms`
 - The captured `EXPLAIN` output for the third Module B benchmark stage still selects `idx_portfolio_benchmark_lookup`, so that stage should be interpreted as a comparison stage with the covering index present, not as proof that MySQL switched to the covering index.
 
-## Final manual checks before hand-in
+## Final hand-in notes
 
 - fill student details in `Docs/00_COVER_PAGE.md`
-- insert the final hosted demo link into `Module_A/report.ipynb`
-- insert the final hosted demo link into `Module_B/report.ipynb`
+- Module A demo video: https://youtu.be/T24vXjLI5dI?si=URhvw7nJmuug-nHH
+- Module B demo video: https://youtu.be/FzY8OeX4d5E?si=ptfeexguYQ99MdmG
