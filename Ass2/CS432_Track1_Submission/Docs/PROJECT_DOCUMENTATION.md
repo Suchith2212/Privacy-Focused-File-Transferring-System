@@ -471,30 +471,30 @@ This package is strong because it provides:
 - security controls backed by actual implementation
 - SQL optimization backed by real measurement
 
-## 12. Contribution statement
+## 12. Team contributions
 
-This submission was prepared and consolidated as a single student project repository.
+The development effort was intentionally distributed by module ownership and final integration needs rather than equally. Because this package combines two modules, evidence folders, notebooks, and evaluator-facing documentation, the final assembly workload was concentrated on the members handling integration and packaging.
 
-The repository author was responsible for:
+| Team member | Contribution share | Primary work completed |
+| --- | ---: | --- |
+| Suchith | 30% | overall coordination, final submission packaging, Module A BlindDrop integration, evidence consolidation, and cross-module documentation cleanup |
+| Rohith | 24% | Module B backend implementation, authentication/session flow, RBAC, portfolio CRUD, and audit/tamper-detection integration |
+| Sanjay | 22% | Module A core B+ Tree/database layer, benchmark scripts, and visualization/rendering support |
+| Hanook | 16% | frontend polishing, SQL/schema support, benchmark evidence preparation, and supporting technical documentation |
+| Rahul | 8% | limited support through manual verification, demo-data checks, evidence organization, notebook formatting, and minor packaging fixes |
 
-- project design decisions and submission planning
-- implementation and integration work for Module A and Module B
-- benchmarking, evidence collection, and packaging
-- documentation preparation and final repository organization
+This division reflects the actual shape of the submitted folder: Module A required custom data-structure and benchmark work, Module B required application and database work, and the final deliverable required a significant amount of integration, documentation, and evidence preparation.
 
-If the final submitted version needs a formal student name or ID declaration, it should also be added on the cover page.
+## 13. AI acknowledgement
 
-## 13. AI usage declaration
+AI tools were used in a limited supporting role during the project. Their use was mainly confined to:
 
-AI tools were used as a support aid during the project workflow.
+- drafting or rephrasing parts of Markdown and notebook explanations
+- troubleshooting isolated implementation issues in Python, Node.js, and SQL
+- suggesting alternative wording for benchmark interpretation and report structure
+- helping identify small cleanup tasks during final packaging
 
-Their use was limited to tasks such as:
-
-- refining documentation wording and structure
-- helping format repository and submission notes
-- assisting with debugging suggestions and code explanation
-
-All final code, documentation, testing decisions, and submitted outputs were reviewed, validated, and accepted by the student before inclusion in the repository.
+The project was not produced by AI end-to-end. The team selected the BlindDrop-based submission strategy, implemented and integrated the final code, ran the benchmarks, captured the evidence, verified the outputs, and edited the documentation manually. Any AI-assisted content was reviewed, revised, and checked against the actual repository state before inclusion.
 
 ## 14. Conclusion
 
