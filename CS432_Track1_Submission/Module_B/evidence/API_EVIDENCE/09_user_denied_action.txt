@@ -1,2 +1,0 @@
-The remote server returned an error: (404) Not Found.
-{"error":"Portfolio entry not found."}
