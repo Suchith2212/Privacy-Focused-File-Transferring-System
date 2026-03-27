@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlindDrop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-one" aria-hidden="true"></div>
+    <div class="bg-orb orb-two" aria-hidden="true"></div>
+
+    <main class="app-shell">
+      <header class="topbar glass-panel reveal" style="--delay:0ms">
+        <button id="brandLogo" class="brand" type="button" aria-label="Go to home">
+          <span class="brand-mark" aria-hidden="true">BD</span>
+          <span class="brand-copy">
+            <strong>BlindDrop</strong>
+            <small>Secure transfer vault</small>
+          </span>
+        </button>
+
+        <section class="topbar-actions" aria-label="Primary navigation">
+          <button id="goFeaturesTop" type="button" class="btn btn-secondary btn-inline">
+            <i data-lucide="layout-grid"></i>
+            <span>Features</span>
+          </button>
+        </section>
+      </header>
+
+      <section id="viewLanding" class="view active">
+        <article class="hero glass-panel reveal" style="--delay:40ms">
+          <p class="eyebrow">Temporary File Security</p>
+          <h1>Transfer sensitive files with scoped, expiring access.</h1>
+          <p class="hero-copy">
+            BlindDrop separates public vault discovery from private token authorization, keeping your files controlled at every step.
+          </p>
+          <div class="hero-highlights" aria-label="Key capabilities">
+            <span>Scoped Token Permissions</span>
+            <span>Automatic Expiry Controls</span>
+            <span>Secure Public + Private Access</span>
+          </div>
+        </article>
+
+        <section class="metric-strip reveal" style="--delay:90ms" aria-label="Product highlights">
+          <article class="metric-item">
+            <strong>Dual-Layer Security</strong>
+            <p>Public outer token + private inner token validation.</p>
+          </article>
+          <article class="metric-item">
+            <strong>Fast Vault Flows</strong>
+            <p>Optimized multi-file upload and progressive feedback.</p>
+          </article>
+          <article class="metric-item">
+            <strong>Scoped Sharing</strong>
+            <p>Create revocable sub-tokens with file-level boundaries.</p>
+          </article>
+        </section>
+
+        <div class="landing-grid reveal-group" aria-label="Primary actions">
+          <article class="card action-card reveal" style="--delay:130ms" id="goUpload" tabindex="0" role="button" aria-label="Create new vault">
+            <div class="icon-wrap">
+              <i data-lucide="folder-plus"></i>
+            </div>
+            <h2>Create New Vault</h2>
+            <p>Upload files and generate a MAIN token with full control permissions.</p>
+            <span class="action-link">Start new vault <i data-lucide="arrow-right"></i></span>
+          </article>
+
+          <article class="card action-card reveal" style="--delay:180ms" id="goAccess" tabindex="0" role="button" aria-label="Access existing vault">
+            <div class="icon-wrap">
+              <i data-lucide="shield-check"></i>
+            </div>
+            <h2>Access Existing Vault</h2>
+            <p>Verify an outer token and unlock files with a MAIN or scoped SUB inner token.</p>
+            <span class="action-link">Open vault access <i data-lucide="arrow-right"></i></span>
+          </article>
+
+          <article class="card action-card reveal" style="--delay:220ms" id="goFeatures" tabindex="0" role="button" aria-label="Open features overview">
+            <div class="icon-wrap">
+              <i data-lucide="sparkles"></i>
+            </div>
+            <h2>Platform Features</h2>
+            <p>Explore architecture, security controls, and the 10-table implementation overview.</p>
+            <span class="action-link">See feature details <i data-lucide="arrow-right"></i></span>
+          </article>
+        </div>
+      </section>
+
+      <section id="viewFeatures" class="view">
+        <button class="btn btn-ghost back-btn" type="button">
+          <i data-lucide="arrow-left"></i>
+          <span>Back</span>
+        </button>
+
+        <article class="card panel reveal" style="--delay:50ms">
+          <div class="card-head">
+            <h2>BlindDrop Features</h2>
+            <p>Implementation-aligned capabilities from the project documentation.</p>
+          </div>
+
+          <div class="feature-banner">
+            <strong>Latest Improvements</strong>
+            <p>
+              One-time CAPTCHA replay, browser QR scanning for outer-token access, SUB token visibility + recovery,
+              file conflict alerts before reassignment, and hard upload quotas are now live.
+            </p>
+          </div>
+
+          <div class="features-grid">
+            <article class="feature-card">
+              <h3>Dual-Token Vault Access</h3>
+              <p>Outer token for discovery and MAIN/SUB inner tokens for scoped authorization.</p>
+            </article>
+            <article class="feature-card">
+              <h3>QR-Based Outer Token Scan</h3>
+              <p>Recipients can type the outer token or scan the generated QR with the browser camera.</p>
+            </article>
+            <article class="feature-card">
+              <h3>One-Time CAPTCHA Replay</h3>
+              <p>After solving a challenge once, the blocked action is replayed without instantly prompting again.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Module B Role Mapping</h3>
+              <p>MAIN token acts as vault admin, while SUB token acts as vault user for RBAC flows.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Portfolio CRUD Layer</h3>
+              <p>Vault-scoped portfolio entries provide a clean authenticated CRUD surface for Module B evaluation.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Tamper Detection</h3>
+              <p>Unauthorized direct DB modifications are detected through integrity hashing on portfolio rows.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Scoped Sub-Tokens</h3>
+              <p>Create revocable SUB tokens mapped to selected files for controlled sharing.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Encrypted Fallback + Recovery</h3>
+              <p>When a SUB value is not stored, UI shows <strong>[Encrypted]</strong> and allows MAIN users to bind it via Set Value.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Exclusive File-to-SUB Mapping</h3>
+              <p>Each file is scoped to only one active SUB token at a time to reduce complexity.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Conflict Alerts Before Reassignment</h3>
+              <p>If a selected file already belongs to another SUB token, users get a clear warning and confirmation step.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Edit Sub-Token File Scope</h3>
+              <p>Update file mappings for any SUB token from the Manage section without recreating tokens.</p>
+            </article>
+            <article class="feature-card">
+              <h3>One-Time Secure Download</h3>
+              <p>Download actions are audited and file access mappings are invalidated after retrieval.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Session + Attempt Auditing</h3>
+              <p>Tracks sessions, auth attempts, download logs, and file audit entries for security visibility.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Captcha Protection</h3>
+              <p>Adaptive anti-brute-force challenge tracking with verify, required checks, and replay-friendly UX.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Expiry Job Scheduling</h3>
+              <p>Vault lifecycle is coordinated by scheduled expiry jobs and status processing.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Quota Enforcement</h3>
+              <p>Uploads are blocked when vault size exceeds 250MB or total active system usage exceeds 14GB.</p>
+            </article>
+            <article class="feature-card">
+              <h3>SQL Optimization Evidence</h3>
+              <p>Portfolio access paths are documented with index benchmarking evidence for the Module B mapping.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Deploy-Ready Stack</h3>
+              <p>Runs as one Node service with static frontend + API, suitable for Render deployment.</p>
+            </article>
+            <article class="feature-card">
+              <h3>Google Drive Blob Storage</h3>
+              <p>File content is stored externally while metadata and access rules remain in MySQL.</p>
+            </article>
+          </div>
+        </article>
+      </section>
+
+      <section id="viewUpload" class="view">
+        <button class="btn btn-ghost back-btn" type="button">
+          <i data-lucide="arrow-left"></i>
+          <span>Back</span>
+        </button>
+
+        <article class="card panel reveal" style="--delay:60ms">
+          <div class="card-head">
+            <h2>Create New Vault</h2>
+            <p>Set token security, choose expiry, and upload one or more files/folders.</p>
+          </div>
+
+          <form id="uploadForm" class="form-grid">
+            <div class="form-row">
+              <div class="field-row">
+              <label for="uploadInnerToken">MAIN Inner Token</label>
+              <input
+                id="uploadInnerToken"
+                minlength="10"
+                maxlength="20"
+                required
+                placeholder="10-20 chars"
+                autocomplete="new-password"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                data-lpignore="true"
+                data-1p-ignore="true"
+              />
+              <small>Use a strong secret. This key grants full vault access.</small>
+            </div>
+
+            <div class="field-row">
+              <label for="uploadExpiryDays">Expiry Days</label>
+              <input id="uploadExpiryDays" type="number" min="1" max="14" value="7" required />
+              <small>Vault auto-expires between 1 and 14 days.</small>
+            </div>
+            </div>
+
+            <div class="field-row">
+              <label>Files / Folders</label>
+              <div id="dropzoneNew" class="dropzone" role="group" aria-label="Upload files and folders">
+                <p>Drag files/folders here or select manually.</p>
+                <div class="dropzone-actions">
+                  <button id="pickFilesBtnNew" type="button" class="btn btn-secondary">
+                    <i data-lucide="file-up"></i>
+                    <span>Choose Files</span>
+                  </button>
+                  <button id="pickFolderBtnNew" type="button" class="btn btn-secondary">
+                    <i data-lucide="folder-open"></i>
+                    <span>Choose Folder</span>
+                  </button>
+                </div>
+                <input id="uploadFilesNew" type="file" multiple class="hidden" />
+                <input id="uploadFolderNew" type="file" webkitdirectory directory multiple class="hidden" />
+              </div>
+              <ul id="selectedFilesNew" class="simple-list file-pill-list"></ul>
+            </div>
+
+            <button type="submit" class="btn btn-primary" data-loading-text="Creating vault...">
+              <i data-lucide="rocket"></i>
+              <span>Create Vault + Upload</span>
+            </button>
+          </form>
+
+          <div id="uploadProgressWrap" class="progress-wrap hidden" aria-live="polite">
+            <div class="progress-head">
+              <span>Uploading files...</span>
+              <strong id="uploadProgressLabel">0%</strong>
+            </div>
+            <div class="progress-track"><div id="uploadProgressBar" class="progress-bar"></div></div>
+          </div>
+        </article>
+
+        <article id="uploadResultCard" class="card panel success-card hidden reveal" style="--delay:110ms">
+          <h3>Vault Created Successfully</h3>
+          <div class="kv-grid">
+            <div class="kv"><span>Outer Token</span><strong id="resultOuterToken" class="token-text"></strong></div>
+            <div class="kv"><span>MAIN Inner Token</span><strong id="resultInnerToken" class="token-text"></strong></div>
+            <div class="kv"><span>Expires At</span><strong id="resultExpiresAt"></strong></div>
+          </div>
+          <div class="qr-wrap">
+            <img id="outerTokenQr" alt="Outer token QR" />
+          </div>
+          <button id="goToVaultBtn" class="btn btn-primary" type="button">
+            <i data-lucide="arrow-up-right"></i>
+            <span>Go to Vault Management</span>
+          </button>
+        </article>
+      </section>
+
+      <section id="viewAccess" class="view">
+        <button class="btn btn-ghost back-btn" type="button">
+          <i data-lucide="arrow-left"></i>
+          <span>Back</span>
+        </button>
+
+        <article class="card panel reveal" style="--delay:60ms">
+          <div class="card-head">
+            <h2>Access Vault</h2>
+            <p>Enter your vault outer token, then verify with an inner token.</p>
+          </div>
+
+          <form id="outerTokenForm" class="form-grid">
+            <div class="field-row">
+              <label for="accessOuterToken">Outer Token (Public ID)</label>
+              <div class="inline-input-actions">
+                <input id="accessOuterToken" required placeholder="Enter 8-char token" />
+                <button id="scanOuterTokenBtn" type="button" class="btn btn-secondary btn-inline">
+                  <i data-lucide="qr-code"></i>
+                  <span>Scan QR</span>
+                </button>
+              </div>
+              <small>Type the token or scan the QR code shown by the vault creator.</small>
+            </div>
+            <button type="submit" class="btn btn-primary" data-loading-text="Verifying token...">
+              <i data-lucide="scan-search"></i>
+              <span>Verify Outer Token</span>
+            </button>
+          </form>
+        </article>
+
+        <article id="publicVaultInfo" class="card panel hidden reveal" style="--delay:110ms">
+          <h3>Vault Info</h3>
+          <div id="publicInfoGrid" class="kv-grid"></div>
+
+          <hr />
+
+          <h4>Security Verification</h4>
+          <form id="innerTokenForm" class="form-grid">
+            <div class="field-row">
+              <label for="accessInnerToken">Inner Token (Private Key)</label>
+              <input
+                id="accessInnerToken"
+                required
+                type="password"
+                placeholder="MAIN or SUB token"
+                autocomplete="new-password"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                data-lpignore="true"
+                data-1p-ignore="true"
+              />
+            </div>
+            <button type="submit" class="btn btn-primary" data-loading-text="Unlocking vault...">
+              <i data-lucide="lock-open"></i>
+              <span>Unlock Files</span>
+            </button>
+          </form>
+        </article>
+      </section>
+
+      <section id="viewVaultDetails" class="view">
+        <div class="vault-layout reveal" style="--delay:60ms">
+          <aside class="vault-sidebar card panel">
+            <div class="sidebar-head">
+              <h2 id="vaultTitle">Vault Contents</h2>
+              <p id="vaultMeta" class="muted"></p>
+            </div>
+
+            <nav class="vault-nav" aria-label="Vault navigation">
+              <button id="navFiles" class="nav-tab active" type="button">
+                <i data-lucide="files"></i>
+                <span>Files</span>
+              </button>
+              <button id="navManage" class="nav-tab hidden" type="button">
+                <i data-lucide="key-round"></i>
+                <span>Manage Tokens</span>
+              </button>
+              <button id="navUploadMore" class="nav-tab hidden" type="button">
+                <i data-lucide="upload"></i>
+                <span>Upload More</span>
+              </button>
+            </nav>
+
+            <button id="logoutBtn" class="btn btn-secondary" type="button">
+              <i data-lucide="log-out"></i>
+              <span>Exit Vault</span>
+            </button>
+          </aside>
+
+          <div id="vaultContentArea" class="vault-main">
+            <article id="subViewFiles" class="card panel subview-panel">
+              <div class="panel-head-inline">
+                <h3>Accessible Files</h3>
+                <p id="tokenTypeBadge" class="badge"></p>
+              </div>
+              <div class="files-toolbar">
+                <label class="search-wrap" for="fileSearch">
+                  <i data-lucide="search"></i>
+                  <input id="fileSearch" type="text" placeholder="Search files by name or type" />
+                </label>
+                <p id="selectedCount" class="selected-chip hidden">0 files selected</p>
+              </div>
+              <div id="folderToolbar" class="folder-toolbar hidden">
+                <div id="folderBreadcrumbs" class="folder-breadcrumbs"></div>
+              </div>
+              <div id="filesList" class="files-list"></div>
+              <div id="filesEmpty" class="empty-state hidden">
+                <i data-lucide="inbox"></i>
+                <p>No files match your current search.</p>
+              </div>
+            </article>
+
+            <article id="subViewManage" class="card panel hidden subview-panel">
+              <h3>Sub-Token Management</h3>
+
+              <div class="tool-section">
+                <h4>Create New Sub-Token</h4>
+                <p class="muted small">Select files from the Files tab first.</p>
+                <form id="subTokenForm" class="form-grid">
+                  <div class="field-row">
+                    <label for="subInnerTokenInput">New Sub Token Secret</label>
+                    <input
+                      id="subInnerTokenInput"
+                      minlength="10"
+                      maxlength="20"
+                      required
+                      placeholder="10-20 chars"
+                      autocomplete="new-password"
+                      autocorrect="off"
+                      autocapitalize="off"
+                      spellcheck="false"
+                      data-lpignore="true"
+                      data-1p-ignore="true"
+                    />
+                  </div>
+                  <button type="submit" class="btn btn-primary" data-loading-text="Creating token...">
+                    <i data-lucide="sparkles"></i>
+                    <span>Generate Scoped Access</span>
+                  </button>
+                </form>
+              </div>
+
+              <div class="tool-section">
+                <h4>Existing Scoped Access</h4>
+                <div id="subTokensList" class="simple-list"></div>
+              </div>
+
+              <div id="subTokenEditor" class="tool-section hidden">
+                <h4>Edit Sub-Token Files</h4>
+                <p id="subTokenEditorMeta" class="muted small"></p>
+                <div id="subTokenFilePicker" class="token-file-picker"></div>
+                <div class="editor-actions">
+                  <button id="saveSubTokenFilesBtn" type="button" class="btn btn-primary" data-loading-text="Saving changes...">
+                    <i data-lucide="save"></i>
+                    <span>Save File Mapping</span>
+                  </button>
+                  <button id="cancelSubTokenEditBtn" type="button" class="btn btn-secondary">
+                    <i data-lucide="x"></i>
+                    <span>Cancel</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article id="subViewUploadMore" class="card panel hidden subview-panel">
+              <h3>Upload More Files</h3>
+              <p class="muted">Add additional files to this vault (MAIN access required).</p>
+              <form id="uploadMoreForm" class="form-grid">
+                <div class="field-row">
+                  <label for="uploadFilesMore">Additional Files</label>
+                  <div id="dropzoneMore" class="dropzone">
+                    <p>Drag files here or choose manually. Use Choose Folder to keep folder structure.</p>
+                    <div class="dropzone-actions">
+                      <button id="pickFilesBtnMore" type="button" class="btn btn-secondary">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Choose Files</span>
+                      </button>
+                      <button id="pickFolderBtnMore" type="button" class="btn btn-secondary">
+                        <i data-lucide="folder-open"></i>
+                        <span>Choose Folder</span>
+                      </button>
+                    </div>
+                    <input id="uploadFilesMore" type="file" multiple class="hidden" />
+                    <input id="uploadFolderMore" type="file" webkitdirectory directory multiple class="hidden" />
+                  </div>
+                </div>
+                <ul id="selectedFilesMore" class="simple-list file-pill-list"></ul>
+                <button type="submit" class="btn btn-primary" data-loading-text="Uploading files...">
+                  <i data-lucide="cloud-upload"></i>
+                  <span>Start Upload</span>
+                </button>
+              </form>
+              <div id="uploadMoreProgressWrap" class="progress-wrap hidden" aria-live="polite">
+                <div class="progress-track"><div id="uploadMoreProgressBar" class="progress-bar"></div></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <article id="captchaCard" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="captchaTitle">
+        <div class="card panel modal-content">
+          <h3 id="captchaTitle">Security Check</h3>
+          <p id="captchaQuestion"></p>
+          <form id="captchaForm" class="form-grid">
+            <div class="field-row">
+              <label for="captchaAnswer">Answer</label>
+              <input id="captchaAnswer" required placeholder="Enter answer" />
+            </div>
+            <button type="submit" class="btn btn-primary" data-loading-text="Verifying...">
+              <i data-lucide="shield"></i>
+              <span>Verify</span>
+            </button>
+          </form>
+        </div>
+      </article>
+
+      <article id="scannerCard" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="scannerTitle">
+        <div class="card panel modal-content scanner-modal">
+          <div class="panel-head-inline">
+            <h3 id="scannerTitle">Scan Outer Token QR</h3>
+            <button id="closeScannerBtn" type="button" class="btn btn-ghost btn-inline">
+              <i data-lucide="x"></i>
+              <span>Close</span>
+            </button>
+          </div>
+          <p class="muted small">Point your camera at the outer-token QR. If scanning works, the token field will be filled automatically.</p>
+          <div class="scanner-frame">
+            <video id="scannerVideo" autoplay playsinline muted></video>
+          </div>
+          <p id="scannerStatus" class="muted small">Preparing camera...</p>
+        </div>
+      </article>
+
+      <pre id="globalError" class="error-box hidden" role="alert" aria-live="assertive"></pre>
+    </main>
+
+    <section id="toast" class="toast hidden" aria-live="polite"></section>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
