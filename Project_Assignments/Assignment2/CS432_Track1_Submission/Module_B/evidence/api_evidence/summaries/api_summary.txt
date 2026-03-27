@@ -1,0 +1,9 @@
+﻿{
+    "moduleBEvidenceCaptured":  true,
+    "userRole":  "user",
+    "adminRole":  "admin",
+    "outputDirectory":  "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment2\\CS432_Track1_Submission\\Module_B\\evidence\\api_evidence",
+    "createdEntryId":  "9b889139-d22e-484e-8db3-6b2afdd2409f",
+    "deniedEntryChecked":  true
+}
+

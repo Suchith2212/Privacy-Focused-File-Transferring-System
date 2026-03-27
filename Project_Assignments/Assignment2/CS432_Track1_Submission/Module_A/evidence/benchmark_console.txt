@@ -1,0 +1,628 @@
+﻿Detailed benchmark run - 2026-03-22T14:00:28
+
+Measuring size: 500...
+
+Measuring size: 1500...
+
+Measuring size: 2500...
+
+Measuring size: 3500...
+
+Measuring size: 4500...
+
+Measuring size: 5500...
+
+Measuring size: 6500...
+
+Measuring size: 7500...
+
+Measuring size: 8500...
+
+Measuring size: 9500...
+
+Measuring size: 10500...
+
+Measuring size: 11500...
+
+Measuring size: 12500...
+
+Measuring size: 13500...
+
+Measuring size: 14500...
+
+Measuring size: 15500...
+
+Measuring size: 16500...
+
+Measuring size: 17500...
+
+Measuring size: 18500...
+
+Measuring size: 19500...
+
+Measuring size: 20500...
+
+Measuring size: 21500...
+
+Measuring memory...
+
+Measuring random workload...
+
+Detailed benchmark saved to F:\SEM IV\lessons\DB\Project\Project_Assignments\Assignment2\CS432_Track1_Submission\Module_A\evidence\detailed_benchmark_results.json
+
+
+BlindDrop path benchmark run - 2026-03-22T14:05:41
+
+Benchmarking size: 500...
+
+Benchmarking size: 1500...
+
+Benchmarking size: 2500...
+
+Benchmarking size: 3500...
+
+Benchmarking size: 4500...
+
+Benchmarking size: 5500...
+
+Benchmarking size: 6500...
+
+Benchmarking size: 7500...
+
+Benchmarking size: 8500...
+
+Benchmarking size: 9500...
+
+Benchmarking size: 10500...
+
+Benchmarking size: 11500...
+
+Benchmarking size: 12500...
+
+Benchmarking size: 13500...
+
+Benchmarking size: 14500...
+
+Benchmarking size: 15500...
+
+Benchmarking size: 16500...
+
+Benchmarking size: 17500...
+
+Benchmarking size: 18500...
+
+Benchmarking size: 19500...
+
+{
+
+  "sourceSnapshot": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment2\\Project_432\\backend\\database_export.json",
+
+  "results": [
+
+    {
+
+      "size": 500,
+
+      "bpt_load": 0.003952000000026601,
+
+      "brute_load": 0.029328000000532484,
+
+      "bpt_outer": 6.400000529538374e-06,
+
+      "brute_outer": 5.100000635138713e-06,
+
+      "bpt_expiry": 5.9000003602704965e-06,
+
+      "brute_expiry": 2.0200000108161476e-05,
+
+      "bpt_files": 4.499999704421498e-06,
+
+      "brute_files": 2.8299999939918052e-05,
+
+      "bpt_auth": 4.19999923906289e-06,
+
+      "brute_auth": 2.5899999855028e-05
+
+    },
+
+    {
+
+      "size": 1500,
+
+      "bpt_load": 0.015737199999421136,
+
+      "brute_load": 0.2609394999999495,
+
+      "bpt_outer": 8.300000445160549e-06,
+
+      "brute_outer": 3.370000013092067e-05,
+
+      "bpt_expiry": 7.200000254670158e-06,
+
+      "brute_expiry": 7.49000000723754e-05,
+
+      "bpt_files": 6.799999937356915e-06,
+
+      "brute_files": 9.859999954642262e-05,
+
+      "bpt_auth": 1.5099999473022763e-05,
+
+      "brute_auth": 8.290000005217735e-05
+
+    },
+
+    {
+
+      "size": 2500,
+
+      "bpt_load": 0.03262600000016391,
+
+      "brute_load": 0.7377808999999615,
+
+      "bpt_outer": 8.89999955688836e-06,
+
+      "brute_outer": 6.25000002401066e-05,
+
+      "bpt_expiry": 2.3300000066228677e-05,
+
+      "brute_expiry": 0.0001976000003196532,
+
+      "bpt_files": 1.5900000107649248e-05,
+
+      "brute_files": 0.00032529999953112565,
+
+      "bpt_auth": 2.4400000256719068e-05,
+
+      "brute_auth": 0.00015419999999721767
+
+    },
+
+    {
+
+      "size": 3500,
+
+      "bpt_load": 0.04592439999942144,
+
+      "brute_load": 1.4505159999998796,
+
+      "bpt_outer": 9.900000804918818e-06,
+
+      "brute_outer": 3.790000027947826e-05,
+
+      "bpt_expiry": 1.0900000233959872e-05,
+
+      "brute_expiry": 0.00010479999946255703,
+
+      "bpt_files": 9.999999747378752e-06,
+
+      "brute_files": 0.00019470000006549526,
+
+      "bpt_auth": 2.2600000193051528e-05,
+
+      "brute_auth": 0.00018910000017058337
+
+    },
+
+    {
+
+      "size": 4500,
+
+      "bpt_load": 0.06620459999976447,
+
+      "brute_load": 2.393494300000384,
+
+      "bpt_outer": 3.699999979289714e-05,
+
+      "brute_outer": 0.0003307999995740829,
+
+      "bpt_expiry": 2.100000074278796e-05,
+
+      "brute_expiry": 0.0003495999999358901,
+
+      "bpt_files": 1.6599999980826396e-05,
+
+      "brute_files": 0.0003313999995953054,
+
+      "bpt_auth": 3.8299999687296804e-05,
+
+      "brute_auth": 0.0002561999999670661
+
+    },
+
+    {
+
+      "size": 5500,
+
+      "bpt_load": 0.08210140000028332,
+
+      "brute_load": 3.595128900000418,
+
+      "bpt_outer": 8.600000001024455e-06,
+
+      "brute_outer": 8.629999956610845e-05,
+
+      "bpt_expiry": 8.600000001024455e-06,
+
+      "brute_expiry": 0.0002565000004324247,
+
+      "bpt_files": 8.69999985297909e-06,
+
+      "brute_files": 0.00034760000016831327,
+
+      "bpt_auth": 4.1199999941454735e-05,
+
+      "brute_auth": 0.00021870000000490109
+
+    },
+
+    {
+
+      "size": 6500,
+
+      "bpt_load": 0.09903660000054515,
+
+      "brute_load": 5.005739400000493,
+
+      "bpt_outer": 1.0299999303242657e-05,
+
+      "brute_outer": 0.00011509999967529438,
+
+      "bpt_expiry": 1.2999999853491317e-05,
+
+      "brute_expiry": 0.0003465999998297775,
+
+      "bpt_files": 9.499999578110874e-06,
+
+      "brute_files": 0.0004003000003649504,
+
+      "bpt_auth": 4.810000064026099e-05,
+
+      "brute_auth": 0.00039569999989907956
+
+    },
+
+    {
+
+      "size": 7500,
+
+      "bpt_load": 0.11875919999965845,
+
+      "brute_load": 6.654341600000407,
+
+      "bpt_outer": 8.89999955688836e-06,
+
+      "brute_outer": 0.00011409999933675863,
+
+      "bpt_expiry": 8.69999985297909e-06,
+
+      "brute_expiry": 0.00033600000006117625,
+
+      "bpt_files": 9.800000043469481e-06,
+
+      "brute_files": 0.00046689999999216525,
+
+      "bpt_auth": 4.069999977218686e-05,
+
+      "brute_auth": 0.0004232000001138658
+
+    },
+
+    {
+
+      "size": 8500,
+
+      "bpt_load": 0.15476809999927355,
+
+      "brute_load": 8.53994479999983,
+
+      "bpt_outer": 9.200000022246968e-06,
+
+      "brute_outer": 0.00013560000024881447,
+
+      "bpt_expiry": 8.900000466383062e-06,
+
+      "brute_expiry": 0.00037799999972776277,
+
+      "bpt_files": 1.1300000551273115e-05,
+
+      "brute_files": 0.0007264000005307025,
+
+      "bpt_auth": 0.0002648999998200452,
+
+      "brute_auth": 0.0006192999999257154
+
+    },
+
+    {
+
+      "size": 9500,
+
+      "bpt_load": 0.16092570000000705,
+
+      "brute_load": 10.85716709999997,
+
+      "bpt_outer": 1.1599999197642319e-05,
+
+      "brute_outer": 0.00019119999979011482,
+
+      "bpt_expiry": 1.2299999980314169e-05,
+
+      "brute_expiry": 0.00043879999975615647,
+
+      "bpt_files": 1.0000000656873453e-05,
+
+      "brute_files": 0.0010576000004220987,
+
+      "bpt_auth": 7.820000064384658e-05,
+
+      "brute_auth": 0.0006478000004790374
+
+    },
+
+    {
+
+      "size": 10500,
+
+      "bpt_load": 0.17918559999998251,
+
+      "brute_load": 13.331016699999964,
+
+      "bpt_outer": 9.899999895424116e-06,
+
+      "brute_outer": 0.0001723000004858477,
+
+      "bpt_expiry": 1.0599999768601265e-05,
+
+      "brute_expiry": 0.0004931999992550118,
+
+      "bpt_files": 1.2600000445672777e-05,
+
+      "brute_files": 0.0007803000007697847,
+
+      "bpt_auth": 7.900000036897836e-05,
+
+      "brute_auth": 0.0005784000004496193
+
+    },
+
+    {
+
+      "size": 11500,
+
+      "bpt_load": 0.2047632000003432,
+
+      "brute_load": 16.008147099999405,
+
+      "bpt_outer": 1.2999999853491317e-05,
+
+      "brute_outer": 0.0002476999998179963,
+
+      "bpt_expiry": 1.1900000572495628e-05,
+
+      "brute_expiry": 0.0009413999996468192,
+
+      "bpt_files": 2.1100000594742596e-05,
+
+      "brute_files": 0.0008521999998265528,
+
+      "bpt_auth": 7.659999937459361e-05,
+
+      "brute_auth": 0.0006511000001410139
+
+    },
+
+    {
+
+      "size": 12500,
+
+      "bpt_load": 0.22209190000012313,
+
+      "brute_load": 18.96848829999999,
+
+      "bpt_outer": 1.1099999937869143e-05,
+
+      "brute_outer": 0.0001339999998890562,
+
+      "bpt_expiry": 1.3500000022759195e-05,
+
+      "brute_expiry": 0.0003372000001036213,
+
+      "bpt_files": 1.4199999895936344e-05,
+
+      "brute_files": 0.000611899999967136,
+
+      "bpt_auth": 7.020000066404464e-05,
+
+      "brute_auth": 0.0006062000002202694
+
+    },
+
+    {
+
+      "size": 13500,
+
+      "bpt_load": 0.24654319999990548,
+
+      "brute_load": 22.382912000000033,
+
+      "bpt_outer": 9.800000043469481e-06,
+
+      "brute_outer": 0.00020740000036312267,
+
+      "bpt_expiry": 1.3099999705445953e-05,
+
+      "brute_expiry": 0.0004612000002452987,
+
+      "bpt_files": 1.2800000149582047e-05,
+
+      "brute_files": 0.000832099999570346,
+
+      "bpt_auth": 8.139999954437371e-05,
+
+      "brute_auth": 0.0009093999997276114
+
+    },
+
+    {
+
+      "size": 14500,
+
+      "bpt_load": 0.26585330000034446,
+
+      "brute_load": 26.21421630000077,
+
+      "bpt_outer": 1.0200000360782724e-05,
+
+      "brute_outer": 0.00021700000070268288,
+
+      "bpt_expiry": 1.2100000276404899e-05,
+
+      "brute_expiry": 0.0006866000003356021,
+
+      "bpt_files": 1.1900000572495628e-05,
+
+      "brute_files": 0.0009012000000439002,
+
+      "bpt_auth": 8.509999952366343e-05,
+
+      "brute_auth": 0.000806199999715318
+
+    },
+
+    {
+
+      "size": 15500,
+
+      "bpt_load": 0.29468139999971754,
+
+      "brute_load": 30.147815500000434,
+
+      "bpt_outer": 1.2299999980314169e-05,
+
+      "brute_outer": 0.0001596000001882203,
+
+      "bpt_expiry": 1.3199999557400588e-05,
+
+      "brute_expiry": 0.0005688999999620137,
+
+      "bpt_files": 1.3099999705445953e-05,
+
+      "brute_files": 0.0007125000001906301,
+
+      "bpt_auth": 0.00012729999980365392,
+
+      "brute_auth": 0.0008452000001852866
+
+    },
+
+    {
+
+      "size": 16500,
+
+      "bpt_load": 0.31857010000021546,
+
+      "brute_load": 34.40213499999936,
+
+      "bpt_outer": 1.1300000551273115e-05,
+
+      "brute_outer": 0.0004922999996779254,
+
+      "bpt_expiry": 1.7600000319362152e-05,
+
+      "brute_expiry": 0.0010949999996228144,
+
+      "bpt_files": 6.289999964792514e-05,
+
+      "brute_files": 0.0012380999996821629,
+
+      "bpt_auth": 0.00010209999982180307,
+
+      "brute_auth": 0.0008863000002747867
+
+    },
+
+    {
+
+      "size": 17500,
+
+      "bpt_load": 0.38090550000015355,
+
+      "brute_load": 38.95154030000049,
+
+      "bpt_outer": 2.500000027794158e-05,
+
+      "brute_outer": 0.0003144999991491204,
+
+      "bpt_expiry": 1.5099999473022763e-05,
+
+      "brute_expiry": 0.0008901000001060311,
+
+      "bpt_files": 1.5999999959603883e-05,
+
+      "brute_files": 0.0012302000004638103,
+
+      "bpt_auth": 0.00016419999974459643,
+
+      "brute_auth": 0.0008106999994197395
+
+    },
+
+    {
+
+      "size": 18500,
+
+      "bpt_load": 0.36793480000051204,
+
+      "brute_load": 43.924863899999764,
+
+      "bpt_outer": 1.2100000276404899e-05,
+
+      "brute_outer": 0.0003281999997852836,
+
+      "bpt_expiry": 1.8799999452312477e-05,
+
+      "brute_expiry": 0.001023699999677774,
+
+      "bpt_files": 3.319999996165279e-05,
+
+      "brute_files": 0.001450299999305571,
+
+      "bpt_auth": 0.00010229999952571234,
+
+      "brute_auth": 0.0010204999998677522
+
+    },
+
+    {
+
+      "size": 19500,
+
+      "bpt_load": 0.4306839000000764,
+
+      "brute_load": 49.14336600000024,
+
+      "bpt_outer": 9.999999747378752e-06,
+
+      "brute_outer": 0.00028159999965282623,
+
+      "bpt_expiry": 1.4000000192027073e-05,
+
+      "brute_expiry": 0.0008548999994673068,
+
+      "bpt_files": 1.0100000508828089e-05,
+
+      "brute_files": 0.0014632000002166023,
+
+      "bpt_auth": 0.00010779999956866959,
+
+      "brute_auth": 0.0012904999994134414
+
+    }
+
+  ]
+
+}
+
+
+
+
