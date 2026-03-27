@@ -1,5 +1,0 @@
-node_modules/
-.env
-oauth_credentials.json
-service-account.json
-service_account.json
