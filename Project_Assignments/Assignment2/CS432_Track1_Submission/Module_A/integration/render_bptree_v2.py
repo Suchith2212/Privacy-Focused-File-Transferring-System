@@ -1,4 +1,4 @@
-"""Render BlindDrop-oriented B+ tree visuals from the exported backend snapshot."""
+"""Render GhostDrop-oriented B+ tree visuals from the exported backend snapshot."""
 
 from __future__ import annotations
 
@@ -508,7 +508,7 @@ def render_all(snapshot: Dict[str, List[Dict[str, Any]]], out_dir: Path, order: 
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Render BlindDrop-oriented B+ tree visuals.")
+    parser = argparse.ArgumentParser(description="Render GhostDrop-oriented B+ tree visuals.")
     parser.add_argument("--snapshot", type=str, default=None, help="Optional path to a JSON snapshot export.")
     parser.add_argument("--out-dir", type=Path, default=Path(__file__).resolve().parent / "bptree_v2")
     parser.add_argument("--order", type=int, default=5)

@@ -8,6 +8,16 @@ This folder contains the packaged database-side proof for Module B. It shows tha
 - `summaries/schema_inventory.md`
 - `tamper_before_check.txt`
 - `tamper_detection_result.txt`
+- `ER_Diagrams/ghostdrop_er_basic.png`
+- `ER_Diagrams/ghostdrop_er_basic.pdf`
+- `ER_Diagrams/ghostdrop_er_formal.png`
+- `ER_Diagrams/ghostdrop_er_formal.pdf`
+
+Direct ERD source:
+
+- [ER_Diagrams/ghostdrop_er_basic.gv](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/evidence/database_evidence/ER_Diagrams/ghostdrop_er_basic.gv)
+- [ER_Diagrams/ghostdrop_er_formal.gv](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/evidence/database_evidence/ER_Diagrams/ghostdrop_er_formal.gv)
+- [ER_Diagrams/generate_er_diagrams.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/evidence/database_evidence/ER_Diagrams/generate_er_diagrams.py)
 
 ## What this evidence demonstrates
 
@@ -16,6 +26,7 @@ This folder contains the packaged database-side proof for Module B. It shows tha
 - the optimized indexes exist on the relevant tables
 - `integrity_hash` is present on the portfolio table
 - the tamper-detection workflow can identify direct database changes
+- the regenerated ER diagrams match the updated schema
 
 ## Useful SQL inspection commands
 
@@ -40,3 +51,4 @@ SELECT file_id, vault_id, original_filename, status FROM files;
 1. Open `db_snapshot.txt` for the concrete table/index snapshot
 2. Open `summaries/schema_inventory.md` for the written explanation of what the tables and indexes mean
 3. Open `tamper_before_check.txt` and `tamper_detection_result.txt` for the tamper-detection proof sequence
+

@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-path = ROOT / "Project_432" / "backend" / "database_export.json"
+path = ROOT / "Ghost_Drop" / "backend" / "database_export.json"
 
 with path.open("r", encoding="utf-8") as f:
     data = json.load(f)

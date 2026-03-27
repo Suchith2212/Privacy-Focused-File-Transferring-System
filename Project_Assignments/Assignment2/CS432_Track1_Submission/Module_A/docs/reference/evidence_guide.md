@@ -1,4 +1,4 @@
-﻿# Module A Evidence Guide
+# Module A Evidence Guide
 
 This guide explains how the packaged Module A evidence should be read during evaluation.
 
@@ -22,7 +22,7 @@ The Module A evidence should demonstrate:
 4. `evidence/parity_summary.md`
 5. `integration/db_index_parity_demo_summary.md`
 6. `evidence/benchmark_summary.md`
-7. `integration/benchmark_blinddrop_paths_summary.md`
+7. `integration/benchmark_ghostdrop_paths_summary.md`
 8. the PNG plots in `evidence/` and `integration/`
 
 ## Evidence groups
@@ -59,7 +59,7 @@ These prove:
 - `benchmark_console.txt`
 - `benchmark_results.json`
 - `benchmark_summary.md`
-- `integration/benchmark_blinddrop_paths_summary.md`
+- `integration/benchmark_ghostdrop_paths_summary.md`
 - the four domain PNGs in `integration/`
 - the detailed benchmark PNGs in `evidence/`
 
@@ -76,9 +76,10 @@ These prove:
 - `integration/bptree_v2/*.png`
 - `integration/bptree_v2/render_manifest.json`
 
-These show the actual tree structure, the 19 rendered BlindDrop-oriented indexes, and the snapshot/row-count metadata behind the rendered visuals.
+These show the actual tree structure, the 19 rendered Ghost Drop-oriented indexes, and the snapshot/row-count metadata behind the rendered visuals.
 
 ## Final defense line
 
-`Module A is not packaged here as a disconnected classroom tree. It is a complete from-scratch B+ Tree implementation, wrapped in a lightweight database layer, benchmarked against brute force, visualized with Graphviz, and then integrated into BlindDrop-shaped lookup paths for stronger end-to-end justification.`
+`Module A is not packaged here as a disconnected classroom tree. It is a complete from-scratch B+ Tree implementation, wrapped in a lightweight database layer, benchmarked against brute force, visualized with Graphviz, and then integrated into Ghost Drop-shaped lookup paths for stronger end-to-end justification.`
+
 

@@ -1,12 +1,12 @@
 # CS432 Track 1 Submission
 
-This folder is the final combined submission package for **CS432 Track 1 Assignment 2**. It contains the completed **Module A** and **Module B** deliverables derived from the BlindDrop project, together with evaluator-facing reports, notebooks, evidence folders, and technical documentation.
+This folder is the final combined submission package for **CS432 Track 1 Assignment 2**. It contains the completed **Module A** and **Module B** deliverables derived from the Ghost Drop project, together with evaluator-facing reports, notebooks, evidence folders, and technical documentation.
 
 ## Submission summary
 
-- **Project title:** BlindDrop / `Project_432`
+- **Project title:** Ghost Drop / `Ghost_Drop`
 - **Submission scope:** custom B+ Tree implementation, project-specific index integration, local authenticated web application, RBAC CRUD, audit logging, tamper detection, and SQL optimization
-- **Primary source project:** `Project_432`
+- **Primary source project:** `Ghost_Drop`
 - **Packaged submission folder:** `CS432_Track1_Submission`
 
 ## Package structure
@@ -14,7 +14,7 @@ This folder is the final combined submission package for **CS432 Track 1 Assignm
 - `Docs/`
   Shared submission documents, cover page, end-to-end project documentation, demo guide, checklist, architecture notes, API reference, and assignment PDF.
 - `Module_A/`
-  Final Module A package containing the standalone Python B+ Tree database layer, BlindDrop integration, tree visualizations, benchmarks, evidence, and notebook report.
+  Final Module A package containing the standalone Python B+ Tree database layer, Ghost Drop integration, tree visualizations, benchmarks, evidence, and notebook report.
 - `Module_B/`
   Final Module B package containing the backend, frontend, SQL schema, logs, evidence, technical documentation, and notebook report.
 
@@ -22,12 +22,12 @@ This folder is the final combined submission package for **CS432 Track 1 Assignm
 
 - a B+ Tree implemented from scratch in Python
 - a brute-force comparison baseline and lightweight DB/table wrapper
-- project-specific indexing over the BlindDrop data domain using `Project_432/backend/database_export.json`
+- project-specific indexing over the Ghost Drop data domain using `Ghost_Drop/backend/database_export.json`
 - Graphviz-based visualization of integrated tree structures
 - detailed Module A benchmarking and parity validation
-- a local database-backed BlindDrop web application
+- a local database-backed Ghost Drop web application
 - session-based login and validation
-- role mapping from BlindDrop credentials to `admin` and `user`
+- role mapping from Ghost Drop credentials to `admin` and `user`
 - portfolio CRUD with owner-aware RBAC
 - tamper-evident audit logging
 - unauthorized direct database modification detection
@@ -47,7 +47,7 @@ This folder is the final combined submission package for **CS432 Track 1 Assignm
 ## Important package notes
 
 - `Module_A/report.ipynb` and `Module_B/report.ipynb` are the notebook reports included in the submission bundle.
-- The Module A integration, visualization, and domain benchmarks are driven by the real snapshot export at `Project_432/backend/database_export.json`.
+- The Module A integration, visualization, and domain benchmarks are driven by the real snapshot export at `Ghost_Drop/backend/database_export.json`.
 - The packaged Module B benchmark evidence records:
   - `Baseline full scan`: `452.8318 ms`
   - `Composite lookup index`: `40.0727 ms`
@@ -58,3 +58,4 @@ This folder is the final combined submission package for **CS432 Track 1 Assignm
 
 - Module A demo video: https://youtu.be/T24vXjLI5dI?si=URhvw7nJmuug-nHH
 - Module B demo video: https://youtu.be/FzY8OeX4d5E?si=ptfeexguYQ99MdmG
+

@@ -8,7 +8,7 @@ This folder is the evaluator-facing SQL entry point for Module B.
 
 It mirrors the runnable backend schema in `app/backend/sql/init_schema.sql` and contains:
 
-- core BlindDrop tables
+- core Ghost Drop tables
 - the Module B `portfolio_entries` table
 - packaged index definitions
 - the portable application-side integrity setup used by the submission
@@ -17,3 +17,4 @@ It mirrors the runnable backend schema in `app/backend/sql/init_schema.sql` and 
 
 - The schema is written to be rerunnable on ordinary MySQL 8 setups.
 - Unauthorized direct database modification detection in this package is enforced primarily through the `integrity_hash` model and the protected API checks, not through a privileged trigger requirement.
+

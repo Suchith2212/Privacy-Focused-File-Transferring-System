@@ -1,6 +1,6 @@
 # Module A Integration Layer
 
-This folder contains the BlindDrop-specific integration layer for Module A. It reuses the standalone Python B+ Tree from `Module_A/database/` and maps it to real project-shaped index paths.
+This folder contains the Ghost Drop-specific integration layer for Module A. It reuses the standalone Python B+ Tree from `Module_A/database/` and maps it to real project-shaped index paths.
 
 ## Purpose
 
@@ -13,19 +13,19 @@ The integration rule is:
 
 ## Main artifacts
 
-- `blinddrop_index_manager.py`
+- `ghostdrop_index_manager.py`
   Main integration facade. Wraps the B+ Tree and brute-force baseline in duplicate-key-friendly posting-list indexes.
-- `blinddrop_index_demo.py`
+- `ghostdrop_index_demo.py`
   Demonstrates the project-shaped lookup and range-scan paths.
 - `db_index_parity_manager.py`
   Manages the authoritative-state vs custom-index contract.
 - `db_index_parity_demo.py`
   Demonstrates rollback, parity validation, lazy repair, and rebuild.
-- `benchmark_blinddrop_paths.py`
-  Benchmarks the B+ Tree wrapper against the brute-force baseline on BlindDrop-shaped paths derived from the exported backend snapshot.
+- `benchmark_ghostdrop_paths.py`
+  Benchmarks the B+ Tree wrapper against the brute-force baseline on Ghost Drop-shaped paths derived from the exported backend snapshot.
 - `benchmark_detailed.py`
   Runs a broader multi-size benchmark suite with additional plots, dashboard views, and memory measurements.
-- `render_bptree_v2.py` and `visualize_blinddrop_indexes.py`
+- `render_bptree_v2.py` and `visualize_ghostdrop_indexes.py`
   Regenerate the Graphviz visualizations for the integrated indexes.
 - `bptree_v2/`
   Generated PNG visualizations of the integrated index structures plus `render_manifest.json`.
@@ -49,26 +49,26 @@ These were chosen because they match meaningful application access paths:
 From `Module_A/integration`:
 
 ```powershell
-python blinddrop_index_demo.py
+python ghostdrop_index_demo.py
 python db_index_parity_demo.py
-python benchmark_blinddrop_paths.py
+python benchmark_ghostdrop_paths.py
 python benchmark_detailed.py
 python render_bptree_v2.py
 ```
 
 By default these scripts resolve snapshots in this order:
 
-1. `Project_432/backend/database_export.json`
+1. `Ghost_Drop/backend/database_export.json`
 2. `CS432_Track1_Submission/Module_B/app/backend/database_export.json`
 3. `Module_A/integration/amplified_snapshot.json`
 
 ## Important generated outputs
 
-- `blinddrop_index_demo_output.json`
+- `ghostdrop_index_demo_output.json`
 - `db_index_parity_demo_output.json`
 - `reports/db_index_parity_report.md`
-- `benchmark_blinddrop_paths.json`
-- `reports/blinddrop_paths_benchmark.md`
+- `benchmark_ghostdrop_paths.json`
+- `reports/ghostdrop_paths_benchmark.md`
 - `path_speedup_benchmark.png`
 - `outer_lookup_benchmark.png`
 - `Module_A/evidence/detailed_benchmark_results.json`
@@ -86,3 +86,4 @@ By default these scripts resolve snapshots in this order:
 ## Why this is a strong Module A story
 
 This integration turns Module A from a generic data-structure exercise into a project-aligned indexing demonstration. It preserves the standalone B+ Tree implementation required by the assignment while proving that the same structure can support meaningful point lookups, range scans, and parity/rebuild workflows on application-shaped data.
+

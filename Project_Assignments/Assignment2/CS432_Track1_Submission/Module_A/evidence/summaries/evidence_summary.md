@@ -21,7 +21,7 @@ This summary ties together the complete Module A evidence package.
 - `benchmark_console.txt`
 - `benchmark_results.json`
 - `Module_A/evidence/summaries/benchmark_summary.md`
-- `Module_A/integration/reports/blinddrop_paths_benchmark.md`
+- `Module_A/integration/reports/ghostdrop_paths_benchmark.md`
 - `Module_A/integration/path_speedup_benchmark.png`
 - `speedup_comparison.png`
 - `insertion_benchmark.png`
@@ -38,7 +38,7 @@ This summary ties together the complete Module A evidence package.
 
 - the custom Python B+ Tree is implemented and functional
 - the tree is wrapped in a lightweight DB-style abstraction
-- the tree can be demonstrated on BlindDrop-shaped lookup and range paths
+- the tree can be demonstrated on Ghost Drop-shaped lookup and range paths
 - parity, rollback, lazy repair, and rebuild can be defended
 - the B+ Tree compares favorably against the brute-force baseline
 - the package includes both textual and visual evidence for the final submission
@@ -47,3 +47,4 @@ This summary ties together the complete Module A evidence package.
 ## Final defense line
 
 `Module A is packaged here as a complete from-scratch indexing submission: core B+ Tree implementation, database wrapper, benchmark suite, visualization support, project-shaped integration layer, and parity/rebuild proof.`
+

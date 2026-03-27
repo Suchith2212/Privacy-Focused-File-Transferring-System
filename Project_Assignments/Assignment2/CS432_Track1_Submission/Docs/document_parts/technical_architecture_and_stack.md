@@ -4,10 +4,10 @@
 
 The submission combines one real application domain with two assignment-facing modules:
 
-- **BlindDrop product layer**
+- **Ghost Drop product layer**
   secure temporary file sharing through expiring vaults
 - **Module A layer**
-  a standalone Python B+ Tree database engine plus BlindDrop-specific indexing and benchmarking
+  a standalone Python B+ Tree database engine plus Ghost Drop-specific indexing and benchmarking
 - **Module B layer**
   a local authenticated web application layer with RBAC, auditability, tamper detection, and SQL optimization
 
@@ -34,7 +34,7 @@ This is important because the submission is not a pair of disconnected artifacts
 
 ### 3.1 Frontend
 
-The frontend provides the user-facing BlindDrop flows:
+The frontend provides the user-facing Ghost Drop flows:
 
 - vault creation
 - file upload
@@ -79,7 +79,7 @@ The Python B+ Tree layer is not the authoritative production database. It is the
 - range and exact lookup behavior
 - comparison against brute force
 - visualization
-- domain-specific indexing over the exported BlindDrop dataset
+- domain-specific indexing over the exported Ghost Drop dataset
 
 ## 4. Module A technical architecture
 
@@ -98,9 +98,9 @@ This layer satisfies the direct assignment requirement for a custom B+ Tree and 
 
 The integration layer uses the exported snapshot at:
 
-- `Project_432/backend/database_export.json`
+- `Ghost_Drop/backend/database_export.json`
 
-It derives realistic index paths from the BlindDrop dataset and feeds them into the custom tree implementation.
+It derives realistic index paths from the Ghost Drop dataset and feeds them into the custom tree implementation.
 
 ### 4.3 Indexed paths
 
@@ -119,7 +119,7 @@ Graphviz-backed renderers generate the packaged tree PNGs and the accompanying r
 
 ### 5.1 Authentication and role mapping
 
-Module B reuses the BlindDrop vault credential model:
+Module B reuses the Ghost Drop vault credential model:
 
 - `MAIN` token -> `admin`
 - `SUB` token -> `user`
@@ -238,3 +238,4 @@ The final submission is intentionally evidence-oriented.
 - realistic RBAC resource for Module B instead of an artificial user table
 - benchmarking tied to real access patterns
 - strong submission readability through packaged notebooks, Markdown, logs, and evidence
+

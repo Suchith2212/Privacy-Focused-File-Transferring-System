@@ -1,4 +1,4 @@
-﻿# Module B Optimization Report
+# Module B Optimization Report
 
 This report explains the SQL optimization work packaged inside `CS432_Track1_Submission/Module_B/app/backend/reports`.
 

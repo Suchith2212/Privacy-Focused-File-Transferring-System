@@ -22,7 +22,7 @@ def snapshot_candidates() -> List[Path]:
     root = project_root()
     module_root = module_a_root()
     return [
-        (root / "Project_432" / "backend" / "database_export.json").resolve(),
+        (root / "Ghost_Drop" / "backend" / "database_export.json").resolve(),
         (root / "CS432_Track1_Submission" / "Module_B" / "app" / "backend" / "database_export.json").resolve(),
         (module_root / "integration" / "amplified_snapshot.json").resolve(),
     ]
@@ -40,7 +40,7 @@ def resolve_snapshot_path(preferred: str | Path | None = None) -> Path:
             return candidate
 
     raise FileNotFoundError(
-        "Could not locate a snapshot. Expected Project_432/backend/database_export.json, "
+        "Could not locate a snapshot. Expected Ghost_Drop/backend/database_export.json, "
         "Module_B/app/backend/database_export.json, or Module_A/integration/amplified_snapshot.json."
     )
 

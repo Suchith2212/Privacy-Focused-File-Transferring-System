@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "CS432_Track1_Submission" / "Module_A"
 REPORT_PATH = ROOT / "report.ipynb"
-DOMAIN_PATH = ROOT / "integration" / "benchmark_blinddrop_paths.json"
+DOMAIN_PATH = ROOT / "integration" / "benchmark_ghostdrop_paths.json"
 DETAILED_PATH = ROOT / "evidence" / "detailed_benchmark_results.json"
 COMBINED_RESULTS_PATH = ROOT / "evidence" / "benchmark_results.json"
 BENCHMARK_SUMMARY_PATH = ROOT / "evidence" / "summaries" / "benchmark_summary.md"
@@ -122,21 +122,21 @@ This summary explains the benchmark evidence packaged in:
 - `benchmark_results.json`
 - `detailed_benchmark_results.json`
 - the PNG plots in `evidence/`
-- `Module_A/integration/reports/blinddrop_paths_benchmark.md`
+- `Module_A/integration/reports/ghostdrop_paths_benchmark.md`
 
 ## Source dataset
 
 The current benchmark package is anchored to:
 
-- `Project_432/backend/database_export.json`
+- `Ghost_Drop/backend/database_export.json`
 
-That export provides the real BlindDrop-shaped rows used by the integration layer. The domain benchmark amplifies those rows into larger deterministic datasets so the benchmark stays project-aligned while still showing scaling behavior.
+That export provides the real GhostDrop-shaped rows used by the integration layer. The domain benchmark amplifies those rows into larger deterministic datasets so the benchmark stays project-aligned while still showing scaling behavior.
 
 ## Benchmark layers
 
 ### Domain benchmark
 
-The domain benchmark is produced by `integration/benchmark_blinddrop_paths.py`.
+The domain benchmark is produced by `integration/benchmark_ghostdrop_paths.py`.
 
 It currently includes:
 
@@ -220,7 +220,7 @@ This summary ties together the complete Module A evidence package.
 - `benchmark_console.txt`
 - `benchmark_results.json`
 - `Module_A/evidence/summaries/benchmark_summary.md`
-- `Module_A/integration/reports/blinddrop_paths_benchmark.md`
+- `Module_A/integration/reports/ghostdrop_paths_benchmark.md`
 - `Module_A/integration/path_speedup_benchmark.png`
 - `speedup_comparison.png`
 - `insertion_benchmark.png`
@@ -237,7 +237,7 @@ This summary ties together the complete Module A evidence package.
 
 - the custom Python B+ Tree is implemented and functional
 - the tree is wrapped in a lightweight DB-style abstraction
-- the tree can be demonstrated on BlindDrop-shaped lookup and range paths
+- the tree can be demonstrated on GhostDrop-shaped lookup and range paths
 - parity, rollback, lazy repair, and rebuild can be defended
 - the B+ Tree compares favorably against the brute-force baseline
 - the package includes both textual and visual evidence for the final submission

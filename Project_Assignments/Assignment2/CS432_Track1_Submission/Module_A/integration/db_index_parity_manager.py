@@ -1,4 +1,4 @@
-"""DB-authoritative parity manager for the Project_432 Module A proof."""
+"""DB-authoritative parity manager for the Ghost_Drop Module A proof."""
 
 from __future__ import annotations
 
@@ -7,9 +7,9 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Sequence
 
 try:
-    from .blinddrop_index_manager import BlindDropIndexManager
+    from .ghostdrop_index_manager import GhostDropIndexManager
 except ImportError:  # pragma: no cover - direct script execution fallback
-    from blinddrop_index_manager import BlindDropIndexManager
+    from ghostdrop_index_manager import GhostDropIndexManager
 
 
 Snapshot = Dict[str, List[Dict[str, Any]]]
@@ -24,7 +24,7 @@ def empty_snapshot() -> Snapshot:
 
 
 @dataclass
-class AuthoritativeBlindDropStore:
+class AuthoritativeGhostDropStore:
     """A small DB-like authoritative store for parity and rollback proofs."""
 
     snapshot: Snapshot = field(default_factory=empty_snapshot)
@@ -43,14 +43,14 @@ class AuthoritativeBlindDropStore:
         ]
 
 
-class BlindDropParityManager:
-    """Maintain a custom B+ Tree view over an authoritative BlindDrop snapshot."""
+class GhostDropParityManager:
+    """Maintain a custom B+ Tree view over an authoritative GhostDrop snapshot."""
 
     def __init__(self, engine: str = "bplustree", order: int = 16):
         self.engine = engine
         self.order = order
-        self.store = AuthoritativeBlindDropStore()
-        self.index_manager = BlindDropIndexManager(engine=engine, order=order)
+        self.store = AuthoritativeGhostDropStore()
+        self.index_manager = GhostDropIndexManager(engine=engine, order=order)
 
     def load_snapshot(self, snapshot: Snapshot) -> None:
         """Seed the authoritative store from an exported snapshot."""
@@ -63,12 +63,12 @@ class BlindDropParityManager:
         self.rebuild_indexes()
 
     def rebuild_indexes(self) -> None:
-        rebuilt = BlindDropIndexManager(engine=self.engine, order=self.order)
+        rebuilt = GhostDropIndexManager(engine=self.engine, order=self.order)
         rebuilt.load_snapshot(self.store.clone_snapshot())
         self.index_manager = rebuilt
 
     def validate_parity(self) -> Dict[str, Any]:
-        expected = BlindDropIndexManager(engine=self.engine, order=self.order)
+        expected = GhostDropIndexManager(engine=self.engine, order=self.order)
         expected.load_snapshot(self.store.clone_snapshot())
 
         comparisons = {
@@ -109,7 +109,7 @@ class BlindDropParityManager:
             }
         )
 
-        staged_index = BlindDropIndexManager(engine=self.engine, order=self.order)
+        staged_index = GhostDropIndexManager(engine=self.engine, order=self.order)
         staged_index.load_snapshot(staged_snapshot)
 
         if inject_index_failure:
@@ -143,7 +143,7 @@ class BlindDropParityManager:
             }
         )
 
-        staged_index = BlindDropIndexManager(engine=self.engine, order=self.order)
+        staged_index = GhostDropIndexManager(engine=self.engine, order=self.order)
         staged_index.load_snapshot(staged_snapshot)
 
         if inject_index_failure:
@@ -176,7 +176,7 @@ class BlindDropParityManager:
             }
         )
 
-        staged_index = BlindDropIndexManager(engine=self.engine, order=self.order)
+        staged_index = GhostDropIndexManager(engine=self.engine, order=self.order)
         staged_index.load_snapshot(staged_snapshot)
 
         if inject_index_failure:

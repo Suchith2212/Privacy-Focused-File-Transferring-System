@@ -3,7 +3,7 @@
 ## 1. Cover page and identity
 
 - [ ] student details reviewed in `Docs/project_documentation.md`
-- [ ] project title written consistently as `BlindDrop` / `Project_432`
+- [ ] project title written consistently as `Ghost Drop` / `Ghost_Drop`
 - [ ] course and assignment labels match instructor expectations
 - [ ] submission date verified
 
@@ -22,7 +22,7 @@
 - [ ] `Module_A/report.ipynb` is present and opens correctly
 - [x] final hosted demo video link added in `Module_A/report.ipynb`
 - [ ] `Module_A/database/` contains the standalone B+ Tree engine files
-- [ ] `Module_A/integration/` contains the BlindDrop integration files
+- [ ] `Module_A/integration/` contains the Ghost Drop integration files
 - [ ] `Module_A/integration/bptree_v2/` contains the rendered tree PNGs
 - [ ] `Module_A/integration/bptree_v2/render_manifest.json` is present
 - [ ] `Module_A/evidence/` contains benchmark outputs and summary Markdown files
@@ -33,7 +33,7 @@
 - [ ] brute-force baseline is included
 - [ ] tree visualization tooling is included
 - [ ] parity / rebuild evidence is included
-- [ ] domain benchmark uses `Project_432/backend/database_export.json`
+- [ ] domain benchmark uses `Ghost_Drop/backend/database_export.json`
 - [ ] detailed benchmark outputs and dashboard plots are included
 
 ## 5. Module B package completeness
@@ -75,3 +75,4 @@
 - [ ] root `README.md` matches the current package structure
 - [ ] both module readmes match the current package structure
 - [ ] final submission folder opens cleanly and reads as a coherent bundle
+

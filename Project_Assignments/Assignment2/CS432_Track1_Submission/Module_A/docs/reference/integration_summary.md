@@ -1,6 +1,6 @@
 # Module A Integration Summary
 
-This summary explains how the standalone Module A B+ Tree implementation is connected back to the BlindDrop project domain inside the packaged `Module_A` submission.
+This summary explains how the standalone Module A B+ Tree implementation is connected back to the Ghost Drop project domain inside the packaged `Module_A` submission.
 
 ## Core idea
 
@@ -19,10 +19,10 @@ The project-specific integration code is packaged in:
 
 The most important files are:
 
-- `blinddrop_index_manager.py`
-- `blinddrop_index_demo.py`
+- `ghostdrop_index_manager.py`
+- `ghostdrop_index_demo.py`
 - `db_index_parity_demo.py`
-- `benchmark_blinddrop_paths.py`
+- `benchmark_ghostdrop_paths.py`
 - `benchmark_detailed.py`
 - `render_bptree_v2.py`
 
@@ -37,7 +37,7 @@ The custom B+ Tree is demonstrated on four meaningful project-shaped access path
 
 These paths show both exact lookup and range-scan behavior on data that resembles the actual application.
 
-In the current submission package, those paths are exercised against the exported dataset at `Project_432/backend/database_export.json`, so the demo, parity proof, renderer, and benchmark layer all share the same project snapshot.
+In the current submission package, those paths are exercised against the exported dataset at `Ghost_Drop/backend/database_export.json`, so the demo, parity proof, renderer, and benchmark layer all share the same project snapshot.
 
 ## Why this matters
 
@@ -50,4 +50,5 @@ This is stronger than a generic integer-key demonstration because it shows:
 
 ## One-line viva explanation
 
-`For Module A, I kept the custom Python B+ Tree as the assignment-facing index engine and integrated it through a BlindDrop-specific wrapper so I could demonstrate real project-shaped lookups, range scans, parity validation, and rebuild behavior without replacing the authoritative relational model.`
+`For Module A, I kept the custom Python B+ Tree as the assignment-facing index engine and integrated it through a Ghost Drop-specific wrapper so I could demonstrate real project-shaped lookups, range scans, parity validation, and rebuild behavior without replacing the authoritative relational model.`
+

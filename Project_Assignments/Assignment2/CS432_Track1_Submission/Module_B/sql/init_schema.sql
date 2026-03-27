@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS blinddrop_proto;
-USE blinddrop_proto;
+CREATE DATABASE IF NOT EXISTS ghostdrop_proto;
+USE ghostdrop_proto;
 
 CREATE TABLE IF NOT EXISTS vaults (
   vault_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,

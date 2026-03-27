@@ -102,7 +102,7 @@ async function runIntegrityBackgroundScan() {
 function startServer() {
   const server = app.listen(port, () => {
     // eslint-disable-next-line no-console
-    console.log(`BlindDrop prototype server running at http://localhost:${port}`);
+    console.log(`GhostDrop prototype server running at http://localhost:${port}`);
   });
 
   if (integrityScanIntervalMs > 0) {

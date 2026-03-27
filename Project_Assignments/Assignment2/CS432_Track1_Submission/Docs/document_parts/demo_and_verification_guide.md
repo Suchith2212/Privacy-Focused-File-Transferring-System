@@ -1,10 +1,10 @@
-﻿# Demo And Verification Guide
+# Demo And Verification Guide
 
 ## 1. Purpose
 
 This guide provides a clean end-to-end sequence for presenting the combined submission. The recommended order is:
 
-1. introduce the BlindDrop product problem
+1. introduce the Ghost Drop product problem
 2. show the running application
 3. demonstrate the core product flow
 4. present Module A integration and evidence
@@ -22,7 +22,7 @@ The package already contains prepared evidence folders, so the demo can be run l
 - Module B package:
   `CS432_Track1_Submission/Module_B`
 - primary source project:
-  `Project_432`
+  `Ghost_Drop`
 
 ## 3. Environment preparation
 
@@ -35,7 +35,7 @@ The package already contains prepared evidence folders, so the demo can be run l
 
 ### 3.2 Database setup for the original backend
 
-From `Project_432/backend`:
+From `Ghost_Drop/backend`:
 
 ```powershell
 Get-Content .\sql\init_schema.sql | mysql -h 127.0.0.1 -P 3306 -u <db_user> -p --protocol=TCP
@@ -43,7 +43,7 @@ Get-Content .\sql\init_schema.sql | mysql -h 127.0.0.1 -P 3306 -u <db_user> -p -
 
 ### 3.3 Start the backend
 
-From `Project_432/backend`:
+From `Ghost_Drop/backend`:
 
 ```powershell
 npm install
@@ -63,7 +63,7 @@ Expected response:
 
 ## 4. Product flow demonstration
 
-### 4.1 Explain the BlindDrop model
+### 4.1 Explain the Ghost Drop model
 
 State clearly:
 
@@ -120,19 +120,19 @@ Use the SUB token and verify:
 Explain that Module A is not just a synthetic B+ Tree implementation. It contains:
 
 - the required standalone B+ Tree database layer
-- a BlindDrop-specific integration layer
+- a Ghost Drop-specific integration layer
 - benchmarks and visualization evidence generated from the real exported snapshot
 
 The source snapshot used by the packaged integration is:
 
-- `Project_432/backend/database_export.json`
+- `Ghost_Drop/backend/database_export.json`
 
-### 5.2 BlindDrop index demo
+### 5.2 Ghost Drop index demo
 
 From `CS432_Track1_Submission/Module_A/integration`:
 
 ```powershell
-python .\blinddrop_index_demo.py
+python .\ghostdrop_index_demo.py
 ```
 
 Explain the four integrated paths:
@@ -162,7 +162,7 @@ Explain that this proves:
 From `CS432_Track1_Submission/Module_A/integration`:
 
 ```powershell
-python .\benchmark_blinddrop_paths.py
+python .\benchmark_ghostdrop_paths.py
 ```
 
 Use the packaged summary to explain that the B+ Tree wrapper outperforms the brute-force baseline on project-shaped paths, with approximate average speedups of:
@@ -306,9 +306,10 @@ Use the following explanation:
 
 ## 9. Suggested viva talking points
 
-- why the same BlindDrop credential model was reused for RBAC
+- why the same Ghost Drop credential model was reused for RBAC
 - why `portfolio_entries` was added instead of overloading file tables
 - how Module A uses the real exported dataset rather than a synthetic sample
 - why the benchmark stages are named `Baseline full scan`, `Composite lookup index`, and `Composite + covering comparison stage`
 - why the third Module B benchmark stage should not be misrepresented as a switch to the covering index
+
 

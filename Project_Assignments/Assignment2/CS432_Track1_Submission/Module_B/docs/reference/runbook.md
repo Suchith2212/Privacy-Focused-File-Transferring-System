@@ -1,4 +1,4 @@
-﻿# Module B Runbook
+# Module B Runbook
 
 This runbook gives the exact end-to-end flow for running the packaged Module B system, verifying the assignment features, and refreshing the key evidence artifacts.
 
@@ -29,7 +29,7 @@ The packaged submission is intentionally source-only. It does **not** include `n
    - `DB_PASSWORD`
    - `DB_NAME`
    - `PORTFOLIO_INTEGRITY_SECRET`
-3. Add Google Drive credentials only if the full BlindDrop upload/download flow will be demonstrated
+3. Add Google Drive credentials only if the full Ghost Drop upload/download flow will be demonstrated
 
 ## 4. Database setup
 
@@ -41,7 +41,7 @@ Get-Content .\sql\init_schema.sql | mysql -h 127.0.0.1 -P 3306 -u <db_user> -p -
 
 This creates:
 
-- core BlindDrop tables
+- core Ghost Drop tables
 - `portfolio_entries`
 - production indexes
 - the application-side integrity and tamper-detection path used by the submission
@@ -171,4 +171,5 @@ Before submission, confirm that `Module_B` contains:
 - DB evidence
 - audit evidence
 - benchmark evidence
+
 

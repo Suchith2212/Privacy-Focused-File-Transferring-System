@@ -1,19 +1,19 @@
-﻿# Module B Technical Documentation
+# Module B Technical Documentation
 
 This document describes the **current packaged Module B implementation** in `CS432_Track1_Submission/Module_B`. It is written as a self-contained technical explanation for the submission bundle rather than as a development note for the wider repository.
 
 ## 1. Architecture
 
 - **Backend:** Node.js + Express
-- **Database:** MySQL (`blinddrop_proto`)
+- **Database:** MySQL (`ghostdrop_proto`)
 - **Frontend:** static HTML/CSS/JavaScript served by Express
-- **Storage for file blobs:** Google Drive in the original BlindDrop workflow
+- **Storage for file blobs:** Google Drive in the original Ghost Drop workflow
 - **Session model:** token-based vault session service
 - **Assignment layer:** RBAC portfolio CRUD, audit logging, tamper detection, and SQL optimization evidence
 
 ## 2. Authentication and Role Mapping
 
-The application reuses the original BlindDrop credential model instead of introducing a second, unrelated user table.
+The application reuses the original Ghost Drop credential model instead of introducing a second, unrelated user table.
 
 - `outerToken + MAIN innerToken` => `admin`
 - `outerToken + SUB innerToken` => `user`
@@ -56,7 +56,7 @@ This is the dedicated Module B CRUD resource. It exists so the submission can de
 
 12. `sub_token_secrets`
 
-This support table is created by the application for the BlindDrop UI and is not the primary Module B evaluation table.
+This support table is created by the application for the Ghost Drop UI and is not the primary Module B evaluation table.
 
 ## 4. Why `portfolio_entries` was added
 
@@ -244,6 +244,14 @@ This is approximately:
 
 Important note: in the captured `EXPLAIN` output, MySQL still selected `idx_portfolio_benchmark_lookup` even after the covering index was added. The third stage therefore represents a comparison stage with the covering index present, not a proof that the optimizer switched to that covering index.
 
+For the packaged Ghost Drop schema, the practical index story is:
+
+- `vaults.outer_token` is covered by the `UNIQUE` key, so no extra lookup index is needed
+- `inner_tokens(token_lookup_hash, vault_id, status)` supports the deterministic prefilter used before PBKDF2 verification
+- `files(vault_id, status, created_at)` and `portfolio_entries(vault_id, status, updated_at)` match the hot listing paths
+- `portfolio_entries(vault_id, owner_token_id, status, updated_at)` supports the owner-scoped user view
+- `files(deleted_at)`, `download_logs(file_id, download_time)`, `download_logs(inner_token_id)`, `auth_attempts(session_id, attempt_time, success)`, and `expiry_jobs(processed, scheduled_time)` support background and audit scans
+
 The backend package now also contains `reports/api_response_benchmark.js`, which benchmarks real HTTP response times for the login, session validation, portfolio list, and evidence endpoints.
 
 ## 10. Source files in this package
@@ -261,7 +269,10 @@ The backend package now also contains `reports/api_response_benchmark.js`, which
 
 ## 11. Supporting documents
 
-- [MODULE_B_FINAL_REPORT.md](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/docs/MODULE_B_FINAL_REPORT.md)
-- [MODULE_B_RUNBOOK.md](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/docs/MODULE_B_RUNBOOK.md)
+- [docs/README.md](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/docs/README.md)
+- [runbook.md](runbook.md)
+- [ghostdrop_er_basic.png](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/evidence/database_evidence/ER_Diagrams/ghostdrop_er_basic.png)
+- [ghostdrop_er_formal.png](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/evidence/database_evidence/ER_Diagrams/ghostdrop_er_formal.png)
 - [optimization_report.md](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/app/backend/reports/optimization_report.md)
+
 

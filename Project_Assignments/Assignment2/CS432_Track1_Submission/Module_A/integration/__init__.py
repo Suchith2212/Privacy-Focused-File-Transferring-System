@@ -1,1 +1,1 @@
-"""Module A integration package for Project_432."""
+"""Module A integration package for Ghost_Drop."""

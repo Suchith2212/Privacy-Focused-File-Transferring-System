@@ -1,4 +1,4 @@
-﻿Detailed benchmark run - 2026-03-22T14:00:28
+Detailed benchmark run - 2026-03-22T14:00:28
 
 Measuring size: 500...
 
@@ -51,7 +51,7 @@ Measuring random workload...
 Detailed benchmark saved to F:\SEM IV\lessons\DB\Project\Project_Assignments\Assignment2\CS432_Track1_Submission\Module_A\evidence\detailed_benchmark_results.json
 
 
-BlindDrop path benchmark run - 2026-03-22T14:05:41
+Ghost Drop path benchmark run - 2026-03-22T14:05:41
 
 Benchmarking size: 500...
 
@@ -95,7 +95,7 @@ Benchmarking size: 19500...
 
 {
 
-  "sourceSnapshot": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment2\\Project_432\\backend\\database_export.json",
+  "sourceSnapshot": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment2\\Ghost_Drop\\backend\\database_export.json",
 
   "results": [
 

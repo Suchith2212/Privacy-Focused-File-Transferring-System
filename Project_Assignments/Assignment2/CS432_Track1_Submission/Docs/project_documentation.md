@@ -1,4 +1,4 @@
-﻿# Project Documentation
+# Project Documentation
 
 ## 1. Document purpose
 
@@ -11,13 +11,13 @@ GitHub Repository: https://github.com/Suchith2212/Privacy-Focused-File-Transferr
 The package combines:
 
 - **Module A**
-  custom B+ Tree implementation, lightweight database wrapper, visualization, and BlindDrop-specific index integration
+  custom B+ Tree implementation, lightweight database wrapper, visualization, and Ghost Drop-specific index integration
 - **Module B**
   local authenticated web application, RBAC CRUD, audit logging, tamper detection, and SQL optimization
 
 ## 2. Project overview
 
-The underlying project is **BlindDrop**, a secure temporary file-sharing system built around expiring vaults. A sender creates a vault, uploads files, receives a public `outerToken`, and controls access through one or more private `innerToken` values. `MAIN` tokens provide full vault access, while `SUB` tokens can be restricted to a selected set of files.
+The underlying project is **Ghost Drop**, a secure temporary file-sharing system built around expiring vaults. A sender creates a vault, uploads files, receives a public `outerToken`, and controls access through one or more private `innerToken` values. `MAIN` tokens provide full vault access, while `SUB` tokens can be restricted to a selected set of files.
 
 This product model already contains meaningful access control, expiry, and security behavior. The submission therefore uses that real domain as the foundation for both assignment modules instead of fabricating a separate unrelated academic example.
 
@@ -30,18 +30,18 @@ The assignment requires two modules with different goals:
 - **Module B**
   implement a local DB-backed application with login, session validation, RBAC, CRUD, audit logging, tamper detection, and SQL optimization evidence
 
-The main design decision in this submission was to keep the real BlindDrop domain intact while adding assignment-facing layers that remain technically defensible.
+The main design decision in this submission was to keep the real Ghost Drop domain intact while adding assignment-facing layers that remain technically defensible.
 
 ### 3.1 Strategy for Module A
 
 Module A is split into:
 
 - a standalone Python B+ Tree database layer that directly satisfies the assignment brief
-- a BlindDrop-specific integration layer that applies the same structure to real exported project data
+- a Ghost Drop-specific integration layer that applies the same structure to real exported project data
 
 ### 3.2 Strategy for Module B
 
-Module B reuses the existing BlindDrop credential model instead of inventing a second artificial authentication system:
+Module B reuses the existing Ghost Drop credential model instead of inventing a second artificial authentication system:
 
 - `outerToken + MAIN innerToken` -> `admin`
 - `outerToken + SUB innerToken` -> `user`
@@ -81,7 +81,7 @@ This decision keeps the submission coherent because the same credentials that go
 The full submission spans two runtime styles:
 
 - **Node.js + Express + MySQL + static frontend + Google Drive**
-  for the main BlindDrop product and Module B behavior
+  for the main Ghost Drop product and Module B behavior
 - **Python + custom B+ Tree + Graphviz tooling**
   for Module A implementation, analysis, and integration
 
@@ -103,9 +103,9 @@ The full submission spans two runtime styles:
 - **Module B**
   session-based access layer, portfolio CRUD, evidence endpoint, integrity guard, and optimization reports
 
-## 6. BlindDrop product model
+## 6. Ghost Drop product model
 
-BlindDrop is built around an expiring-vault workflow:
+Ghost Drop is built around an expiring-vault workflow:
 
 1. a sender creates a vault
 2. files are uploaded
@@ -128,7 +128,7 @@ Module A demonstrates:
 - a lightweight table/database abstraction
 - Graphviz visualization
 - performance benchmarking
-- integration with real BlindDrop-style data
+- integration with real Ghost Drop-style data
 
 ### 7.2 Standalone Module A implementation
 
@@ -165,13 +165,13 @@ The design follows the core B+ Tree rules:
 
 The table/database wrapper exists to show how the tree can be used as part of a simple structured data layer rather than only as a standalone algorithmic object. This makes the module more complete and closer to the assignment's database-engine intent.
 
-### 7.3 Module A integration with BlindDrop
+### 7.3 Module A integration with Ghost Drop
 
 The packaged integration uses the exported dataset at:
 
-- `Project_432/backend/database_export.json`
+- `Ghost_Drop/backend/database_export.json`
 
-This is a key strength of the submission. The integration is not based on random classroom-only rows. Instead, it derives realistic indexes from the actual BlindDrop data snapshot.
+This is a key strength of the submission. The integration is not based on random classroom-only rows. Instead, it derives realistic indexes from the actual Ghost Drop data snapshot.
 
 #### 7.3.1 Snapshot-driven indexing
 
@@ -217,7 +217,7 @@ Two benchmark styles are included.
 
 #### 7.6.1 Domain benchmark
 
-`Module_A/integration/benchmark_blinddrop_paths.py` compares the B+ Tree wrapper with brute force on BlindDrop-shaped paths. The current packaged run uses:
+`Module_A/integration/benchmark_ghostdrop_paths.py` compares the B+ Tree wrapper with brute force on Ghost Drop-shaped paths. The current packaged run uses:
 
 - the real exported snapshot
 - **20 deterministic benchmark points**
@@ -275,7 +275,7 @@ Module B demonstrates:
 
 ### 8.2 Authentication and role mapping
 
-Instead of inventing a separate username/password system, Module B maps existing BlindDrop credentials to roles:
+Instead of inventing a separate username/password system, Module B maps existing Ghost Drop credentials to roles:
 
 - `MAIN` token -> `admin`
 - `SUB` token -> `user`
@@ -289,7 +289,7 @@ The backend issues a session token for protected Module B routes and revalidates
 
 ### 8.3 Why `portfolio_entries` was added
 
-The existing BlindDrop tables are real business tables, but they are not ideal as the assignment CRUD target:
+The existing Ghost Drop tables are real business tables, but they are not ideal as the assignment CRUD target:
 
 - `vaults` are top-level containers
 - `inner_tokens` are secrets
@@ -440,8 +440,8 @@ The notebook has been expanded into a full report structure covering problem sta
 
 Although the assignment separates the work into two modules, this submission connects them through the same project domain:
 
-- Module A uses the exported BlindDrop dataset for custom indexing, visualization, and benchmark analysis
-- Module B uses the live BlindDrop application model for authentication, RBAC, auditing, and SQL optimization
+- Module A uses the exported Ghost Drop dataset for custom indexing, visualization, and benchmark analysis
+- Module B uses the live Ghost Drop application model for authentication, RBAC, auditing, and SQL optimization
 
 This makes the combined submission stronger than a pair of disconnected examples because both modules are traceable to the same underlying system.
 
@@ -477,7 +477,7 @@ The development effort was intentionally distributed by module ownership and fin
 
 | Team member | Contribution share | Primary work completed |
 | --- | ---: | --- |
-| Suchith | 30% | overall coordination, final submission packaging, Module A BlindDrop integration, evidence consolidation, and cross-module documentation cleanup |
+| Suchith | 30% | overall coordination, final submission packaging, Module A Ghost Drop integration, evidence consolidation, and cross-module documentation cleanup |
 | Rohith | 24% | Module B backend implementation, authentication/session flow, RBAC, portfolio CRUD, and audit/tamper-detection integration |
 | Sanjay | 22% | Module A core B+ Tree/database layer, benchmark scripts, and visualization/rendering support |
 | Hanook | 16% | frontend polishing, SQL/schema support, benchmark evidence preparation, and supporting technical documentation |
@@ -494,11 +494,12 @@ AI tools were used in a limited supporting role during the project. Their use wa
 - suggesting alternative wording for benchmark interpretation and report structure
 - helping identify small cleanup tasks during final packaging
 
-The project was not produced by AI end-to-end. The team selected the BlindDrop-based submission strategy, implemented and integrated the final code, ran the benchmarks, captured the evidence, verified the outputs, and edited the documentation manually. Any AI-assisted content was reviewed, revised, and checked against the actual repository state before inclusion.
+The project was not produced by AI end-to-end. The team selected the Ghost Drop-based submission strategy, implemented and integrated the final code, ran the benchmarks, captured the evidence, verified the outputs, and edited the documentation manually. Any AI-assisted content was reviewed, revised, and checked against the actual repository state before inclusion.
 
 ## 14. Conclusion
 
-The `CS432_Track1_Submission` package is an end-to-end submission built around the BlindDrop project. Module A demonstrates a from-scratch B+ Tree and its integration into realistic project-shaped indexing workloads. Module B demonstrates local authentication, RBAC CRUD, tamper-evident audit logging, unauthorized modification detection, and SQL optimization on a project-specific data model. Together they form one coherent technical submission rather than two unrelated deliverables.
+The `CS432_Track1_Submission` package is an end-to-end submission built around the Ghost Drop project. Module A demonstrates a from-scratch B+ Tree and its integration into realistic project-shaped indexing workloads. Module B demonstrates local authentication, RBAC CRUD, tamper-evident audit logging, unauthorized modification detection, and SQL optimization on a project-specific data model. Together they form one coherent technical submission rather than two unrelated deliverables.
 
 The only remaining manual item outside the Markdown package is filling in student details on the cover page.
+
 

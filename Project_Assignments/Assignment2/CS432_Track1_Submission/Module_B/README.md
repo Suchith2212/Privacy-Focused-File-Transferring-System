@@ -1,6 +1,6 @@
-﻿# Module B
+# Module B
 
-This folder is the final **Module B** submission package for **CS432 Track 1 Assignment 2**. It presents the assignment-facing part of `Project_432` as a complete local system with source code, schema scripts, report material, logs, and evaluator-ready evidence.
+This folder is the final **Module B** submission package for **CS432 Track 1 Assignment 2**. It presents the assignment-facing part of `Ghost_Drop` as a complete local system with source code, schema scripts, report material, logs, and evaluator-ready evidence.
 
 ## Submission objective
 
@@ -14,7 +14,7 @@ Module B requires:
 - identification of unauthorized direct database modifications
 - SQL indexing, profiling, and before/after performance benchmarking
 
-This package satisfies those requirements by adapting the BlindDrop application into a coherent Module B submission.
+This package satisfies those requirements by adapting the Ghost Drop application into a coherent Module B submission.
 
 ## System summary
 
@@ -67,9 +67,26 @@ The packaged frontend now also includes a session-backed **Member Portfolio** pa
 | Local audit logging | `src/services/fileAuditLogger.js`, `logs/audit.log` |
 | Unauthorized DB modification detection | `src/services/portfolioIntegrity.js`, `/api/security/unauthorized-check` |
 | SQL indexing and optimization | `src/services/schemaOptimization.js`, `sql/init_schema.sql` |
+| Database diagram evidence | `evidence/database_evidence/ER_Diagrams/ghostdrop_er_basic.png`, `evidence/database_evidence/ER_Diagrams/ghostdrop_er_formal.png` |
 | Profiling and benchmarking | `app/backend/reports/index_benchmark.js`, `app/backend/reports/api_response_benchmark.js`, `evidence/benchmark_evidence/` |
 
 The packaged schema is intentionally rerunnable on ordinary MySQL setups. Unauthorized direct database modification detection is enforced primarily through the `integrity_hash` model and the application-side verification route, rather than depending on elevated trigger-creation privileges.
+
+The `vaults.outer_token` lookup uses the `UNIQUE` key directly, so the standalone `idx_vault_token` index was removed as redundant.
+
+Current lookup map:
+
+- `vaults.outer_token` -> `UNIQUE` key
+- `vaults(status, expires_at)` -> expiring-vault scans
+- `inner_tokens(token_lookup_hash, vault_id, status)` -> token-prefiltered auth lookup
+- `files(vault_id, status, created_at)` -> vault file listing
+- `files(deleted_at)` -> cleanup scans
+- `download_logs(file_id, download_time)` -> download history by file
+- `download_logs(inner_token_id)` -> download history by token
+- `auth_attempts(session_id, attempt_time, success)` -> session audit timeline
+- `portfolio_entries(vault_id, owner_token_id, status, updated_at)` -> owned-entry reads
+- `portfolio_entries(vault_id, status, updated_at)` -> vault-wide admin reads
+- `portfolio_entries(integrity_hash)` -> tamper verification
 
 ## Evaluator shortcuts
 
@@ -78,6 +95,7 @@ The packaged schema is intentionally rerunnable on ordinary MySQL setups. Unauth
 - Protected CRUD routes: [`portfolio.js`](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/app/backend/src/routes/portfolio.js)
 - Admin-only tamper check: [`security.js`](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/app/backend/src/routes/security.js)
 - EXPLAIN and timing benchmark: [`index_benchmark.js`](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/app/backend/reports/index_benchmark.js)
+- ER diagrams: [`evidence/database_evidence/ER_Diagrams/`](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/evidence/database_evidence/ER_Diagrams)
 - Compliance map: [`compliance_checklist.md`](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/docs/reference/compliance_checklist.md)
 
 ## Key implementation files
@@ -118,4 +136,5 @@ Useful packaged verification commands from `app/backend`:
 - `npm run verify:e2e`
 - `npm run smoke:tamper`
 - `npm run smoke:full`
+
 

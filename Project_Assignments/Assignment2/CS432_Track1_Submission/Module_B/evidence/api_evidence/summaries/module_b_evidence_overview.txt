@@ -1,5 +1,5 @@
 {
-    "project":  "Project_432",
+    "project":  "Ghost_Drop",
     "module":  "Module B",
     "vaultId":  "91ff4e74-f0c4-43b9-ae76-78e0713fa802",
     "rbacMapping":  {

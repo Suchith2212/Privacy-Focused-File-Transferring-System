@@ -1,4 +1,4 @@
-﻿# Module B Compliance Checklist
+# Module B Compliance Checklist
 
 This note maps the packaged Module B submission directly to the common evaluator checks from the Track 1 Assignment 2 brief.
 
@@ -12,7 +12,7 @@ The packaged `sql/` folder now exposes one clear schema entry point instead of s
 
 ## 2. Core tables and project-specific tables are separated
 
-Core BlindDrop tables are defined in the same schema script and include:
+Core Ghost Drop tables are defined in the same schema script and include:
 
 - `vaults`
 - `inner_tokens`
@@ -125,6 +125,8 @@ Packaged benchmark evidence:
 - `evidence/benchmark_evidence/benchmark_results.txt`
 - `evidence/benchmark_evidence/explain_plan_table.md`
 - `evidence/benchmark_evidence/benchmark_results.json`
+- [evidence/database_evidence/ER_Diagrams/ghostdrop_er_basic.png](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/evidence/database_evidence/ER_Diagrams/ghostdrop_er_basic.png)
+- [evidence/database_evidence/ER_Diagrams/ghostdrop_er_formal.png](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_B/evidence/database_evidence/ER_Diagrams/ghostdrop_er_formal.png)
 
 The measured protected query uses `vault_id`, `owner_token_id`, `status`, and `updated_at`, which is why the composite lookup index follows that order.
 
@@ -136,5 +138,6 @@ The final package should exclude transient dependency caches and local install a
 - `.npm-cache/`
 
 Those folders are not part of the graded source submission.
+
 
 

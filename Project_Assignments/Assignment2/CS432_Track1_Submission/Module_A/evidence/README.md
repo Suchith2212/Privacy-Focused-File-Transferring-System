@@ -51,6 +51,6 @@ This evidence demonstrates that:
 1. `summaries/evidence_summary.md`
 2. `summaries/parity_summary.md`
 3. `summaries/benchmark_summary.md`
-4. `Module_A/integration/reports/blinddrop_paths_benchmark.md`
+4. `Module_A/integration/reports/ghostdrop_paths_benchmark.md`
 5. the PNG plots in this folder
 6. `Module_A/integration/bptree_v2/render_manifest.json`

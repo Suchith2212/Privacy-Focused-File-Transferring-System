@@ -1,0 +1,40 @@
+digraph ghostdrop_formal {
+	bgcolor=white nodesep=0.45 pad=0.3 rankdir=LR ranksep=0.7 splines=spline
+	node [fontname=Helvetica shape=plain]
+	edge [arrowsize=0.8 color="#5A5A5A" fontname=Helvetica]
+	subgraph cluster_core {
+		color="#9BB7D4" label="Core Vault Data" style=rounded
+		vaults [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" BGCOLOR="#E8EEF7"><B>vaults</B></TD></TR><TR><TD ALIGN="LEFT"><B>PK</B></TD><TD ALIGN="LEFT">vault_id</TD></TR><TR><TD ALIGN="LEFT"><B>UK</B></TD><TD ALIGN="LEFT">outer_token</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">created_at</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">expires_at</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">status</TD></TR></TABLE>>]
+		inner_tokens [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" BGCOLOR="#E8EEF7"><B>inner_tokens</B></TD></TR><TR><TD ALIGN="LEFT"><B>PK</B></TD><TD ALIGN="LEFT">inner_token_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">vault_id</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">token_type</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">token_hash</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">token_lookup_hash</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">salt</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">key_iterations</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">created_at</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">status</TD></TR></TABLE>>]
+		files [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" BGCOLOR="#E8EEF7"><B>files</B></TD></TR><TR><TD ALIGN="LEFT"><B>PK</B></TD><TD ALIGN="LEFT">file_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">vault_id</TD></TR><TR><TD ALIGN="LEFT"><B>UK</B></TD><TD ALIGN="LEFT">drive_file_id</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">original_filename</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">mime_type</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">file_size</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">storage_path</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">file_key_iv</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">file_hmac</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">status</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">deleted_at</TD></TR></TABLE>>]
+		file_metadata [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" BGCOLOR="#E8EEF7"><B>file_metadata</B></TD></TR><TR><TD ALIGN="LEFT"><B>PK</B></TD><TD ALIGN="LEFT">metadata_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">file_id</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">original_filename</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">relative_path</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">mime_type</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">file_size</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">uploaded_at</TD></TR></TABLE>>]
+		file_key_access [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" BGCOLOR="#E8EEF7"><B>file_key_access</B></TD></TR><TR><TD ALIGN="LEFT"><B>PK</B></TD><TD ALIGN="LEFT">access_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">file_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">inner_token_id</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">encrypted_file_key</TD></TR></TABLE>>]
+	}
+	subgraph cluster_security {
+		color="#C9A66B" label="Security and Audit" style=rounded
+		sessions [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" BGCOLOR="#E8EEF7"><B>sessions</B></TD></TR><TR><TD ALIGN="LEFT"><B>PK</B></TD><TD ALIGN="LEFT">session_id</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">ip_address</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">user_agent</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">created_at</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">last_activity</TD></TR></TABLE>>]
+		auth_attempts [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" BGCOLOR="#E8EEF7"><B>auth_attempts</B></TD></TR><TR><TD ALIGN="LEFT"><B>PK</B></TD><TD ALIGN="LEFT">attempt_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">session_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">vault_id</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">attempt_time</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">success</TD></TR></TABLE>>]
+		download_logs [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" BGCOLOR="#E8EEF7"><B>download_logs</B></TD></TR><TR><TD ALIGN="LEFT"><B>PK</B></TD><TD ALIGN="LEFT">download_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">file_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">inner_token_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">session_id</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">download_time</TD></TR></TABLE>>]
+		captcha_tracking [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" BGCOLOR="#E8EEF7"><B>captcha_tracking</B></TD></TR><TR><TD ALIGN="LEFT"><B>PK</B></TD><TD ALIGN="LEFT">captcha_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">session_id</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">attempts</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">required</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">last_attempt</TD></TR></TABLE>>]
+		expiry_jobs [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" BGCOLOR="#E8EEF7"><B>expiry_jobs</B></TD></TR><TR><TD ALIGN="LEFT"><B>PK</B></TD><TD ALIGN="LEFT">job_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">vault_id</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">scheduled_time</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">processed</TD></TR></TABLE>>]
+	}
+	subgraph cluster_portfolio {
+		color="#7CB8A7" label="Module B CRUD" style=rounded
+		portfolio_entries [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" BGCOLOR="#E8EEF7"><B>portfolio_entries</B></TD></TR><TR><TD ALIGN="LEFT"><B>PK</B></TD><TD ALIGN="LEFT">entry_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">vault_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">owner_token_id</TD></TR><TR><TD ALIGN="LEFT"><B>FK</B></TD><TD ALIGN="LEFT">created_by_token_id</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">title</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">content</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">integrity_hash</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">status</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">created_at</TD></TR><TR><TD COLSPAN="2" ALIGN="LEFT">updated_at</TD></TR></TABLE>>]
+	}
+	inner_tokens -> vaults [label="vault_id\nN:1"]
+	files -> vaults [label="vault_id\nN:1"]
+	file_metadata -> files [label="file_id\n1:1"]
+	file_key_access -> files [label="file_id\nN:1"]
+	file_key_access -> inner_tokens [label="inner_token_id\nN:1"]
+	auth_attempts -> sessions [label="session_id\nN:1"]
+	auth_attempts -> vaults [label="vault_id\nN:1 optional"]
+	download_logs -> files [label="file_id\nN:1"]
+	download_logs -> inner_tokens [label="inner_token_id\nN:1"]
+	download_logs -> sessions [label="session_id\nN:1 optional"]
+	captcha_tracking -> sessions [label="session_id\n1:1"]
+	expiry_jobs -> vaults [label="vault_id\n1:1"]
+	portfolio_entries -> vaults [label="vault_id\nN:1"]
+	portfolio_entries -> inner_tokens [label="owner_token_id\nN:1"]
+	portfolio_entries -> inner_tokens [label="created_by_token_id\nN:1"]
+}

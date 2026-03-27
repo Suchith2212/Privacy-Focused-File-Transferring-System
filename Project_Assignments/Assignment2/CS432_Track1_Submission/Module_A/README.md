@@ -1,6 +1,6 @@
-﻿# Module A
+# Module A
 
-This folder is the final **Module A** submission package for **CS432 Track 1 Assignment 2**. It packages the custom Python B+ Tree implementation, the lightweight database wrapper built around it, and the BlindDrop-specific integration layer used to connect the structure back to the project domain.
+This folder is the final **Module A** submission package for **CS432 Track 1 Assignment 2**. It packages the custom Python B+ Tree implementation, the lightweight database wrapper built around it, and the Ghost Drop-specific integration layer used to connect the structure back to the project domain.
 
 ## Submission objective
 
@@ -14,16 +14,16 @@ Module A requires:
 - Graphviz-based tree visualization
 - a report and evidence demonstrating the above
 
-This package satisfies those requirements while also showing how the same B+ Tree can be applied to real BlindDrop-style lookup paths.
+This package satisfies those requirements while also showing how the same B+ Tree can be applied to real Ghost Drop-style lookup paths.
 
-The current packaged evidence is driven by the exported backend snapshot at `Project_432/backend/database_export.json`, so the integration, parity proof, renderer, and domain benchmark all start from the same reproducible project dataset.
+The current packaged evidence is driven by the exported backend snapshot at `Ghost_Drop/backend/database_export.json`, so the integration, parity proof, renderer, and domain benchmark all start from the same reproducible project dataset.
 
 ## Package structure
 
 - `database/`
   The standalone Module A engine: B+ Tree, brute-force baseline, table abstraction, and database manager.
 - `integration/`
-  BlindDrop-specific indexing layer, snapshot-driven demos, parity proof, domain benchmarks, renderer manifest, and generated Graphviz visuals.
+  Ghost Drop-specific indexing layer, snapshot-driven demos, parity proof, domain benchmarks, renderer manifest, and generated Graphviz visuals.
 - `docs/reference/`
   Submission-facing explanation documents and evidence guidance.
 - `evidence/`
@@ -49,8 +49,8 @@ The current packaged evidence is driven by the exported backend snapshot at `Pro
 | Table abstraction | `database/table.py` |
 | Database manager | `database/db_manager.py` |
 | Exact search / insert / delete / update / range query | `database/bplustree.py` |
-| Graphviz visualization | `database/bplustree.py`, `integration/render_bptree_v2.py`, `integration/visualize_blinddrop_indexes.py` |
-| Performance analysis | `integration/benchmark_detailed.py`, `integration/benchmark_blinddrop_paths.py`, generated dashboard plots |
+| Graphviz visualization | `database/bplustree.py`, `integration/render_bptree_v2.py`, `integration/visualize_ghostdrop_indexes.py` |
+| Performance analysis | `integration/benchmark_detailed.py`, `integration/benchmark_ghostdrop_paths.py`, generated dashboard plots |
 | Submission evidence | `evidence/` and `integration/reports/*.md` |
 
 ## Key design decision
@@ -59,7 +59,7 @@ The package keeps two layers distinct:
 
 - **Standalone Module A database layer**
   The custom B+ Tree and database wrapper required by the assignment.
-- **BlindDrop integration layer**
+- **Ghost Drop integration layer**
   A project-specific adapter showing how the same data structure can index real application-shaped paths.
 
 This is stronger than submitting only a synthetic classroom example because it preserves the assignment's from-scratch implementation while also connecting it to the actual project domain.
@@ -70,10 +70,10 @@ This is stronger than submitting only a synthetic classroom example because it p
 - [bruteforce.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/database/bruteforce.py)
 - [table.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/database/table.py)
 - [db_manager.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/database/db_manager.py)
-- [blinddrop_index_manager.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/integration/blinddrop_index_manager.py)
-- [blinddrop_index_demo.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/integration/blinddrop_index_demo.py)
+- [ghostdrop_index_manager.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/integration/ghostdrop_index_manager.py)
+- [ghostdrop_index_demo.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/integration/ghostdrop_index_demo.py)
 - [db_index_parity_demo.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/integration/db_index_parity_demo.py)
-- [benchmark_blinddrop_paths.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/integration/benchmark_blinddrop_paths.py)
+- [benchmark_ghostdrop_paths.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/integration/benchmark_ghostdrop_paths.py)
 - [benchmark_detailed.py](/F:/SEM%20IV/lessons/DB/Project/Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/integration/benchmark_detailed.py)
 
 ## Submission status
@@ -96,4 +96,5 @@ Notable generated artifacts include:
 - `integration/bptree_v2/render_manifest.json`
 
 Hosted demo video: https://youtu.be/T24vXjLI5dI?si=URhvw7nJmuug-nHH
+
 

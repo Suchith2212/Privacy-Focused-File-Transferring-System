@@ -1,7 +1,7 @@
 {
-  "name": "blinddrop-prototype-backend",
+  "name": "ghostdrop-prototype-backend",
   "version": "0.1.0",
-  "description": "Initial BlindDrop prototype backend",
+  "description": "Initial GhostDrop prototype backend",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",

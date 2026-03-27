@@ -41,7 +41,7 @@ The brute-force implementation is intentionally simple. It stores rows in a line
 
 ## Relationship to the integration layer
 
-The `database/` folder is the standalone Module A implementation. The `integration/` folder sits on top of it and adapts the same structure to BlindDrop-specific index keys such as:
+The `database/` folder is the standalone Module A implementation. The `integration/` folder sits on top of it and adapts the same structure to Ghost Drop-specific index keys such as:
 
 - `outer_token -> vault_id`
 - `expires_at_epoch -> vault_id[]`
@@ -49,3 +49,4 @@ The `database/` folder is the standalone Module A implementation. The `integrati
 - `(session_id, attempt_time_epoch) -> auth_attempt_id[]`
 
 That means the core implementation remains assignment-valid on its own, while the integration layer demonstrates project relevance.
+

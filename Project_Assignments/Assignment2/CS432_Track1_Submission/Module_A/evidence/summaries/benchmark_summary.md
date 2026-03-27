@@ -6,21 +6,21 @@ This summary explains the benchmark evidence packaged in:
 - `benchmark_results.json`
 - `detailed_benchmark_results.json`
 - the PNG plots in `evidence/`
-- `Module_A/integration/reports/blinddrop_paths_benchmark.md`
+- `Module_A/integration/reports/ghostdrop_paths_benchmark.md`
 
 ## Source dataset
 
 The current benchmark package is anchored to:
 
-- `Project_432/backend/database_export.json`
+- `Ghost_Drop/backend/database_export.json`
 
-That export provides the real BlindDrop-shaped rows used by the integration layer. The domain benchmark amplifies those rows into larger deterministic datasets so the benchmark stays project-aligned while still showing scaling behavior.
+That export provides the real Ghost Drop-shaped rows used by the integration layer. The domain benchmark amplifies those rows into larger deterministic datasets so the benchmark stays project-aligned while still showing scaling behavior.
 
 ## Benchmark layers
 
 ### Domain benchmark
 
-The domain benchmark is produced by `integration/benchmark_blinddrop_paths.py`.
+The domain benchmark is produced by `integration/benchmark_ghostdrop_paths.py`.
 
 It currently includes:
 
@@ -76,3 +76,4 @@ This benchmark package is stronger than the earlier lightweight draft because it
 - denser plots with 20-point and 22-point sweeps
 - dashboard visualizations that compare multiple operations in one figure
 - a refreshed aggregate JSON file, `benchmark_results.json`, that now matches the current detailed benchmark output
+

@@ -1,6 +1,6 @@
-﻿{
+{
 
-  "source": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment2\\Project_432\\backend\\database_export.json",
+  "source": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment2\\Ghost_Drop\\backend\\database_export.json",
 
   "snapshotCounts": {
 
@@ -246,7 +246,7 @@
 
 }
 
-Saved demo output to F:\SEM IV\lessons\DB\Project\Project_Assignments\Assignment2\CS432_Track1_Submission\Module_A\integration\blinddrop_index_demo_output.json
+Saved demo output to F:\SEM IV\lessons\DB\Project\Project_Assignments\Assignment2\CS432_Track1_Submission\Module_A\integration\ghostdrop_index_demo_output.json
 
 
 

@@ -1,7 +1,7 @@
-﻿{
+{
   "sourceSnapshot": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment2\\CS432_Track1_Submission\\Module_A\\database_export.json",
   "domainBenchmark": {
-    "sourceSnapshot": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment2\\Project_432\\backend\\database_export.json",
+    "sourceSnapshot": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment2\\Ghost_Drop\\backend\\database_export.json",
     "metadata": {
       "points": 20,
       "runs": 1,

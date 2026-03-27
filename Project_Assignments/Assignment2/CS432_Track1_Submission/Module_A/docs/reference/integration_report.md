@@ -7,7 +7,7 @@ This report explains the full Module A story in the packaged `Module_A` submissi
 The submission has two layers:
 
 - a standalone Python B+ Tree database layer that directly answers the assignment brief
-- a BlindDrop-specific integration layer that demonstrates the same structure on application-shaped paths
+- a Ghost Drop-specific integration layer that demonstrates the same structure on application-shaped paths
 
 ## 2. Standalone Module A implementation
 
@@ -39,7 +39,7 @@ The integration follows a strict rule:
 
 This means the design does not try to replace MySQL or duplicate the full live backend in Python. Instead, it keeps the custom index in the role it is best suited to defend academically: a standalone from-scratch structure that can also be mapped onto realistic workloads.
 
-## 4. BlindDrop-shaped indexed paths
+## 4. Ghost Drop-shaped indexed paths
 
 The integration layer demonstrates four concrete paths:
 
@@ -81,7 +81,7 @@ This is enough to support the integrated paths while preserving the original tre
 
 ## 6. Demonstration layer
 
-`blinddrop_index_demo.py` shows the integrated B+ Tree working on the four project-shaped paths. This is important because it proves the tree is not only correct on synthetic examples, but also meaningful on a domain-aligned dataset.
+`ghostdrop_index_demo.py` shows the integrated B+ Tree working on the four project-shaped paths. This is important because it proves the tree is not only correct on synthetic examples, but also meaningful on a domain-aligned dataset.
 
 ## 7. Parity, rollback, and rebuild layer
 
@@ -104,14 +104,14 @@ The package includes two benchmark styles:
 
 ### Domain benchmark
 
-`benchmark_blinddrop_paths.py` compares the B+ Tree wrapper against brute force on:
+`benchmark_ghostdrop_paths.py` compares the B+ Tree wrapper against brute force on:
 
 - outer-token lookup
 - expiry range scan
 - vault-file range scan
 - auth-attempt range scan
 
-The packaged run is driven from `Project_432/backend/database_export.json`, expands that export into 20 deterministic benchmark points, and produces both per-path plots and a combined dashboard plus speedup chart.
+The packaged run is driven from `Ghost_Drop/backend/database_export.json`, expands that export into 20 deterministic benchmark points, and produces both per-path plots and a combined dashboard plus speedup chart.
 
 ### Detailed benchmark
 
@@ -162,4 +162,5 @@ This Module A package is stronger than a minimal submission because it provides:
 
 ## 11. Viva explanation
 
-`For Module A, I implemented the B+ Tree and the lightweight database wrapper in Python as required, benchmarked it against a brute-force baseline, and then added a BlindDrop-specific integration layer so I could demonstrate exact lookups, range scans, parity validation, rollback, repair, rebuild, and Graphviz visualization on realistic project-shaped paths.`
+`For Module A, I implemented the B+ Tree and the lightweight database wrapper in Python as required, benchmarked it against a brute-force baseline, and then added a Ghost Drop-specific integration layer so I could demonstrate exact lookups, range scans, parity validation, rollback, repair, rebuild, and Graphviz visualization on realistic project-shaped paths.`
+

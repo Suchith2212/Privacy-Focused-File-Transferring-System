@@ -6,10 +6,10 @@ import json
 from pathlib import Path
 
 try:
-    from .db_index_parity_manager import BlindDropParityManager
+    from .db_index_parity_manager import GhostDropParityManager
     from .snapshot_utils import load_snapshot, snapshot_counts
 except ImportError:  # pragma: no cover - direct script execution fallback
-    from db_index_parity_manager import BlindDropParityManager
+    from db_index_parity_manager import GhostDropParityManager
     from snapshot_utils import load_snapshot, snapshot_counts
 
 
@@ -27,7 +27,7 @@ def make_seeded_snapshot() -> tuple[dict, str]:
 
 
 def main() -> None:
-    manager = BlindDropParityManager(engine="bplustree", order=16)
+    manager = GhostDropParityManager(engine="bplustree", order=16)
     seeded_snapshot, snapshot_source = make_seeded_snapshot()
     manager.load_snapshot(seeded_snapshot)
 
@@ -175,7 +175,7 @@ def build_summary(result: dict) -> str:
     lines = [
         "# DB and B+ Tree Parity Proof",
         "",
-        "This proof demonstrates the Assignment 2 contract in executable form on top of the packaged BlindDrop-shaped snapshot:",
+        "This proof demonstrates the Assignment 2 contract in executable form on top of the packaged GhostDrop-shaped snapshot:",
         "",
         "- relational state is authoritative",
         "- the custom B+ Tree is synchronized before commit becomes visible",

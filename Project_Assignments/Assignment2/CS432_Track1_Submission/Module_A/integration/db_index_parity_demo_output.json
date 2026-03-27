@@ -1,9 +1,9 @@
-﻿{
+{
   "authorityModel": {
     "db": "authoritative",
     "bPlusTree": "acceleration and range-scan layer"
   },
-  "sourceSnapshot": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment2\\Project_432\\backend\\database_export.json",
+  "sourceSnapshot": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment2\\Ghost_Drop\\backend\\database_export.json",
   "seedCounts": {
     "vaults": 120,
     "files": 500,

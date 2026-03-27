@@ -1,6 +1,6 @@
-﻿# DB and B+ Tree Parity Proof
+# DB and B+ Tree Parity Proof
 
-This proof demonstrates the Assignment 2 contract in executable form on top of the packaged BlindDrop-shaped snapshot:
+This proof demonstrates the Assignment 2 contract in executable form on top of the packaged Ghost Drop-shaped snapshot:
 
 - relational state is authoritative
 - the custom B+ Tree is synchronized before commit becomes visible
@@ -9,7 +9,7 @@ This proof demonstrates the Assignment 2 contract in executable form on top of t
 - read-path lazy repair can heal a missing index entry
 - full rebuild can restore parity from authoritative state
 
-Source snapshot: `F:\SEM IV\lessons\DB\Project\Project_Assignments\Assignment2\Project_432\backend\database_export.json`
+Source snapshot: `F:\SEM IV\lessons\DB\Project\Project_Assignments\Assignment2\Ghost_Drop\backend\database_export.json`
 
 | Seeded vaults | Seeded files | Seeded auth attempts | Final vaults | Final files | Final auth attempts |
 | --- | --- | --- | --- | --- | --- |
@@ -29,4 +29,5 @@ Source snapshot: `F:\SEM IV\lessons\DB\Project\Project_Assignments\Assignment2\P
 ## Viva Line
 
 `The write path is DB-authoritative. If index mutation fails, the DB snapshot is not committed. If the index diverges later, parity checks detect it, lazy repair can restore a missed key during reads, and a full rebuild can reconstruct the complete B+ Tree from the authoritative relational state.`
+
 
