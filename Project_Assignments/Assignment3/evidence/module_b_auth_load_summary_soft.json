@@ -1,0 +1,22 @@
+{
+  "total": 160,
+  "success": 80,
+  "failed": 80,
+  "success_rate": 50.0,
+  "latency_ms": {
+    "mean": 126.76,
+    "p50": 123.19,
+    "p95": 195.56,
+    "max": 253.24
+  },
+  "by_status": {
+    "429": 80,
+    "200": 80
+  },
+  "by_operation": {
+    "vault_access": 80,
+    "files_list": 80
+  },
+  "duration_sec": 2.651,
+  "mode": "auth"
+}

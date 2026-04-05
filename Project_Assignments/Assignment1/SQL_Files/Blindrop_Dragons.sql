@@ -1,5 +1,5 @@
-create database blinddrop;
-use blinddrop;
+create database ghostdrop;
+use ghostdrop;
 -- =====================================================
 -- DATABASE: Secure Vault System
 -- =====================================================

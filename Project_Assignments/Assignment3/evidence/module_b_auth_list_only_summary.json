@@ -1,0 +1,24 @@
+{
+  "total": 40,
+  "success": 40,
+  "failed": 0,
+  "success_rate": 100.0,
+  "latency_ms": {
+    "mean": 144.95,
+    "p50": 126.4,
+    "p95": 335.92,
+    "max": 338.24
+  },
+  "by_status": {
+    "200": 40
+  },
+  "by_operation": {
+    "files_list": 40
+  },
+  "duration_sec": 1.483,
+  "mode": "auth",
+  "users": 4,
+  "requests_per_user": 10,
+  "delay_ms": 0,
+  "auth_pattern": "list"
+}

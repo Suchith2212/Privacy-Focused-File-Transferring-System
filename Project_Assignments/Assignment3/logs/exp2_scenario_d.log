@@ -1,0 +1,17 @@
+{"type":"SCHEMA","table":"vaults","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.854218+00:00"}
+{"type":"SCHEMA","table":"inner_tokens","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.854765+00:00"}
+{"type":"SCHEMA","table":"files","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.855353+00:00"}
+{"type":"SCHEMA","table":"sessions","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.856048+00:00"}
+{"type":"SCHEMA","table":"download_logs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.856582+00:00"}
+{"type":"SCHEMA","table":"expiry_jobs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.857101+00:00"}
+{"type":"SCHEMA","table":"portfolio_entries","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.857637+00:00"}
+{"type":"BEGIN","tx_id":"e9649e96-4b44-4bde-90c0-88498cbe3120","ts":"2026-04-05T12:20:36.858161+00:00"}
+{"type":"OP","tx_id":"e9649e96-4b44-4bde-90c0-88498cbe3120","op":"insert","table":"vaults","key":1,"value":{"outer_token":"OUTER_D","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.859011+00:00"}
+{"type":"OP","tx_id":"e9649e96-4b44-4bde-90c0-88498cbe3120","op":"insert","table":"inner_tokens","key":101,"value":{"vault_id":1,"token_type":"MAIN","token_hash":"hd","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.860032+00:00"}
+{"type":"OP","tx_id":"e9649e96-4b44-4bde-90c0-88498cbe3120","op":"insert","table":"sessions","key":501,"value":{"ip_address":"10.0.0.1","user_agent":"dragon-agent"},"ts":"2026-04-05T12:20:36.860797+00:00"}
+{"type":"OP","tx_id":"e9649e96-4b44-4bde-90c0-88498cbe3120","op":"insert","table":"files","key":1001,"value":{"vault_id":1,"inner_token_id":101,"file_size":4096,"status":"ACTIVE","download_count":0,"max_downloads":1},"ts":"2026-04-05T12:20:36.861379+00:00"}
+{"type":"OP","tx_id":"e9649e96-4b44-4bde-90c0-88498cbe3120","op":"insert","table":"download_logs","key":7001,"value":{"file_id":1001,"inner_token_id":101,"session_id":501},"ts":"2026-04-05T12:20:36.862037+00:00"}
+{"type":"OP","tx_id":"e9649e96-4b44-4bde-90c0-88498cbe3120","op":"insert","table":"expiry_jobs","key":8001,"value":{"vault_id":1,"processed":false},"ts":"2026-04-05T12:20:36.862669+00:00"}
+{"type":"OP","tx_id":"e9649e96-4b44-4bde-90c0-88498cbe3120","op":"insert","table":"portfolio_entries","key":9001,"value":{"vault_id":1,"owner_token_id":101,"created_by_token_id":101,"title":"Consistency Test Entry","content":"valid","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.863276+00:00"}
+{"type":"PREPARE","tx_id":"e9649e96-4b44-4bde-90c0-88498cbe3120","ts":"2026-04-05T12:20:36.863852+00:00"}
+{"type":"COMMIT","tx_id":"e9649e96-4b44-4bde-90c0-88498cbe3120","ts":"2026-04-05T12:20:36.864571+00:00"}

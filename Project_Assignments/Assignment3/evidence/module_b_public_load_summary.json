@@ -1,0 +1,21 @@
+{
+  "total": 600,
+  "success": 600,
+  "failed": 0,
+  "success_rate": 100.0,
+  "latency_ms": {
+    "mean": 22.37,
+    "p50": 8.0,
+    "p95": 24.16,
+    "max": 428.31
+  },
+  "by_status": {
+    "200": 600
+  },
+  "by_operation": {
+    "health": 300,
+    "captcha_get": 300
+  },
+  "duration_sec": 0.726,
+  "mode": "public"
+}

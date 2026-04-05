@@ -1,0 +1,108 @@
+{
+  "suite": "module_a_acid_recovery",
+  "run_started_utc": "2026-04-05T12:20:36.368308+00:00",
+  "total_checks": 16,
+  "passed_checks": 16,
+  "failed_checks": 0,
+  "all_passed": true,
+  "elapsed_sec": 0.28565,
+  "wal_path": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment3\\module_a\\logs\\acid_test_wal.log",
+  "checks": [
+    {
+      "name": "Atomicity (crash before commit)",
+      "passed": true,
+      "elapsed_sec": 0.013601,
+      "error": null
+    },
+    {
+      "name": "Atomicity (explicit rollback, 7 relations)",
+      "passed": true,
+      "elapsed_sec": 0.014851,
+      "error": null
+    },
+    {
+      "name": "Consistency (valid references across 7 relations)",
+      "passed": true,
+      "elapsed_sec": 0.012964,
+      "error": null
+    },
+    {
+      "name": "Consistency (engine rejects negative file size)",
+      "passed": true,
+      "elapsed_sec": 0.009241,
+      "error": null
+    },
+    {
+      "name": "Consistency (engine rejects missing reference)",
+      "passed": true,
+      "elapsed_sec": 0.008658,
+      "error": null
+    },
+    {
+      "name": "Isolation (concurrent file inserts)",
+      "passed": true,
+      "elapsed_sec": 0.070226,
+      "error": null
+    },
+    {
+      "name": "Isolation (no dirty read)",
+      "passed": true,
+      "elapsed_sec": 0.009561,
+      "error": null
+    },
+    {
+      "name": "Isolation (serialized write conflict ordering)",
+      "passed": true,
+      "elapsed_sec": 0.015606,
+      "error": null
+    },
+    {
+      "name": "Atomicity (mid-commit failure injection rollback)",
+      "passed": true,
+      "elapsed_sec": 0.017277,
+      "error": null
+    },
+    {
+      "name": "API blocks non-transactional mutations",
+      "passed": true,
+      "elapsed_sec": 0.004069,
+      "error": null
+    },
+    {
+      "name": "Negative path: bypass is not durable and not WAL-logged",
+      "passed": true,
+      "elapsed_sec": 0.011693,
+      "error": null
+    },
+    {
+      "name": "Durability (single commit restart)",
+      "passed": true,
+      "elapsed_sec": 0.020951,
+      "error": null
+    },
+    {
+      "name": "Durability (multiple commits restart across 7 relations)",
+      "passed": true,
+      "elapsed_sec": 0.020788,
+      "error": null
+    },
+    {
+      "name": "Durability (multiple commits + incomplete tail)",
+      "passed": true,
+      "elapsed_sec": 0.020206,
+      "error": null
+    },
+    {
+      "name": "Recovery (commit replay + incomplete ignore)",
+      "passed": true,
+      "elapsed_sec": 0.018797,
+      "error": null
+    },
+    {
+      "name": "Recovery (idempotent replay across repeated restarts)",
+      "passed": true,
+      "elapsed_sec": 0.017067,
+      "error": null
+    }
+  ]
+}

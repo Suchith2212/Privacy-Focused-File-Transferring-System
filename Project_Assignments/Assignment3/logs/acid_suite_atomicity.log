@@ -1,0 +1,11 @@
+{"type":"SCHEMA","table":"vaults","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.374018+00:00"}
+{"type":"SCHEMA","table":"inner_tokens","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.374729+00:00"}
+{"type":"SCHEMA","table":"files","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.375807+00:00"}
+{"type":"SCHEMA","table":"sessions","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.376481+00:00"}
+{"type":"SCHEMA","table":"download_logs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.377155+00:00"}
+{"type":"SCHEMA","table":"expiry_jobs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.377744+00:00"}
+{"type":"SCHEMA","table":"portfolio_entries","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.378256+00:00"}
+{"type":"BEGIN","tx_id":"e1cfc643-3aef-4e1a-9729-597349ac9d2c","ts":"2026-04-05T12:20:37.378768+00:00"}
+{"type":"OP","tx_id":"e1cfc643-3aef-4e1a-9729-597349ac9d2c","op":"insert","table":"vaults","key":100,"value":{"outer_token":"A_OUTER","status":"ACTIVE"},"ts":"2026-04-05T12:20:37.379301+00:00"}
+{"type":"OP","tx_id":"e1cfc643-3aef-4e1a-9729-597349ac9d2c","op":"insert","table":"inner_tokens","key":200,"value":{"vault_id":100,"token_type":"MAIN","token_hash":"a","status":"ACTIVE"},"ts":"2026-04-05T12:20:37.379836+00:00"}
+{"type":"OP","tx_id":"e1cfc643-3aef-4e1a-9729-597349ac9d2c","op":"insert","table":"files","key":300,"value":{"vault_id":100,"inner_token_id":200,"file_size":64,"status":"ACTIVE","download_count":0,"max_downloads":1},"ts":"2026-04-05T12:20:37.380304+00:00"}

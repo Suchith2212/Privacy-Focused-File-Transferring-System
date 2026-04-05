@@ -1,0 +1,125 @@
+{
+  "test": "one_file_concurrent_download",
+  "base_url": "http://localhost:4000",
+  "outer_token": "JQizdHu",
+  "file_id": "68fd2135-2239-4248-b540-eff90bd9bb53",
+  "concurrency": 15,
+  "success_count": 1,
+  "status_counts": {
+    "404": 6,
+    "200": 1,
+    "429": 8
+  },
+  "passed": true,
+  "attempts": [
+    {
+      "index": 1,
+      "status": 404,
+      "latency_ms": 1526.2447999994038,
+      "ok": false,
+      "error": "{\"error\": \"File not found or access denied.\"}"
+    },
+    {
+      "index": 2,
+      "status": 404,
+      "latency_ms": 1526.2845999968704,
+      "ok": false,
+      "error": "{\"error\": \"File not found or access denied.\"}"
+    },
+    {
+      "index": 3,
+      "status": 404,
+      "latency_ms": 1525.1396000021487,
+      "ok": false,
+      "error": "{\"error\": \"File not found or access denied.\"}"
+    },
+    {
+      "index": 4,
+      "status": 200,
+      "latency_ms": 1529.0137000047253,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "index": 5,
+      "status": 404,
+      "latency_ms": 1525.6402000013622,
+      "ok": false,
+      "error": "{\"error\": \"File not found or access denied.\"}"
+    },
+    {
+      "index": 6,
+      "status": 404,
+      "latency_ms": 1525.1206000029924,
+      "ok": false,
+      "error": "{\"error\": \"File not found or access denied.\"}"
+    },
+    {
+      "index": 7,
+      "status": 429,
+      "latency_ms": 166.81019999668933,
+      "ok": false,
+      "error": "{\"error\": \"Rate limit exceeded.\", \"code\": \"RATE_LIMIT\", \"minuteCount\": 10, \"dayCount\": 44, \"minuteLimit\": 10, \"dayLimit\": 100, \"routeMinuteCount\": 8, \"routeDayCount\": 8, \"routeMinuteLimit\": 20, \"routeDayLimit\": 250, \"retryAfterSeconds\": 267"
+    },
+    {
+      "index": 8,
+      "status": 404,
+      "latency_ms": 1523.0193000024883,
+      "ok": false,
+      "error": "{\"error\": \"File not found or access denied.\"}"
+    },
+    {
+      "index": 9,
+      "status": 429,
+      "latency_ms": 164.83499999594642,
+      "ok": false,
+      "error": "{\"error\": \"Rate limit exceeded.\", \"code\": \"RATE_LIMIT\", \"minuteCount\": 12, \"dayCount\": 46, \"minuteLimit\": 10, \"dayLimit\": 100, \"routeMinuteCount\": 10, \"routeDayCount\": 10, \"routeMinuteLimit\": 20, \"routeDayLimit\": 250, \"retryAfterSeconds\": 2"
+    },
+    {
+      "index": 10,
+      "status": 429,
+      "latency_ms": 163.980299999821,
+      "ok": false,
+      "error": "{\"error\": \"Rate limit exceeded.\", \"code\": \"RATE_LIMIT\", \"minuteCount\": 11, \"dayCount\": 45, \"minuteLimit\": 10, \"dayLimit\": 100, \"routeMinuteCount\": 9, \"routeDayCount\": 9, \"routeMinuteLimit\": 20, \"routeDayLimit\": 250, \"retryAfterSeconds\": 267"
+    },
+    {
+      "index": 11,
+      "status": 429,
+      "latency_ms": 162.64040000532987,
+      "ok": false,
+      "error": "{\"error\": \"Rate limit exceeded.\", \"code\": \"RATE_LIMIT\", \"minuteCount\": 13, \"dayCount\": 47, \"minuteLimit\": 10, \"dayLimit\": 100, \"routeMinuteCount\": 11, \"routeDayCount\": 11, \"routeMinuteLimit\": 20, \"routeDayLimit\": 250, \"retryAfterSeconds\": 2"
+    },
+    {
+      "index": 12,
+      "status": 429,
+      "latency_ms": 162.5181999988854,
+      "ok": false,
+      "error": "{\"error\": \"Rate limit exceeded.\", \"code\": \"RATE_LIMIT\", \"minuteCount\": 14, \"dayCount\": 48, \"minuteLimit\": 10, \"dayLimit\": 100, \"routeMinuteCount\": 12, \"routeDayCount\": 12, \"routeMinuteLimit\": 20, \"routeDayLimit\": 250, \"retryAfterSeconds\": 2"
+    },
+    {
+      "index": 13,
+      "status": 429,
+      "latency_ms": 160.52289999788627,
+      "ok": false,
+      "error": "{\"error\": \"Rate limit exceeded.\", \"code\": \"RATE_LIMIT\", \"minuteCount\": 16, \"dayCount\": 50, \"minuteLimit\": 10, \"dayLimit\": 100, \"routeMinuteCount\": 14, \"routeDayCount\": 14, \"routeMinuteLimit\": 20, \"routeDayLimit\": 250, \"retryAfterSeconds\": 2"
+    },
+    {
+      "index": 14,
+      "status": 429,
+      "latency_ms": 158.32640000007814,
+      "ok": false,
+      "error": "{\"error\": \"Rate limit exceeded.\", \"code\": \"RATE_LIMIT\", \"minuteCount\": 15, \"dayCount\": 49, \"minuteLimit\": 10, \"dayLimit\": 100, \"routeMinuteCount\": 13, \"routeDayCount\": 13, \"routeMinuteLimit\": 20, \"routeDayLimit\": 250, \"retryAfterSeconds\": 2"
+    },
+    {
+      "index": 15,
+      "status": 429,
+      "latency_ms": 157.86020000086864,
+      "ok": false,
+      "error": "{\"error\": \"Rate limit exceeded.\", \"code\": \"RATE_LIMIT\", \"minuteCount\": 17, \"dayCount\": 51, \"minuteLimit\": 10, \"dayLimit\": 100, \"routeMinuteCount\": 15, \"routeDayCount\": 15, \"routeMinuteLimit\": 20, \"routeDayLimit\": 250, \"retryAfterSeconds\": 2"
+    }
+  ],
+  "pass_criteria": {
+    "exactly_one_http_200": true,
+    "no_http_500": true
+  }
+}

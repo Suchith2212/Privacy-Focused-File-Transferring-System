@@ -1,0 +1,16 @@
+{
+  "experiment": "durability",
+  "passed": true,
+  "committed_ok": true,
+  "uncommitted_discarded": true,
+  "row_checks": {
+    "vaults[10]": true,
+    "inner_tokens[1010]": true,
+    "sessions[5010]": true,
+    "files[10010]": true,
+    "download_logs[70010]": true,
+    "expiry_jobs[80010]": true,
+    "portfolio_entries[90010]": true
+  },
+  "uncommitted_vault_after_recovery": null
+}

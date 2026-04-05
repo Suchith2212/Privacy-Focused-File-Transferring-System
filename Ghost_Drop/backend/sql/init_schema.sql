@@ -35,7 +35,9 @@ CREATE TABLE IF NOT EXISTS files (
   file_size BIGINT NOT NULL,
   storage_path TEXT NULL,
   file_key_iv CHAR(32) NULL,
+  file_auth_tag CHAR(32) NULL,
   file_hmac CHAR(64) NULL,
+  file_plain_hash CHAR(64) NULL,
   status ENUM('ACTIVE', 'DELETED') NOT NULL DEFAULT 'ACTIVE',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   deleted_at TIMESTAMP NULL,
@@ -61,12 +63,37 @@ CREATE TABLE IF NOT EXISTS file_key_access (
   file_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   inner_token_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   encrypted_file_key CHAR(64) NULL,
+  key_wrap_iv CHAR(24) NULL,
+  key_wrap_tag CHAR(32) NULL,
+  key_wrap_salt CHAR(32) NULL,
+  key_wrap_iterations INT NULL,
+  key_wrap_version SMALLINT NULL,
   CONSTRAINT fk_file_access_file
     FOREIGN KEY (file_id) REFERENCES files(file_id) ON DELETE CASCADE,
   CONSTRAINT fk_file_access_token
     FOREIGN KEY (inner_token_id) REFERENCES inner_tokens(inner_token_id) ON DELETE CASCADE,
   UNIQUE KEY uq_file_token_access (file_id, inner_token_id),
   INDEX idx_file_key_access_token (inner_token_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS sub_token_secrets (
+  inner_token_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+  vault_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  -- Legacy compatibility only. New writes must keep this NULL.
+  sub_inner_token VARCHAR(32) NULL,
+  -- Encrypted-at-rest payload (AES-256-GCM): ciphertext + iv + auth tag.
+  secret_ciphertext TEXT NULL,
+  secret_iv CHAR(24) NULL,
+  secret_auth_tag CHAR(32) NULL,
+  secret_version SMALLINT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_sub_token_secret_token
+    FOREIGN KEY (inner_token_id) REFERENCES inner_tokens(inner_token_id) ON DELETE CASCADE,
+  CONSTRAINT fk_sub_token_secret_vault
+    FOREIGN KEY (vault_id) REFERENCES vaults(vault_id) ON DELETE CASCADE,
+  INDEX idx_sub_token_secrets_vault (vault_id),
+  INDEX idx_sub_token_secrets_updated (updated_at)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS sessions (
@@ -173,3 +200,4 @@ BEGIN
   END IF;
 END$$
 DELIMITER ;
+

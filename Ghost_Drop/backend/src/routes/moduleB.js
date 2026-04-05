@@ -25,7 +25,7 @@ router.get("/evidence", requireAdmin, async (req, res) => {
 
     return res.json({
       project: "Ghost_Drop",
-      module: "Module B",
+      module: "Portfolio Security API",
       vaultId: req.authSession.vaultId,
       rbacMapping: {
         MAIN: "admin",
@@ -47,7 +47,7 @@ router.get("/evidence", requireAdmin, async (req, res) => {
       explainPlan: explainRows
     });
   } catch (err) {
-    return res.status(500).json({ error: err.message || "Failed to build Module B evidence." });
+    return res.status(500).json({ error: err.message || "Failed to build portfolio API evidence." });
   }
 });
 

@@ -1,0 +1,24 @@
+{
+  "test": "failure_injection",
+  "passed": true,
+  "elapsed_sec": 0.036,
+  "scenarios": [
+    {
+      "scenario": "A \u2013 injected exception, no partial write",
+      "passed": true
+    },
+    {
+      "scenario": "B \u2013 FK violation aborts entire batch",
+      "passed": true,
+      "rejected": true,
+      "file_5001_after": null,
+      "file_5002_after": null
+    },
+    {
+      "scenario": "C \u2013 concurrent: one fails, one succeeds",
+      "passed": true,
+      "good_tx_committed": true,
+      "bad_tx_rejected": true
+    }
+  ]
+}

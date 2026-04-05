@@ -1,0 +1,24 @@
+{
+  "total": 600,
+  "success": 0,
+  "failed": 600,
+  "success_rate": 0.0,
+  "latency_ms": {
+    "mean": 368.5,
+    "p50": 389.51,
+    "p95": 593.54,
+    "max": 1011.03
+  },
+  "by_status": {
+    "429": 600
+  },
+  "by_operation": {
+    "vault_access": 600
+  },
+  "duration_sec": 11.219,
+  "mode": "auth",
+  "users": 20,
+  "requests_per_user": 30,
+  "delay_ms": 0,
+  "auth_pattern": "access"
+}

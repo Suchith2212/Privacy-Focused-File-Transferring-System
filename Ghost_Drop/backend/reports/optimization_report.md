@@ -1,6 +1,6 @@
 # Portfolio Index Optimization Report
 
-This report aligns `Ghost_Drop` to Module B style SQL optimization evidence using both the protected `portfolio_entries` access path and the higher-frequency Ghost Drop security lookups.
+This report documents SQL optimization evidence for `Ghost_Drop` using both the protected `portfolio_entries` access path and higher-frequency Ghost Drop security lookups.
 
 ## Query Target
 

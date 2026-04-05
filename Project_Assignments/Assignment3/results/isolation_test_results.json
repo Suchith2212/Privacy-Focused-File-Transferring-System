@@ -1,0 +1,29 @@
+{
+  "experiment": "isolation",
+  "passed": true,
+  "scenarios": [
+    {
+      "scenario": "A \u2013 20 concurrent file inserts",
+      "passed": true,
+      "inserted": 20,
+      "expected": 20,
+      "errors": []
+    },
+    {
+      "scenario": "B \u2013 no dirty reads",
+      "passed": true,
+      "read_during_txn": null,
+      "read_after_commit": {
+        "outer_token": "DIRTY_V",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "scenario": "C \u2013 50 concurrent counter increments (no lost updates)",
+      "passed": true,
+      "final_count": 50,
+      "expected": 50,
+      "errors": []
+    }
+  ]
+}

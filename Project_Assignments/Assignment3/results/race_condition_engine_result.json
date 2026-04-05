@@ -1,0 +1,19 @@
+{
+  "test": "one_time_download_race",
+  "concurrency": 50,
+  "success_count": 1,
+  "failed_count": 49,
+  "error_count": 0,
+  "errors": [],
+  "final_download_count": 1,
+  "download_log_entries": 1,
+  "elapsed_sec": 0.22,
+  "passed": true,
+  "pass_criteria": {
+    "exactly_one_success": true,
+    "all_others_failed": true,
+    "final_count_is_1": true,
+    "exactly_one_log_entry": true,
+    "no_unexpected_errors": true
+  }
+}

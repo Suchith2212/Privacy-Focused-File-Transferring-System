@@ -1,0 +1,16 @@
+{"type":"SCHEMA","table":"vaults","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.937844+00:00"}
+{"type":"SCHEMA","table":"inner_tokens","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.938444+00:00"}
+{"type":"SCHEMA","table":"files","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.938989+00:00"}
+{"type":"SCHEMA","table":"sessions","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.939472+00:00"}
+{"type":"SCHEMA","table":"download_logs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.940005+00:00"}
+{"type":"SCHEMA","table":"expiry_jobs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.940904+00:00"}
+{"type":"SCHEMA","table":"portfolio_entries","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.941789+00:00"}
+{"type":"BEGIN","tx_id":"c0b63f77-b242-423a-ab14-4c804d19c2ea","ts":"2026-04-05T12:20:36.942752+00:00"}
+{"type":"OP","tx_id":"c0b63f77-b242-423a-ab14-4c804d19c2ea","op":"insert","table":"vaults","key":1,"value":{"outer_token":"ISO_OUTER","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.943256+00:00"}
+{"type":"OP","tx_id":"c0b63f77-b242-423a-ab14-4c804d19c2ea","op":"insert","table":"inner_tokens","key":101,"value":{"vault_id":1,"token_type":"MAIN","token_hash":"iso_hash","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.943743+00:00"}
+{"type":"PREPARE","tx_id":"c0b63f77-b242-423a-ab14-4c804d19c2ea","ts":"2026-04-05T12:20:36.944283+00:00"}
+{"type":"COMMIT","tx_id":"c0b63f77-b242-423a-ab14-4c804d19c2ea","ts":"2026-04-05T12:20:36.944755+00:00"}
+{"type":"BEGIN","tx_id":"b1e41431-537c-47f3-b66b-10fa138c8553","ts":"2026-04-05T12:20:36.945242+00:00"}
+{"type":"OP","tx_id":"b1e41431-537c-47f3-b66b-10fa138c8553","op":"insert","table":"vaults","key":99,"value":{"outer_token":"DIRTY_V","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.945758+00:00"}
+{"type":"PREPARE","tx_id":"b1e41431-537c-47f3-b66b-10fa138c8553","ts":"2026-04-05T12:20:36.946264+00:00"}
+{"type":"COMMIT","tx_id":"b1e41431-537c-47f3-b66b-10fa138c8553","ts":"2026-04-05T12:20:36.946752+00:00"}

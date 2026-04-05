@@ -1,0 +1,33 @@
+{
+  "suite": "acid_verification",
+  "passed": true,
+  "checks": [
+    {
+      "property": "Atomicity",
+      "passed": true,
+      "description": "Uncommitted 3-table txn leaves no rows after WAL recovery"
+    },
+    {
+      "property": "Consistency",
+      "passed": true,
+      "description": "Negative file_size and missing FK both rejected",
+      "schema_rejected": true,
+      "fk_rejected": true
+    },
+    {
+      "property": "Isolation",
+      "passed": true,
+      "description": "30 concurrent counter increments -> final_count must = 30",
+      "final_count": 30,
+      "expected": 30,
+      "errors": []
+    },
+    {
+      "property": "Durability",
+      "passed": true,
+      "description": "Committed vault+token survive WAL re-instantiation",
+      "vault_888_found": true,
+      "token_8801_found": true
+    }
+  ]
+}

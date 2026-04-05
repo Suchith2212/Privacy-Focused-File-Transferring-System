@@ -1,6 +1,6 @@
 # Ghost Drop Project Documentation
 
-This document matches the current `Ghost_Drop` implementation and its Module B alignment layer.
+This document matches the current `Ghost_Drop` implementation and its portfolio security API layer.
 
 ## 1) Architecture
 
@@ -9,7 +9,7 @@ This document matches the current `Ghost_Drop` implementation and its Module B a
 - Storage: Google Drive for Ghost Drop file blobs
 - Frontend: static HTML/CSS/JS served by backend
 - Session layer: token-based vault session service
-- Module B layer: RBAC portfolio CRUD + tamper detection + audit log file
+- Portfolio security API layer: RBAC portfolio CRUD + tamper detection + audit log file
 - Access UX layer: manual outer-token entry, QR scanning, and one-time CAPTCHA replay
 
 ## 2) Authentication and Role Mapping
@@ -19,12 +19,12 @@ This project uses vault credentials as the login model.
 - `outerToken + MAIN innerToken` => `admin`
 - `outerToken + SUB innerToken` => `user`
 
-Equivalent Module B APIs:
+Portfolio security API endpoints:
 
 - `POST /api/auth/login`
 - `GET /api/auth/isAuth`
 
-The login route returns a session token. Protected Module B routes use:
+The login route returns a session token. Protected portfolio API routes use:
 
 ```http
 Authorization: Bearer <sessionToken>
@@ -61,7 +61,7 @@ Additional runtime schema hardening:
 - `token_lookup_hash` on `inner_tokens` supports indexed token prefiltering without replacing PBKDF2 verification
 - startup schema reconciliation in `schemaOptimization.js` updates index definitions for existing databases
 
-### Module B Alignment Tables
+### Portfolio Security Tables
 
 11. `portfolio_entries`
 - Vault-scoped CRUD resource
@@ -69,16 +69,22 @@ Additional runtime schema hardening:
 - Protected by `integrity_hash`
 - Indexed for RBAC listing queries
 
-### Runtime-Created Table
+### Schema-Managed Security Table
 
 12. `sub_token_secrets`
-- Used for SUB token display/recovery in the Ghost Drop UI
+- Declared in `backend/sql/init_schema.sql` (not runtime-created)
+- Stores encrypted SUB secret fields:
+  - `secret_ciphertext`
+  - `secret_iv`
+  - `secret_auth_tag`
+  - `secret_version`
+- Legacy plaintext column `sub_inner_token` is nullable for compatibility; new writes keep it `NULL`
 
 ## 4) Portfolio CRUD Choice
 
-Existing file listing and folder display are useful application features, but they are not a clean full CRUD resource for Module B evaluation. To close that gap, the project now adds `portfolio_entries`.
+Existing file listing and folder display are useful application features, but they are not a clean full CRUD resource for authenticated RBAC operations. To close that gap, the project adds `portfolio_entries`.
 
-`portfolio_entries` is the Module B demonstration resource because it supports:
+`portfolio_entries` is the dedicated protected resource because it supports:
 
 - authenticated create/read/update/delete
 - role-based ownership checks
@@ -100,9 +106,12 @@ Existing file listing and folder display are useful application features, but th
 - `GET /api/files/:outerToken/sub-tokens`
 - `PUT /api/files/:outerToken/sub-tokens/:tokenId/files`
 - `PUT /api/files/:outerToken/sub-tokens/:tokenId/secret`
+- `GET /api/files/:outerToken/sub-tokens/:tokenId/reveal`
+- `DELETE /api/files/:outerToken/sub-tokens/:tokenId`
 - `POST /api/files/:fileId/download`
+- `POST /api/files/download-batch`
 
-### Module B Alignment APIs
+### Portfolio Security API Endpoints
 
 - `POST /api/auth/login`
 - `GET /api/auth/isAuth`
@@ -126,6 +135,7 @@ Existing file listing and folder display are useful application features, but th
 - vault recipient can scan that QR from the access screen
 - when CAPTCHA is triggered, the frontend reuses the solved state for a short window and retries the blocked action once instead of re-requesting a new challenge immediately
 - scanner support depends on browser camera access and `BarcodeDetector` availability
+- MAIN users can select multiple files and trigger `Download Selected`, which calls `POST /api/files/download-batch` and downloads a ZIP
 
 ## 7) RBAC Rules
 
@@ -240,13 +250,14 @@ CREATE INDEX idx_expiry_jobs_sched ON expiry_jobs(processed, scheduled_time);
 - CAPTCHA double-counting was removed from request prechecks
 - CAPTCHA in the frontend now uses a solved window to reduce repeated prompts in the same flow
 - outer-token QR scanning is available in the access view when the browser supports it
+- `BATCH_DOWNLOAD_MAX_FILES` controls the max files accepted by `POST /api/files/download-batch` (default `10`)
 - legacy Ghost Drop routes remain available
 
 ## 12) Run Instructions
 
 ```powershell
 cd Ghost_Drop/backend
-mysql -u root -p < sql/init_schema.sql
+Get-Content ".\sql\init_schema.sql" | mysql --force -u root -p ghostdrop_proto
 npm install
 npm run dev
 ```
@@ -276,4 +287,3 @@ curl -X POST http://localhost:4000/api/auth/login \
 - [index.html](/F:/SEM%20IV/lessons/DB/Project/Ghost_Drop/frontend/index.html)
 - [app.js](/F:/SEM%20IV/lessons/DB/Project/Ghost_Drop/frontend/app.js)
 - [styles.css](/F:/SEM%20IV/lessons/DB/Project/Ghost_Drop/frontend/styles.css)
-

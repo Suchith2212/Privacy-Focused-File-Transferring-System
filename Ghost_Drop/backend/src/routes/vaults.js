@@ -12,15 +12,18 @@ const {
 } = require("../services/crypto");
 const {
   checkRateLimit,
+  checkRouteRateLimit,
   recordAttempt,
   recordFailure,
+  recordRouteAttempt,
   clearFailure,
   isBlocked,
   blockedRemainingSeconds,
   shouldRequireCaptcha,
   verifyCaptcha,
   isCaptchaSolved,
-  getClientIp
+  getClientIp,
+  evaluateIpRisk
 } = require("../services/security");
 const { logAuthAttempt, upsertExpiryJob } = require("../services/auditService");
 const { ensureRelativePathColumn } = require("../services/filePathSchema");
@@ -47,12 +50,12 @@ function getRemainingSeconds(expiresAt) {
   return Math.max(0, remaining);
 }
 
-function precheckSecurity(req, res) {
+async function precheckSecurity(req, res, routeKey = "default") {
   const ip = getClientIp(req);
-  let captchaSolved = isCaptchaSolved(ip);
+  let captchaSolved = await isCaptchaSolved(ip);
 
-  if (isBlocked(ip)) {
-    const blockedSeconds = blockedRemainingSeconds(ip);
+  if (await isBlocked(ip)) {
+    const blockedSeconds = await blockedRemainingSeconds(ip);
     if (blockedSeconds > 0) {
       res.set("Retry-After", String(blockedSeconds));
     }
@@ -65,19 +68,36 @@ function precheckSecurity(req, res) {
     return { ok: false, ip };
   }
 
-  if (shouldRequireCaptcha(ip) && !captchaSolved) {
+  const risk = await evaluateIpRisk({ routeKey, ip, captchaSolved });
+  if (risk.blocked) {
+    res.status(403).json({
+      error: "Request blocked by risk policy.",
+      code: "RISK_BLOCK",
+      captchaRequired: true,
+      riskScore: risk.risk.score,
+      riskSignals: risk.risk.reasons
+    });
+    return { ok: false, ip };
+  }
+
+  const captchaNeededByFailures = await shouldRequireCaptcha(ip);
+  if ((captchaNeededByFailures || risk.requireCaptcha) && !captchaSolved) {
     const challengeId = req.body?.captchaChallengeId || req.query?.captchaChallengeId;
     const captchaAnswer = req.body?.captchaAnswer || req.query?.captchaAnswer;
-    if (!challengeId || !captchaAnswer) {
+    const providerToken = req.body?.providerToken || req.body?.captchaToken || req.query?.captchaToken;
+
+    if ((!challengeId || !captchaAnswer) && !providerToken) {
       res.status(403).json({
         error: "Captcha required.",
         code: "CAPTCHA_REQUIRED",
-        captchaRequired: true
+        captchaRequired: true,
+        riskScore: risk.risk.score,
+        riskSignals: risk.risk.reasons
       });
       return { ok: false, ip };
     }
 
-    const out = verifyCaptcha({ ip, challengeId, answer: captchaAnswer });
+    const out = await verifyCaptcha({ ip, challengeId, answer: captchaAnswer, providerToken });
     if (!out.ok) {
       res.status(403).json({
         error: out.reason,
@@ -91,25 +111,38 @@ function precheckSecurity(req, res) {
     captchaSolved = true;
   }
 
-  recordAttempt(ip);
-  const rate = checkRateLimit(ip);
-  if ((rate.overMinute || rate.overDay) && !captchaSolved) {
-    const retryAfter = Math.max(rate.resetMinuteSeconds, rate.resetDaySeconds, 1);
+  await recordAttempt(ip);
+  await recordRouteAttempt(routeKey, ip);
+
+  const rate = await checkRateLimit(ip);
+  const routeRate = await checkRouteRateLimit(routeKey, ip);
+  if ((rate.overMinute || rate.overDay || routeRate.overMinute || routeRate.overDay) && !captchaSolved) {
+    const retryAfter = Math.max(
+      rate.resetMinuteSeconds,
+      rate.resetDaySeconds,
+      routeRate.resetMinuteSeconds,
+      routeRate.resetDaySeconds,
+      1
+    );
     res.set("Retry-After", String(retryAfter));
     res.status(429).json({
       error: "Rate limit exceeded.",
-      code: "RATE_LIMIT",
+      code: routeRate.overMinute || routeRate.overDay ? "ROUTE_RATE_LIMIT" : "RATE_LIMIT",
       minuteCount: rate.minuteCount,
       dayCount: rate.dayCount,
       minuteLimit: rate.minuteLimit,
       dayLimit: rate.dayLimit,
+      routeMinuteCount: routeRate.minuteCount,
+      routeDayCount: routeRate.dayCount,
+      routeMinuteLimit: routeRate.minuteLimit,
+      routeDayLimit: routeRate.dayLimit,
       retryAfterSeconds: retryAfter,
       captchaRequired: true
     });
     return { ok: false, ip };
   }
 
-  return { ok: true, ip };
+  return { ok: true, ip, risk };
 }
 
 async function resolveVault(outerToken) {
@@ -183,15 +216,15 @@ router.post("/", async (req, res) => {
 
 router.get("/:outerToken/public-info", async (req, res) => {
   try {
-    const sec = precheckSecurity(req, res);
+    const sec = await precheckSecurity(req, res, "vault.public-info");
     if (!sec.ok) return;
 
     const { outerToken } = req.params;
     const vault = await resolveVault(outerToken);
     if (!vault) {
-      recordFailure(sec.ip);
+      await recordFailure(sec.ip);
       await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
-      return res.status(404).json({ error: "Vault not found.", captchaRequired: shouldRequireCaptcha(sec.ip) });
+      return res.status(404).json({ error: "Vault not found.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
     }
 
     const activeFiles = await query(
@@ -221,7 +254,7 @@ router.get("/:outerToken/public-info", async (req, res) => {
 
 router.post("/:outerToken/access", async (req, res) => {
   try {
-    const sec = precheckSecurity(req, res);
+    const sec = await precheckSecurity(req, res, "vault.access");
     if (!sec.ok) return;
     await ensureRelativePathColumn();
 
@@ -229,21 +262,21 @@ router.post("/:outerToken/access", async (req, res) => {
     const { innerToken } = req.body;
 
     if (!validateInnerToken(innerToken)) {
-      return res.status(400).json({ error: "Invalid inner token format.", captchaRequired: shouldRequireCaptcha(sec.ip) });
+      return res.status(400).json({ error: "Invalid inner token format.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
     }
 
     const vault = await resolveVault(outerToken);
     if (!vault) {
-      recordFailure(sec.ip);
+      await recordFailure(sec.ip);
       await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
-      return res.status(404).json({ error: "Vault not found.", captchaRequired: shouldRequireCaptcha(sec.ip) });
+      return res.status(404).json({ error: "Vault not found.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
     }
 
     const isActive = vault.status === "ACTIVE" && new Date(vault.expires_at) > new Date();
     if (!isActive) {
-      recordFailure(sec.ip);
+      await recordFailure(sec.ip);
       await logAuthAttempt({ req, vaultId: vault.vault_id, success: false }).catch(() => {});
-      return res.status(403).json({ error: "Vault expired or inactive.", captchaRequired: shouldRequireCaptcha(sec.ip) });
+      return res.status(403).json({ error: "Vault expired or inactive.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
     }
 
     const tokenRows = await query(
@@ -296,9 +329,9 @@ router.post("/:outerToken/access", async (req, res) => {
     }
 
     if (!matchedToken) {
-      recordFailure(sec.ip);
+      await recordFailure(sec.ip);
       await logAuthAttempt({ req, vaultId: vault.vault_id, success: false }).catch(() => {});
-      return res.status(401).json({ error: "Invalid inner token.", captchaRequired: shouldRequireCaptcha(sec.ip) });
+      return res.status(401).json({ error: "Invalid inner token.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
     }
 
     const files = await query(
@@ -321,7 +354,7 @@ router.post("/:outerToken/access", async (req, res) => {
       [vault.vault_id, matchedToken.inner_token_id]
     );
 
-    clearFailure(sec.ip);
+    await clearFailure(sec.ip);
     await logAuthAttempt({ req, vaultId: vault.vault_id, success: true }).catch(() => {});
     return res.json({
       outerToken: vault.outer_token,
@@ -339,26 +372,26 @@ router.post("/:outerToken/access", async (req, res) => {
 router.post("/:outerToken/sub-tokens", async (req, res) => {
   const conn = await getConnection();
   try {
-    const sec = precheckSecurity(req, res);
+    const sec = await precheckSecurity(req, res, "vault.subtoken-create");
     if (!sec.ok) return;
 
     const { outerToken } = req.params;
     const { mainInnerToken, subInnerToken, fileIds = [] } = req.body;
 
     if (!validateInnerToken(mainInnerToken)) {
-      recordFailure(sec.ip);
+      await recordFailure(sec.ip);
       await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
       return res.status(400).json({ error: "MAIN token must be 10-20 base62 characters." });
     }
     if (!Array.isArray(fileIds) || fileIds.length === 0) {
-      recordFailure(sec.ip);
+      await recordFailure(sec.ip);
       await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
       return res.status(400).json({ error: "fileIds must contain at least one file id." });
     }
 
     const selectedSubInnerToken = subInnerToken || generateInnerToken(12);
     if (!validateInnerToken(selectedSubInnerToken)) {
-      recordFailure(sec.ip);
+      await recordFailure(sec.ip);
       await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
       return res.status(400).json({ error: "SUB token must be 10-20 base62 characters." });
     }
@@ -366,15 +399,15 @@ router.post("/:outerToken/sub-tokens", async (req, res) => {
     const vaultRows = await resolveVault(outerToken);
 
     if (!vaultRows) {
-      recordFailure(sec.ip);
+      await recordFailure(sec.ip);
       await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
-      return res.status(404).json({ error: "Vault not found.", captchaRequired: shouldRequireCaptcha(sec.ip) });
+      return res.status(404).json({ error: "Vault not found.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
     }
     const vault = vaultRows;
     if (vault.status !== "ACTIVE" || new Date(vault.expires_at) <= new Date()) {
-      recordFailure(sec.ip);
+      await recordFailure(sec.ip);
       await logAuthAttempt({ req, vaultId: vault.vault_id, success: false }).catch(() => {});
-      return res.status(403).json({ error: "Vault expired or inactive.", captchaRequired: shouldRequireCaptcha(sec.ip) });
+      return res.status(403).json({ error: "Vault expired or inactive.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
     }
 
     const mainRows = await query(
@@ -392,9 +425,9 @@ router.post("/:outerToken/sub-tokens", async (req, res) => {
 
     const main = mainRows[0];
     if (!verifyInnerToken(mainInnerToken, main.token_hash, main.salt, main.key_iterations)) {
-      recordFailure(sec.ip);
+      await recordFailure(sec.ip);
       await logAuthAttempt({ req, vaultId: vault.vault_id, success: false }).catch(() => {});
-      return res.status(401).json({ error: "Invalid MAIN token.", captchaRequired: shouldRequireCaptcha(sec.ip) });
+      return res.status(401).json({ error: "Invalid MAIN token.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
     }
 
     const placeholders = fileIds.map(() => "?").join(",");
@@ -411,7 +444,7 @@ router.post("/:outerToken/sub-tokens", async (req, res) => {
     const validatedFiles = scopedFiles[0];
 
     if (validatedFiles.length !== fileIds.length) {
-      recordFailure(sec.ip);
+      await recordFailure(sec.ip);
       await logAuthAttempt({ req, vaultId: vault.vault_id, success: false }).catch(() => {});
       return res
         .status(400)
@@ -443,7 +476,7 @@ router.post("/:outerToken/sub-tokens", async (req, res) => {
     }
 
     await conn.commit();
-    clearFailure(sec.ip);
+    await clearFailure(sec.ip);
     await logAuthAttempt({ req, vaultId: vault.vault_id, success: true }).catch(() => {});
 
     return res.status(201).json({
@@ -479,3 +512,11 @@ router.get("/:outerToken/qr", async (req, res) => {
 });
 
 module.exports = router;
+
+
+
+
+
+
+
+

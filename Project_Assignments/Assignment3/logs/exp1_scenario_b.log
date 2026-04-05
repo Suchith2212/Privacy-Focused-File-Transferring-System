@@ -1,0 +1,20 @@
+{"type":"SCHEMA","table":"vaults","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.804912+00:00"}
+{"type":"SCHEMA","table":"inner_tokens","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.806072+00:00"}
+{"type":"SCHEMA","table":"files","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.807482+00:00"}
+{"type":"SCHEMA","table":"sessions","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.808154+00:00"}
+{"type":"SCHEMA","table":"download_logs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.808708+00:00"}
+{"type":"SCHEMA","table":"expiry_jobs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.809220+00:00"}
+{"type":"SCHEMA","table":"portfolio_entries","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.809727+00:00"}
+{"type":"BEGIN","tx_id":"1750a11c-c2ab-4b12-90ee-7332e3d051db","ts":"2026-04-05T12:20:36.810651+00:00"}
+{"type":"OP","tx_id":"1750a11c-c2ab-4b12-90ee-7332e3d051db","op":"insert","table":"vaults","key":1,"value":{"outer_token":"BASE_VAULT","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.811264+00:00"}
+{"type":"OP","tx_id":"1750a11c-c2ab-4b12-90ee-7332e3d051db","op":"insert","table":"inner_tokens","key":101,"value":{"vault_id":1,"token_type":"MAIN","token_hash":"seed_hash","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.811898+00:00"}
+{"type":"OP","tx_id":"1750a11c-c2ab-4b12-90ee-7332e3d051db","op":"insert","table":"sessions","key":501,"value":{"ip_address":"127.0.0.1","user_agent":"test-agent"},"ts":"2026-04-05T12:20:36.812519+00:00"}
+{"type":"PREPARE","tx_id":"1750a11c-c2ab-4b12-90ee-7332e3d051db","ts":"2026-04-05T12:20:36.813441+00:00"}
+{"type":"COMMIT","tx_id":"1750a11c-c2ab-4b12-90ee-7332e3d051db","ts":"2026-04-05T12:20:36.814029+00:00"}
+{"type":"BEGIN","tx_id":"cb36be0d-073a-42bf-9d5e-b82341441894","ts":"2026-04-05T12:20:36.814844+00:00"}
+{"type":"OP","tx_id":"cb36be0d-073a-42bf-9d5e-b82341441894","op":"insert","table":"files","key":1001,"value":{"vault_id":1,"inner_token_id":101,"file_size":256,"status":"ACTIVE","download_count":0,"max_downloads":1},"ts":"2026-04-05T12:20:36.815801+00:00"}
+{"type":"OP","tx_id":"cb36be0d-073a-42bf-9d5e-b82341441894","op":"insert","table":"download_logs","key":7001,"value":{"file_id":1001,"inner_token_id":101,"session_id":501},"ts":"2026-04-05T12:20:36.816534+00:00"}
+{"type":"OP","tx_id":"cb36be0d-073a-42bf-9d5e-b82341441894","op":"insert","table":"expiry_jobs","key":8001,"value":{"vault_id":1,"processed":false},"ts":"2026-04-05T12:20:36.817399+00:00"}
+{"type":"OP","tx_id":"cb36be0d-073a-42bf-9d5e-b82341441894","op":"insert","table":"portfolio_entries","key":9001,"value":{"vault_id":1,"owner_token_id":101,"created_by_token_id":101,"title":"Rollback Entry","content":"should not persist","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.818068+00:00"}
+{"type":"OP","tx_id":"cb36be0d-073a-42bf-9d5e-b82341441894","op":"update","table":"inner_tokens","key":101,"value":{"vault_id":1,"token_type":"SUB","token_hash":"seed_hash","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.818634+00:00"}
+{"type":"ROLLBACK","tx_id":"cb36be0d-073a-42bf-9d5e-b82341441894","ts":"2026-04-05T12:20:36.819135+00:00"}

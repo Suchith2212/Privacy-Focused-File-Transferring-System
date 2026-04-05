@@ -1,0 +1,19 @@
+{
+  "suite": "assignment3_combined_results",
+  "module_a": {
+    "total_checks": 16,
+    "passed_checks": 16,
+    "failed_checks": 0,
+    "all_passed": true
+  },
+  "module_b_stress": {
+    "total_ops": 1000,
+    "success_count": 1000,
+    "fail_count": 0,
+    "throughput_ops_per_sec": 111.34
+  },
+  "demo": {
+    "passed": true,
+    "total_elapsed_sec": 1.718
+  }
+}

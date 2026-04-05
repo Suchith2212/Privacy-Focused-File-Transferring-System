@@ -1,0 +1,94 @@
+{
+  "all_passed": true,
+  "experiments": {
+    "atomicity_test_results.json": {
+      "experiment": "atomicity",
+      "passed": true,
+      "scenarios": [
+        {
+          "scenario": "A \u2013 crash before commit (3 tables)",
+          "passed": true,
+          "vault_after_recovery": null,
+          "token_after_recovery": null,
+          "file_after_recovery": null
+        },
+        {
+          "scenario": "B \u2013 explicit rollback (7 relations)",
+          "passed": true,
+          "file_after_rollback": null,
+          "log_after_rollback": null,
+          "job_after_rollback": null,
+          "pe_after_rollback": null,
+          "token_type_after_rollback": "MAIN"
+        }
+      ]
+    },
+    "consistency_test_results.json": {
+      "experiment": "consistency",
+      "passed": true,
+      "scenarios": [
+        {
+          "scenario": "A \u2013 negative file_size rejected",
+          "passed": true
+        },
+        {
+          "scenario": "B \u2013 missing vault FK rejected",
+          "passed": true
+        },
+        {
+          "scenario": "C \u2013 file missing token FK rejected",
+          "passed": true
+        },
+        {
+          "scenario": "D \u2013 valid 7-relation commit",
+          "passed": true
+        }
+      ]
+    },
+    "isolation_test_results.json": {
+      "experiment": "isolation",
+      "passed": true,
+      "scenarios": [
+        {
+          "scenario": "A \u2013 20 concurrent file inserts",
+          "passed": true,
+          "inserted": 20,
+          "expected": 20,
+          "errors": []
+        },
+        {
+          "scenario": "B \u2013 no dirty reads",
+          "passed": true,
+          "read_during_txn": null,
+          "read_after_commit": {
+            "outer_token": "DIRTY_V",
+            "status": "ACTIVE"
+          }
+        },
+        {
+          "scenario": "C \u2013 50 concurrent counter increments (no lost updates)",
+          "passed": true,
+          "final_count": 50,
+          "expected": 50,
+          "errors": []
+        }
+      ]
+    },
+    "durability_test_results.json": {
+      "experiment": "durability",
+      "passed": true,
+      "committed_ok": true,
+      "uncommitted_discarded": true,
+      "row_checks": {
+        "vaults[10]": true,
+        "inner_tokens[1010]": true,
+        "sessions[5010]": true,
+        "files[10010]": true,
+        "download_logs[70010]": true,
+        "expiry_jobs[80010]": true,
+        "portfolio_entries[90010]": true
+      },
+      "uncommitted_vault_after_recovery": null
+    }
+  }
+}

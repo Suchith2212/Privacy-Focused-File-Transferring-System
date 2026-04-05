@@ -1,0 +1,25 @@
+{
+  "test": "failure_injection_batch_atomicity",
+  "base_url": "http://localhost:4000",
+  "outer_token": "9J0fQwh",
+  "request_status": 404,
+  "request_body": {
+    "outerToken": "9J0fQwh",
+    "innerToken": "FailInj110",
+    "fileIds": [
+      "4e6d01e7-524c-4d92-bb49-bc4d87678123",
+      "non-existent-file-id"
+    ]
+  },
+  "before_file_ids": [
+    "4e6d01e7-524c-4d92-bb49-bc4d87678123",
+    "9658f209-3a93-4cbb-b139-c4d185b3ee67"
+  ],
+  "after_file_ids": [
+    "4e6d01e7-524c-4d92-bb49-bc4d87678123",
+    "9658f209-3a93-4cbb-b139-c4d185b3ee67"
+  ],
+  "preserved_after_failure": true,
+  "passed": true,
+  "response_preview": "{\"error\":\"One or more files were not found or are not accessible by this token.\",\"fileIds\":[\"non-existent-file-id\"]}"
+}

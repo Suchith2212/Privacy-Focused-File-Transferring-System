@@ -12,11 +12,9 @@ It explains:
 - how the database is structured
 - how authentication and authorization work
 - how files move through the system
-- how the Module B assignment requirements are satisfied
+- how the Portfolio Security API project requirements are satisfied
 - how integrity checking, audit logging, and indexing work
 - what has been hardened beyond the original version
-
-If someone reads this file carefully, they should be able to understand the entire project at both conceptual and implementation level.
 
 ## 2. Project Identity
 
@@ -33,7 +31,7 @@ The main idea is:
 - can optionally create restricted SUB tokens for limited access
 - files can be downloaded securely and then invalidated
 
-At the assignment level, the project was extended to satisfy **Module B** requirements such as:
+At the project level, the project was extended to satisfy **Portfolio Security API** requirements such as:
 
 - login and session validation
 - role-based access control
@@ -42,9 +40,9 @@ At the assignment level, the project was extended to satisfy **Module B** requir
 - unauthorized direct database modification detection
 - SQL indexing and performance evidence
 
-So the project is not just a CRUD assignment. It is a real file-sharing application with an academic RBAC/API layer added in a technically consistent way.
+So the project is not just a CRUD demo. It is a real file-sharing application with an academic RBAC/API layer added in a technically consistent way.
 
-The broader repository also includes a **Module A integration layer** inside `Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/integration`, which reuses the existing Python B+ Tree to demonstrate custom indexing on Ghost Drop-shaped query paths.
+The broader repository also includes a **B+ Tree Indexing integration layer** inside `module_a/`, which reuses the existing Python B+ Tree to demonstrate custom indexing on Ghost Drop-shaped query paths.
 
 ## 3. Core Idea in Simple Words
 
@@ -66,9 +64,9 @@ This creates a layered security model:
 
 This is the core security model of the product.
 
-## 4. Why This Project Was Extended for Module B
+## 4. Why This Project Was Extended for Portfolio Security API
 
-The assignment needed a protected CRUD resource and RBAC proof.
+The project needed a protected CRUD resource and RBAC proof.
 
 The original Ghost Drop model already had:
 
@@ -109,7 +107,7 @@ This table is:
 - suitable for CRUD evaluation
 - suitable for indexing and benchmark demonstration
 
-This was the correct design decision because it keeps the product model clean while still satisfying the assignment.
+This was the correct design decision because it keeps the product model clean while still satisfying the project.
 
 ## 5. High-Level Architecture
 
@@ -188,15 +186,15 @@ Purpose:
 - stores structured JSON-line log events
 - now includes a tamper-evident hash chain
 
-### Module A Integration Layer
+### B+ Tree Indexing Integration Layer
 
 Location:
 
-- `Project_Assignments/Assignment2/CS432_Track1_Submission/Module_A/integration`
+- `module_a/`
 
 Purpose:
 
-- reuse the existing Python B+ Tree implementation from the legacy Module A deliverable
+- reuse the existing Python B+ Tree implementation from the legacy B+ Tree Indexing deliverable
 - map it to actual Ghost Drop access paths
 - provide a project-specific demo and benchmark
 
@@ -238,7 +236,7 @@ Important areas:
 - `Ghost_Drop/backend/`
 - `Ghost_Drop/frontend/`
 - `Ghost_Drop/docs/`
-- `Project_Assignments/Assignment2/CS432_Track1_Submission/`
+- `project root`
 
 ### Backend substructure
 
@@ -255,7 +253,7 @@ Important areas:
 - `app.js`
 - `styles.css`
 
-### Assignment 2 package substructure
+### project 2 package substructure
 
 Contains:
 
@@ -299,7 +297,7 @@ It acts as:
 - vault admin
 - uploader
 - SUB-token creator
-- full portfolio admin in the Module B layer
+- full portfolio admin in the Portfolio Security API layer
 
 ### SUB token
 
@@ -309,11 +307,11 @@ It acts as:
 
 - limited vault user
 - file-scoped recipient
-- restricted portfolio user in the Module B layer
+- restricted portfolio user in the Portfolio Security API layer
 
-## 9. Module B Role Mapping
+## 9. Portfolio Security API Role Mapping
 
-The assignment required RBAC.
+The project required RBAC.
 
 The project maps the real product roles directly:
 
@@ -338,7 +336,7 @@ The product access flow is:
 4. backend verifies inner token belongs to that vault
 5. backend returns accessible files and token type
 
-### Module B login flow
+### Portfolio Security API login flow
 
 Separate routes were added:
 
@@ -357,7 +355,7 @@ The session token is then used for protected portfolio APIs.
 
 ## 11. Session Model
 
-The project uses in-memory session tokens for Module B routes.
+The project uses in-memory session tokens for Portfolio Security API routes.
 
 Session information includes:
 
@@ -433,20 +431,21 @@ Main schema file:
 `expiry_jobs`
 - stores vault expiry scheduling metadata
 
-### Module B table
+### Portfolio Security API table
 
 `portfolio_entries`
 - the main protected CRUD resource for evaluation
 
-### Runtime helper table
+### Schema-managed security table
 
 `sub_token_secrets`
-- created by the app
+- declared in `backend/sql/init_schema.sql`
 - used to store recoverable SUB values for management UI display
+- stores encrypted-at-rest secret fields (`secret_ciphertext`, `secret_iv`, `secret_auth_tag`, `secret_version`)
 
 ## 13. `portfolio_entries` Table
 
-This table is central to the Module B layer.
+This table is central to the Portfolio Security API layer.
 
 Fields:
 
@@ -565,6 +564,7 @@ Main routes:
 - `GET /api/files/:outerToken/sub-tokens`
 - `PUT /api/files/:outerToken/sub-tokens/:tokenId/files`
 - `PUT /api/files/:outerToken/sub-tokens/:tokenId/secret`
+- `GET /api/files/:outerToken/sub-tokens/:tokenId/reveal`
 - `DELETE /api/files/:outerToken/sub-tokens/:tokenId`
 
 Purpose:
@@ -806,7 +806,7 @@ The project uses a simple arithmetic challenge.
 
 Why this is okay:
 
-- assignment scope is local
+- project scope is local
 - goal is to demonstrate challenge/response protection
 - avoids unnecessary third-party service dependency
 
@@ -936,7 +936,7 @@ This is strong evidence because it uses:
 - `EXPLAIN`
 - before/after comparison
 
-## 37. Module B Evidence Route
+## 37. Portfolio Security API Evidence Route
 
 Route:
 
@@ -985,7 +985,7 @@ This is extremely useful for:
 - `GET /api/security/status`
 - `GET /api/security/unauthorized-check`
 
-### Module B route
+### Portfolio Security API route
 
 - `GET /api/module-b/evidence`
 
@@ -1006,6 +1006,7 @@ This is extremely useful for:
 - `GET /api/files/:outerToken/sub-tokens`
 - `PUT /api/files/:outerToken/sub-tokens/:tokenId/files`
 - `PUT /api/files/:outerToken/sub-tokens/:tokenId/secret`
+- `GET /api/files/:outerToken/sub-tokens/:tokenId/reveal`
 - `DELETE /api/files/:outerToken/sub-tokens/:tokenId`
 - `POST /api/files/:fileId/download`
 
@@ -1051,7 +1052,7 @@ These are the files a technical reviewer should know first.
 - `frontend/app.js`
 - `frontend/styles.css`
 
-## 41. How the Project Satisfies Module B
+## 41. How the Project Satisfies Portfolio Security API
 
 ### Login
 
@@ -1100,9 +1101,9 @@ Yes:
 - benchmark evidence
 - explain plans
 
-## 42. Why This Project Is Stronger Than a Minimal Assignment
+## 42. Why This Project Is Stronger Than a Minimal project
 
-Many assignments only do:
+Many minimal demos only do:
 
 - simple login
 - simple CRUD
@@ -1157,7 +1158,7 @@ That order gives a fast but strong understanding.
 
 Use this:
 
-`Ghost_Drop is a secure temporary vault-based file transfer system built with Node.js, Express, MySQL, Google Drive, and a static frontend. It uses an outer token for vault discovery and inner tokens for authorization. MAIN tokens act as admins and SUB tokens act as restricted users. For Module B, the project adds authenticated session APIs, RBAC CRUD on a dedicated portfolio_entries table, direct DB tamper detection through integrity hashing, hash-chained audit logging, and benchmark-backed SQL indexing. It also includes passive protection so tampered portfolio rows are blocked before reaching the user.`
+`Ghost_Drop is a secure temporary vault-based file transfer system built with Node.js, Express, MySQL, Google Drive, and a static frontend. It uses an outer token for vault discovery and inner tokens for authorization. MAIN tokens act as admins and SUB tokens act as restricted users. For Portfolio Security API, the project adds authenticated session APIs, RBAC CRUD on a dedicated portfolio_entries table, direct DB tamper detection through integrity hashing, hash-chained audit logging, and benchmark-backed SQL indexing. It also includes passive protection so tampered portfolio rows are blocked before reaching the user.`
 
 ## 46. Final Understanding
 

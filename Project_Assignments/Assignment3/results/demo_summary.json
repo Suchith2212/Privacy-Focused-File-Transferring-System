@@ -1,0 +1,47 @@
+{
+  "demo": "assignment3",
+  "passed": true,
+  "total_elapsed_sec": 1.299,
+  "steps": [
+    {
+      "step": "Module A - B+ Tree Smoke",
+      "passed": true,
+      "elapsed_sec": 0.083
+    },
+    {
+      "step": "Module A - ACID Tests (16/16)",
+      "passed": true,
+      "elapsed_sec": 0.366
+    },
+    {
+      "step": "Module A - WAL + Recovery Smoke",
+      "passed": true,
+      "elapsed_sec": 0.104
+    },
+    {
+      "step": "ACID Experiments (1-4)",
+      "passed": true,
+      "elapsed_sec": 0.349
+    },
+    {
+      "step": "Module B - Concurrent Vault (20 users)",
+      "passed": true,
+      "elapsed_sec": 0.135
+    },
+    {
+      "step": "Module B - Race Condition (50 threads)",
+      "passed": true,
+      "elapsed_sec": 0.085
+    },
+    {
+      "step": "Module B - Failure Injection",
+      "passed": true,
+      "elapsed_sec": 0.037
+    },
+    {
+      "step": "Module B - ACID Suite",
+      "passed": true,
+      "elapsed_sec": 0.136
+    }
+  ]
+}

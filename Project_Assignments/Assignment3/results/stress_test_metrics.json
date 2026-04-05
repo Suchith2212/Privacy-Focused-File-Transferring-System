@@ -1,0 +1,45 @@
+{
+  "test": "stress_test",
+  "workload_model": "multi_relation_transaction_mix",
+  "total_ops": 1000,
+  "threads": 1,
+  "seed": 42,
+  "success_count": 1000,
+  "fail_count": 0,
+  "success_rate_pct": 100.0,
+  "elapsed_sec": 33.677,
+  "throughput_ops_per_sec": 29.69,
+  "latency_ms": {
+    "mean": 33.639,
+    "p50": 34.049,
+    "p95": 47.943,
+    "p99": 54.936,
+    "max": 73.446
+  },
+  "op_distribution": {
+    "attempted": {
+      "bundle_write": 199,
+      "download_event": 218,
+      "expire_cycle": 133,
+      "portfolio_write": 178,
+      "cleanup": 90,
+      "read_path": 182
+    },
+    "success": {
+      "bundle_write": 199,
+      "download_event": 218,
+      "expire_cycle": 133,
+      "portfolio_write": 178,
+      "cleanup": 90,
+      "read_path": 182
+    },
+    "failed": {
+      "bundle_write": 0,
+      "download_event": 0,
+      "expire_cycle": 0,
+      "portfolio_write": 0,
+      "cleanup": 0,
+      "read_path": 0
+    }
+  }
+}

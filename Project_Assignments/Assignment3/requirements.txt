@@ -1,0 +1,20 @@
+# Assignment 3 - Transaction Management & ACID Validation
+# CS432 Database Systems | Team: Dragons
+#
+# Core runtime dependencies (standard library used where possible).
+# All transaction engine code uses only Python stdlib.
+
+# Optional: for stress test graphs
+matplotlib>=3.7.0
+
+# Optional: for Module B API tests against live backend
+requests>=2.31.0
+
+# Optional: for running unit tests with pytest
+pytest>=7.4.0
+
+# Optional: for the performance monitoring dashboard (bonus feature)
+flask>=3.0.0
+
+# No external databases, ORMs, or pre-built transaction managers allowed.
+# The custom B+ Tree engine is the ONLY storage backend.

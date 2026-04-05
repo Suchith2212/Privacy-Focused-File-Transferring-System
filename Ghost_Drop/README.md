@@ -3,37 +3,46 @@
 This project now serves three purposes:
 
 - Ghost Drop temporary vault/file-sharing prototype
-- Module B aligned local API app using vault credentials as authentication
-- Module A aligned integration surface using the existing Python custom B+ Tree for Ghost Drop-shaped indexing demonstrations
+- Portfolio security API layer with vault-credential authentication
+- B+ tree indexing integration layer using the existing Python custom implementation for Ghost Drop query paths
 
-## Current Model  :- specific to a vault
+## Current Model (Vault-Scoped)
 
 - `outerToken + MAIN innerToken` => vault `admin`
 - `outerToken + SUB innerToken` => vault `user`
 
-That is the Module B role model for this project. There is no separate `admin/admin123` style login table.
+That is the project RBAC role model. There is no separate `admin/admin123` style login table.
+
+
+## Documentation
+
+- Project Architecture Guide: docs/PROJECT_DOCUMENTATION.md
+- API Requests Guide: docs/JSON_API_REQUESTS_PRO_GUIDE.md
+- Encryption Reference: docs/ENCRYPTION_REFERENCE.md
+- Security Limits Reference: docs/SECURITY_LIMITS_REFERENCE.md
 
 ## Core Flows
 
 - Upload: MAIN inner token + files -> vault creation + Drive upload
-- Download: outer token/QR + inner token -> one-time download + logical delete
+- Download: outer token/QR + inner token -> single-file download or batch ZIP download + logical delete
 - Sub-token management: MAIN-only scoped SUB token creation and reassignment
 - Security: one-time CAPTCHA solve window + rate limiting + session auditing
+- Batch download cap is controlled by `BATCH_DOWNLOAD_MAX_FILES` (default `10`)
 - Vault access UX: outer token can be typed or scanned from QR
-- Module B alignment:
+- Portfolio security API layer:
   - `POST /api/auth/login`
   - `GET /api/auth/isAuth`
   - RBAC CRUD under `/api/portfolio`
   - tamper detection at `/api/security/unauthorized-check`
   - audit log file at `backend/logs/audit.log`
   - SQL indexing evidence in `backend/reports`
-- Module A alignment:
+- B+ tree indexing integration:
   - custom B+ Tree integration under `module_a/`
   - Ghost Drop-specific index paths and benchmark scripts
 
-## Module A Mapping
+## B+ Tree Indexing Mapping
 
-The existing Python Module A implementation is reused through a project-local integration layer in:
+The existing Python B+ tree implementation is reused through a project-local integration layer in:
 
 - `module_a/`
 
@@ -46,7 +55,7 @@ It demonstrates Ghost Drop-specific custom indexing for:
 
 This keeps the relational DB authoritative while showing how a custom B+ Tree can accelerate real project access paths.
 
-## Module B Mapping
+## Portfolio Security API Mapping
 
 ### Login and Session Validation
 
@@ -72,7 +81,7 @@ Permissions:
 
 ### CRUD Choice
 
-Existing file/folder display alone is not enough to represent full Module B CRUD cleanly. To make the mapping complete, this project now includes `portfolio_entries`, a vault-scoped resource specifically for:
+Existing file/folder display alone is not enough to represent a full protected CRUD surface. To complete the feature set, this project includes `portfolio_entries`, a vault-scoped resource specifically for:
 
 - protected CRUD
 - role enforcement
@@ -125,10 +134,10 @@ Current query-to-index matchups:
 
 The current database model is documented visually here:
 
-- [Basic ER diagram](../Project_Assignments/Assignment2/ER_Diagrams/ghostdrop_er_basic.png)
-- [Formal ER diagram](../Project_Assignments/Assignment2/ER_Diagrams/ghostdrop_er_formal.png)
+- Basic ER diagram: add `docs/er/ghostdrop_er_basic.png` if you want image-based schema documentation in-repo.
+- Formal ER diagram: add `docs/er/ghostdrop_er_formal.png` for full cardinality notation.
 
-These diagrams reflect the schema in `backend/sql/init_schema.sql`, including the `portfolio_entries` table added for the Module B CRUD surface.
+These diagrams reflect the schema in `backend/sql/init_schema.sql`, including the `portfolio_entries` table added for authenticated portfolio CRUD.
 
 ## Key Backend Files
 
@@ -162,6 +171,12 @@ These diagrams reflect the schema in `backend/sql/init_schema.sql`, including th
 mysql -u root -p < backend/sql/init_schema.sql
 ```
 
+PowerShell alternative:
+
+```powershell
+Get-Content ".\backend\sql\init_schema.sql" | mysql --force -u root -p ghostdrop_proto
+```
+
 2. Configure `backend/.env`
 
 3. Run:
@@ -185,7 +200,7 @@ npm run dev
   - scan the outer-token QR with the browser camera
 - if abuse protection triggers, the user solves one CAPTCHA challenge and the pending action is retried without immediately prompting again
 
-## Module B Demo Flow
+## Portfolio Security API Demo Flow
 
 1. Create a vault with a MAIN token using the Ghost Drop upload flow.
 2. Create at least one SUB token for that vault.
@@ -212,5 +227,7 @@ curl -X POST http://localhost:4000/api/auth/login \
 - CAPTCHA double-counting was removed from the request precheck path.
 - the frontend now keeps a short-lived solved-CAPTCHA window to avoid repeated prompts during the same protected flow
 - the access screen now supports browser-based QR scanning for the outer token
-- The legacy Ghost Drop routes remain intact; the Module B layer is additive.
-
+- SUB token secret storage is encrypted at rest in `sub_token_secrets` (`secret_ciphertext`, `secret_iv`, `secret_auth_tag`, `secret_version`)
+- SUB token admin reveal is available at `GET /api/files/:outerToken/sub-tokens/:tokenId/reveal`
+- The legacy Ghost Drop routes remain intact; the portfolio security API layer is additive.
+- Encryption details are documented in `docs/ENCRYPTION_REFERENCE.md`.

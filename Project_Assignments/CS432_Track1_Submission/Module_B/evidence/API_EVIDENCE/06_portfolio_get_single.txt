@@ -1,0 +1,13 @@
+{
+    "entry":  {
+                  "entryId":  "9b889139-d22e-484e-8db3-6b2afdd2409f",
+                  "vaultId":  "91ff4e74-f0c4-43b9-ae76-78e0713fa802",
+                  "ownerTokenId":  "8c2fa512-d873-4cd9-befa-b4c434f298f1",
+                  "createdByTokenId":  "8c2fa512-d873-4cd9-befa-b4c434f298f1",
+                  "title":  "Admin Note",
+                  "content":  "Module B verification entry created by the evidence script.",
+                  "status":  "ACTIVE",
+                  "createdAt":  "2026-03-20T21:59:59.000Z",
+                  "updatedAt":  "2026-03-20T21:59:59.000Z"
+              }
+}

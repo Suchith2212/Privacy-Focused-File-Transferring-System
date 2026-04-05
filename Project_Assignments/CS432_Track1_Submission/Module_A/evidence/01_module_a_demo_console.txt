@@ -1,0 +1,250 @@
+{
+
+  "source": "F:\\SEM IV\\lessons\\DB\\Project\\Project_432\\backend\\database_export.json",
+
+  "snapshotCounts": {
+
+    "vaults": 120,
+
+    "inner_tokens": 300,
+
+    "files": 500,
+
+    "file_metadata": 500,
+
+    "file_key_access": 800,
+
+    "sessions": 200,
+
+    "auth_attempts": 1200,
+
+    "download_logs": 900,
+
+    "captcha_tracking": 200,
+
+    "expiry_jobs": 120,
+
+    "portfolio_entries": 400
+
+  },
+
+  "queries": {
+
+    "outer_token": "8Y2bTu5",
+
+    "vault_id": "3e448b76-bcbc-43ce-8582-6998368bc51f",
+
+    "expiry_lo": 1772795981,
+
+    "expiry_hi": 1772803181,
+
+    "file_start": 1771709845,
+
+    "file_end": 1771709847,
+
+    "session_id": "8603789c-8f8d-446e-b525-ea342eaeb8ac",
+
+    "auth_start": 1772014769,
+
+    "auth_end": 1773648766
+
+  },
+
+  "outerTokenLookup": [
+
+    "3e448b76-bcbc-43ce-8582-6998368bc51f"
+
+  ],
+
+  "expiryRangeScan": [
+
+    [
+
+      1772799581,
+
+      [
+
+        "3e448b76-bcbc-43ce-8582-6998368bc51f"
+
+      ]
+
+    ]
+
+  ],
+
+  "vaultActiveFiles": [
+
+    [
+
+      [
+
+        "3e448b76-bcbc-43ce-8582-6998368bc51f",
+
+        "ACTIVE",
+
+        1771709846
+
+      ],
+
+      [
+
+        "69481475-3a9d-463e-b558-5bf3ae66d0f5"
+
+      ]
+
+    ]
+
+  ],
+
+  "sessionAttempts": [
+
+    [
+
+      [
+
+        "8603789c-8f8d-446e-b525-ea342eaeb8ac",
+
+        1772014770
+
+      ],
+
+      [
+
+        "86e4c246-e8c4-47c0-9910-e18d8bb6dd2e"
+
+      ]
+
+    ],
+
+    [
+
+      [
+
+        "8603789c-8f8d-446e-b525-ea342eaeb8ac",
+
+        1772133723
+
+      ],
+
+      [
+
+        "3d744309-77e0-4755-a7e2-1170cae9cb32"
+
+      ]
+
+    ],
+
+    [
+
+      [
+
+        "8603789c-8f8d-446e-b525-ea342eaeb8ac",
+
+        1772156502
+
+      ],
+
+      [
+
+        "f2da6e65-1af8-458d-927d-fe0101b8a82e"
+
+      ]
+
+    ],
+
+    [
+
+      [
+
+        "8603789c-8f8d-446e-b525-ea342eaeb8ac",
+
+        1772560516
+
+      ],
+
+      [
+
+        "08d99668-ae86-4d60-98bf-a991a59fce0c"
+
+      ]
+
+    ],
+
+    [
+
+      [
+
+        "8603789c-8f8d-446e-b525-ea342eaeb8ac",
+
+        1772828724
+
+      ],
+
+      [
+
+        "bb5bb8b6-89b2-4b27-bc6a-41f1fae8a1b1"
+
+      ]
+
+    ],
+
+    [
+
+      [
+
+        "8603789c-8f8d-446e-b525-ea342eaeb8ac",
+
+        1773072056
+
+      ],
+
+      [
+
+        "a8cf6911-db26-4143-b0dc-4d57da07bc9c"
+
+      ]
+
+    ],
+
+    [
+
+      [
+
+        "8603789c-8f8d-446e-b525-ea342eaeb8ac",
+
+        1773294557
+
+      ],
+
+      [
+
+        "b5c599ba-7f24-49cc-91be-69b6d5e57644"
+
+      ]
+
+    ],
+
+    [
+
+      [
+
+        "8603789c-8f8d-446e-b525-ea342eaeb8ac",
+
+        1773648765
+
+      ],
+
+      [
+
+        "47810e86-d0fb-4e7a-a03d-8e90b2bd6c04"
+
+      ]
+
+    ]
+
+  ]
+
+}
+
+Saved demo output to F:\SEM IV\lessons\DB\Project\CS432_Track1_Submission\Module_A\integration\blinddrop_index_demo_output.json
+

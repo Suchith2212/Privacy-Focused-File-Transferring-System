@@ -114,6 +114,13 @@ Main entities:
 - Vault access denied after expiry
 - Cross-vault access prevented
 
+## Updated ER Diagram
+
+This README reflects the earlier database model. For the updated schema used in Assignment 2, see:
+
+- `Project_Assignments/Assignment2/ER_Diagrams/ghostdrop_er_basic.png`
+- `Project_Assignments/Assignment2/ER_Diagrams/ghostdrop_er_formal.png`
+
 ---
 
 ## 🔐 Threat Resistance
@@ -188,5 +195,6 @@ This system provides a cryptographically enforced, temporary, anonymous file tra
 Compromise of any single layer does not expose plaintext data. Multiple security boundaries must be broken simultaneously — making practical exploitation highly improbable.
 
 ---
+
 
 

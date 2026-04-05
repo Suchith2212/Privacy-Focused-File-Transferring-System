@@ -1,0 +1,26 @@
+{
+  "total": 40,
+  "success": 20,
+  "failed": 20,
+  "success_rate": 50.0,
+  "latency_ms": {
+    "mean": 44.94,
+    "p50": 39.8,
+    "p95": 95.4,
+    "max": 126.39
+  },
+  "by_status": {
+    "429": 20,
+    "200": 20
+  },
+  "by_operation": {
+    "vault_access": 20,
+    "files_list": 20
+  },
+  "duration_sec": 2.007,
+  "mode": "auth",
+  "users": 4,
+  "requests_per_user": 10,
+  "delay_ms": 150,
+  "auth_pattern": "mixed"
+}

@@ -1,0 +1,108 @@
+{
+    "project":  "Project_432",
+    "module":  "Module B",
+    "vaultId":  "91ff4e74-f0c4-43b9-ae76-78e0713fa802",
+    "rbacMapping":  {
+                        "MAIN":  "admin",
+                        "SUB":  "user"
+                    },
+    "integrity":  {
+                      "ok":  true,
+                      "tamperedCount":  0,
+                      "tamperedEntries":  [
+
+                                          ]
+                  },
+    "audit":  {
+                  "totalEvents":  18,
+                  "hashChainValid":  true
+              },
+    "indexes":  [
+                    {
+                        "table":  "portfolio_entries",
+                        "keyName":  "PRIMARY",
+                        "columnName":  "entry_id",
+                        "seqInIndex":  1,
+                        "nonUnique":  0
+                    },
+                    {
+                        "table":  "portfolio_entries",
+                        "keyName":  "fk_portfolio_owner_token",
+                        "columnName":  "owner_token_id",
+                        "seqInIndex":  1,
+                        "nonUnique":  1
+                    },
+                    {
+                        "table":  "portfolio_entries",
+                        "keyName":  "fk_portfolio_created_by_token",
+                        "columnName":  "created_by_token_id",
+                        "seqInIndex":  1,
+                        "nonUnique":  1
+                    },
+                    {
+                        "table":  "portfolio_entries",
+                        "keyName":  "idx_portfolio_vault_owner_status",
+                        "columnName":  "vault_id",
+                        "seqInIndex":  1,
+                        "nonUnique":  1
+                    },
+                    {
+                        "table":  "portfolio_entries",
+                        "keyName":  "idx_portfolio_vault_owner_status",
+                        "columnName":  "owner_token_id",
+                        "seqInIndex":  2,
+                        "nonUnique":  1
+                    },
+                    {
+                        "table":  "portfolio_entries",
+                        "keyName":  "idx_portfolio_vault_owner_status",
+                        "columnName":  "status",
+                        "seqInIndex":  3,
+                        "nonUnique":  1
+                    },
+                    {
+                        "table":  "portfolio_entries",
+                        "keyName":  "idx_portfolio_vault_owner_status",
+                        "columnName":  "updated_at",
+                        "seqInIndex":  4,
+                        "nonUnique":  1
+                    },
+                    {
+                        "table":  "portfolio_entries",
+                        "keyName":  "idx_portfolio_vault_status",
+                        "columnName":  "vault_id",
+                        "seqInIndex":  1,
+                        "nonUnique":  1
+                    },
+                    {
+                        "table":  "portfolio_entries",
+                        "keyName":  "idx_portfolio_vault_status",
+                        "columnName":  "status",
+                        "seqInIndex":  2,
+                        "nonUnique":  1
+                    },
+                    {
+                        "table":  "portfolio_entries",
+                        "keyName":  "idx_portfolio_vault_status",
+                        "columnName":  "updated_at",
+                        "seqInIndex":  3,
+                        "nonUnique":  1
+                    }
+                ],
+    "explainPlan":  [
+                        {
+                            "id":  1,
+                            "select_type":  "SIMPLE",
+                            "table":  "portfolio_entries",
+                            "partitions":  null,
+                            "type":  "ref",
+                            "possible_keys":  "idx_portfolio_vault_owner_status,idx_portfolio_vault_status",
+                            "key":  "idx_portfolio_vault_status",
+                            "key_len":  "37",
+                            "ref":  "const,const",
+                            "rows":  2,
+                            "filtered":  100,
+                            "Extra":  "Using where; Backward index scan"
+                        }
+                    ]
+}

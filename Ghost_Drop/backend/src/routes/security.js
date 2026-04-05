@@ -4,7 +4,8 @@ const {
   verifyCaptcha,
   getClientIp,
   shouldRequireCaptcha,
-  getSecurityStatus
+  getSecurityStatus,
+  inspectSecurityCounters
 } = require("../services/security");
 const { upsertCaptchaTracking } = require("../services/auditService");
 const { requireAdmin } = require("../middleware/authSession");
@@ -13,20 +14,20 @@ const { appendAuditLog } = require("../services/fileAuditLogger");
 
 const router = express.Router();
 
-router.get("/captcha", (req, res) => {
+router.get("/captcha", async (req, res) => {
   const ip = getClientIp(req);
-  const challenge = createCaptcha(ip);
-  upsertCaptchaTracking({ req, required: true, incrementAttempts: false }).catch(() => {});
+  const challenge = await createCaptcha(ip);
   return res.json({
     captchaRequired: true,
     ...challenge
   });
 });
 
-router.post("/captcha/verify", (req, res) => {
+router.post("/captcha/verify", async (req, res) => {
   const ip = getClientIp(req);
   const { challengeId, answer } = req.body || {};
-  const out = verifyCaptcha({ ip, challengeId, answer });
+  const providerToken = (req.body || {}).providerToken || (req.body || {}).captchaToken;
+  const out = await verifyCaptcha({ ip, challengeId, answer, providerToken });
   if (!out.ok) {
     if (out.retryAfterSeconds) {
       res.set("Retry-After", String(out.retryAfterSeconds));
@@ -41,22 +42,52 @@ router.post("/captcha/verify", (req, res) => {
   return res.json({ message: "Captcha verified." });
 });
 
-router.get("/captcha/required", (req, res) => {
+router.get("/captcha/required", async (req, res) => {
   const ip = getClientIp(req);
-  const required = shouldRequireCaptcha(ip);
-  upsertCaptchaTracking({ req, required, incrementAttempts: false }).catch(() => {});
+  const required = await shouldRequireCaptcha(ip);
   return res.json({ captchaRequired: required });
 });
 
-router.get("/status", (req, res) => {
+router.get("/status", async (req, res) => {
   const ip = getClientIp(req);
-  const status = getSecurityStatus(ip);
+  const status = await getSecurityStatus(ip);
   if (status.blocked && status.blockedSeconds > 0) {
     res.set("Retry-After", String(status.blockedSeconds));
   }
   return res.json(status);
 });
 
+
+router.get("/inspect", requireAdmin, async (req, res) => {
+  try {
+    const ip = String(req.query?.ip || "").trim();
+    const routeKey = String(req.query?.routeKey || "default").trim() || "default";
+    const principalKey = String(req.query?.principalKey || "").trim();
+    const includePolicies = String(req.query?.includePolicies || "true").toLowerCase() !== "false";
+
+    const diagnostics = await inspectSecurityCounters({
+      ip,
+      routeKey,
+      principalKey,
+      includePolicies
+    });
+
+    await appendAuditLog({
+      req,
+      action: "security.inspect",
+      vaultId: req.authSession.vaultId,
+      actorTokenId: req.authSession.innerTokenId,
+      inspectedIp: ip || null,
+      inspectedRouteKey: routeKey,
+      inspectedPrincipal: principalKey || null,
+      severity: "INFO"
+    }).catch(() => {});
+
+    return res.json(diagnostics);
+  } catch (err) {
+    return res.status(500).json({ error: err.message || "Security diagnostics failed." });
+  }
+});
 router.get("/unauthorized-check", requireAdmin, async (req, res) => {
   try {
     await ensurePortfolioSchema();
@@ -80,3 +111,5 @@ router.get("/unauthorized-check", requireAdmin, async (req, res) => {
 });
 
 module.exports = router;
+
+

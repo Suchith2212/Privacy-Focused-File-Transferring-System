@@ -1,0 +1,15 @@
+{"type":"SCHEMA","table":"vaults","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.336663+00:00"}
+{"type":"SCHEMA","table":"inner_tokens","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.337378+00:00"}
+{"type":"SCHEMA","table":"files","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.338112+00:00"}
+{"type":"SCHEMA","table":"sessions","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.338655+00:00"}
+{"type":"SCHEMA","table":"download_logs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.339230+00:00"}
+{"type":"SCHEMA","table":"expiry_jobs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.339733+00:00"}
+{"type":"SCHEMA","table":"portfolio_entries","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.340260+00:00"}
+{"type":"BEGIN","tx_id":"c2676c8c-15df-4510-956f-3354bc13545c","ts":"2026-04-05T12:20:37.341158+00:00"}
+{"type":"OP","tx_id":"c2676c8c-15df-4510-956f-3354bc13545c","op":"insert","table":"vaults","key":1,"value":{"outer_token":"FI_OUTER","status":"ACTIVE"},"ts":"2026-04-05T12:20:37.342084+00:00"}
+{"type":"OP","tx_id":"c2676c8c-15df-4510-956f-3354bc13545c","op":"insert","table":"inner_tokens","key":101,"value":{"vault_id":1,"token_type":"MAIN","token_hash":"fi_h","status":"ACTIVE"},"ts":"2026-04-05T12:20:37.343007+00:00"}
+{"type":"PREPARE","tx_id":"c2676c8c-15df-4510-956f-3354bc13545c","ts":"2026-04-05T12:20:37.343920+00:00"}
+{"type":"COMMIT","tx_id":"c2676c8c-15df-4510-956f-3354bc13545c","ts":"2026-04-05T12:20:37.344402+00:00"}
+{"type":"BEGIN","tx_id":"59e3772f-28eb-4c6b-9557-facb054a4146","ts":"2026-04-05T12:20:37.344891+00:00"}
+{"type":"OP","tx_id":"59e3772f-28eb-4c6b-9557-facb054a4146","op":"insert","table":"files","key":4001,"value":{"vault_id":1,"inner_token_id":101,"file_size":100,"status":"ACTIVE","download_count":0,"max_downloads":1},"ts":"2026-04-05T12:20:37.345380+00:00"}
+{"type":"ROLLBACK","tx_id":"59e3772f-28eb-4c6b-9557-facb054a4146","ts":"2026-04-05T12:20:37.345919+00:00"}

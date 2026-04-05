@@ -1,0 +1,12 @@
+{
+  "test": "concurrent_vault_creation",
+  "users": 20,
+  "success_count": 20,
+  "vault_count": 20,
+  "token_count": 20,
+  "file_count": 20,
+  "errors": [],
+  "elapsed_sec": 0.18,
+  "throughput_ops_per_sec": 110.93,
+  "passed": true
+}

@@ -1,0 +1,22 @@
+{
+  "experiment": "atomicity",
+  "passed": true,
+  "scenarios": [
+    {
+      "scenario": "A \u2013 crash before commit (3 tables)",
+      "passed": true,
+      "vault_after_recovery": null,
+      "token_after_recovery": null,
+      "file_after_recovery": null
+    },
+    {
+      "scenario": "B \u2013 explicit rollback (7 relations)",
+      "passed": true,
+      "file_after_rollback": null,
+      "log_after_rollback": null,
+      "job_after_rollback": null,
+      "pe_after_rollback": null,
+      "token_type_after_rollback": "MAIN"
+    }
+  ]
+}

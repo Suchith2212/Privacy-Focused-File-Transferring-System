@@ -75,12 +75,12 @@ async function main() {
       mainTokenId,
       mainTokenId,
       "Admin Seed Entry",
-      "Seeded admin-owned entry for Module B evidence.",
+      "Seeded admin-owned entry for portfolio API evidence.",
       computeIntegrityHash({
         vaultId,
         ownerTokenId: mainTokenId,
         title: "Admin Seed Entry",
-        content: "Seeded admin-owned entry for Module B evidence.",
+        content: "Seeded admin-owned entry for portfolio API evidence.",
         status: "ACTIVE"
       })
     ]
@@ -98,19 +98,19 @@ async function main() {
       subTokenId,
       mainTokenId,
       "User Seed Entry",
-      "Seeded sub-owned entry for Module B evidence.",
+      "Seeded user-owned entry for portfolio API evidence.",
       computeIntegrityHash({
         vaultId,
         ownerTokenId: subTokenId,
         title: "User Seed Entry",
-        content: "Seeded sub-owned entry for Module B evidence.",
+        content: "Seeded user-owned entry for portfolio API evidence.",
         status: "ACTIVE"
       })
     ]
   );
 
   const output = {
-    message: "Module B demo data seeded.",
+    message: "Portfolio API demo data seeded.",
     outerToken: DEMO.outerToken,
     mainInnerToken: DEMO.mainInnerToken,
     subInnerToken: DEMO.subInnerToken,

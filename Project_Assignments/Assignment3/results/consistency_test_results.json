@@ -1,0 +1,22 @@
+{
+  "experiment": "consistency",
+  "passed": true,
+  "scenarios": [
+    {
+      "scenario": "A \u2013 negative file_size rejected",
+      "passed": true
+    },
+    {
+      "scenario": "B \u2013 missing vault FK rejected",
+      "passed": true
+    },
+    {
+      "scenario": "C \u2013 file missing token FK rejected",
+      "passed": true
+    },
+    {
+      "scenario": "D \u2013 valid 7-relation commit",
+      "passed": true
+    }
+  ]
+}

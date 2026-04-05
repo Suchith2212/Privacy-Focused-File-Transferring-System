@@ -1,0 +1,16 @@
+{"type":"SCHEMA","table":"vaults","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.346751+00:00"}
+{"type":"SCHEMA","table":"inner_tokens","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.347273+00:00"}
+{"type":"SCHEMA","table":"files","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.347991+00:00"}
+{"type":"SCHEMA","table":"sessions","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.348489+00:00"}
+{"type":"SCHEMA","table":"download_logs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.349010+00:00"}
+{"type":"SCHEMA","table":"expiry_jobs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.349471+00:00"}
+{"type":"SCHEMA","table":"portfolio_entries","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:37.349941+00:00"}
+{"type":"BEGIN","tx_id":"50fff09c-ee8e-4603-8d85-fd5fc289936f","ts":"2026-04-05T12:20:37.350424+00:00"}
+{"type":"OP","tx_id":"50fff09c-ee8e-4603-8d85-fd5fc289936f","op":"insert","table":"vaults","key":1,"value":{"outer_token":"FI_OUTER","status":"ACTIVE"},"ts":"2026-04-05T12:20:37.350917+00:00"}
+{"type":"OP","tx_id":"50fff09c-ee8e-4603-8d85-fd5fc289936f","op":"insert","table":"inner_tokens","key":101,"value":{"vault_id":1,"token_type":"MAIN","token_hash":"fi_h","status":"ACTIVE"},"ts":"2026-04-05T12:20:37.351416+00:00"}
+{"type":"PREPARE","tx_id":"50fff09c-ee8e-4603-8d85-fd5fc289936f","ts":"2026-04-05T12:20:37.351899+00:00"}
+{"type":"COMMIT","tx_id":"50fff09c-ee8e-4603-8d85-fd5fc289936f","ts":"2026-04-05T12:20:37.352470+00:00"}
+{"type":"BEGIN","tx_id":"8807f9d9-621b-4bcd-aeb3-66e47f07fd4f","ts":"2026-04-05T12:20:37.352968+00:00"}
+{"type":"OP","tx_id":"8807f9d9-621b-4bcd-aeb3-66e47f07fd4f","op":"insert","table":"files","key":5001,"value":{"vault_id":1,"inner_token_id":101,"file_size":256,"status":"ACTIVE","download_count":0,"max_downloads":1},"ts":"2026-04-05T12:20:37.353440+00:00"}
+{"type":"OP","tx_id":"8807f9d9-621b-4bcd-aeb3-66e47f07fd4f","op":"insert","table":"files","key":5002,"value":{"vault_id":1,"inner_token_id":9999,"file_size":512,"status":"ACTIVE","download_count":0,"max_downloads":1},"ts":"2026-04-05T12:20:37.354004+00:00"}
+{"type":"ROLLBACK","tx_id":"8807f9d9-621b-4bcd-aeb3-66e47f07fd4f","reason":"commit_failed","ts":"2026-04-05T12:20:37.354980+00:00"}

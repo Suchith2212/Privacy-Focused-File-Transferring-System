@@ -1,0 +1,16 @@
+{"type":"SCHEMA","table":"vaults","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.821467+00:00"}
+{"type":"SCHEMA","table":"inner_tokens","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.822101+00:00"}
+{"type":"SCHEMA","table":"files","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.822708+00:00"}
+{"type":"SCHEMA","table":"sessions","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.823364+00:00"}
+{"type":"SCHEMA","table":"download_logs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.824512+00:00"}
+{"type":"SCHEMA","table":"expiry_jobs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.825441+00:00"}
+{"type":"SCHEMA","table":"portfolio_entries","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.825933+00:00"}
+{"type":"BEGIN","tx_id":"c7b062cc-d337-4b1b-bcae-61ee96fc3465","ts":"2026-04-05T12:20:36.826522+00:00"}
+{"type":"OP","tx_id":"c7b062cc-d337-4b1b-bcae-61ee96fc3465","op":"insert","table":"vaults","key":1,"value":{"outer_token":"BASE_OUTER","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.827060+00:00"}
+{"type":"OP","tx_id":"c7b062cc-d337-4b1b-bcae-61ee96fc3465","op":"insert","table":"inner_tokens","key":101,"value":{"vault_id":1,"token_type":"MAIN","token_hash":"h1","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.827638+00:00"}
+{"type":"OP","tx_id":"c7b062cc-d337-4b1b-bcae-61ee96fc3465","op":"insert","table":"sessions","key":501,"value":{"ip_address":"127.0.0.1","user_agent":"consistency-agent"},"ts":"2026-04-05T12:20:36.828183+00:00"}
+{"type":"PREPARE","tx_id":"c7b062cc-d337-4b1b-bcae-61ee96fc3465","ts":"2026-04-05T12:20:36.828757+00:00"}
+{"type":"COMMIT","tx_id":"c7b062cc-d337-4b1b-bcae-61ee96fc3465","ts":"2026-04-05T12:20:36.829359+00:00"}
+{"type":"BEGIN","tx_id":"172510e0-831f-4a8c-8b4e-39e802ecf62c","ts":"2026-04-05T12:20:36.829896+00:00"}
+{"type":"OP","tx_id":"172510e0-831f-4a8c-8b4e-39e802ecf62c","op":"insert","table":"files","key":1001,"value":{"vault_id":1,"inner_token_id":101,"file_size":-500,"status":"ACTIVE","download_count":0,"max_downloads":1},"ts":"2026-04-05T12:20:36.830403+00:00"}
+{"type":"ROLLBACK","tx_id":"172510e0-831f-4a8c-8b4e-39e802ecf62c","reason":"commit_failed","ts":"2026-04-05T12:20:36.831043+00:00"}

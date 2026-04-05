@@ -1,6 +1,6 @@
-require('dotenv').config({ path: '../Assignment2/Project_432/backend/.env' });
-const { findTamperedEntries } = require('../Assignment2/Project_432/backend/src/services/portfolioIntegrity');
-const { query } = require('../Assignment2/Project_432/backend/src/config/db');
+require('dotenv').config({ path: '../Assignment2/Ghost_Drop/backend/.env' });
+const { findTamperedEntries } = require('../Assignment2/Ghost_Drop/backend/src/services/portfolioIntegrity');
+const { query } = require('../Assignment2/Ghost_Drop/backend/src/config/db');
 
 async function testTamper() {
   try {

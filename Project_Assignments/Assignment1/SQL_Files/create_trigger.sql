@@ -1,4 +1,4 @@
-USE blinddrop_proto;
+USE ghostdrop_proto;
 DROP TRIGGER IF EXISTS before_portfolio_update_guard;
 DELIMITER //
 CREATE TRIGGER before_portfolio_update_guard

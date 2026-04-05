@@ -455,6 +455,31 @@ function createButton({ text, icon, className }) {
   return btn;
 }
 
+function pruneSelectedFileIds() {
+  const allowed = new Set((state.accessibleFiles || []).map((f) => String(f.file_id)));
+  state.selectedFileIds = new Set(
+    Array.from(state.selectedFileIds).filter((id) => allowed.has(String(id)))
+  );
+}
+
+function updateBatchDownloadButton() {
+  const btn = $("batchDownloadBtn");
+  if (!btn) return;
+  const isMain = state.tokenType === "MAIN";
+  const selected = state.selectedFileIds.size;
+  show(btn, isMain);
+  btn.disabled = !isMain || selected === 0;
+}
+
+function filenameFromDisposition(disposition, fallback) {
+  const value = String(disposition || "");
+  const utf8Match = value.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) return decodeURIComponent(utf8Match[1]).trim();
+  const plainMatch = value.match(/filename=\"?([^\";]+)\"?/i);
+  if (plainMatch?.[1]) return plainMatch[1].trim();
+  return fallback;
+}
+
 function normalizePath(input) {
   return String(input || "").replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");
 }
@@ -543,6 +568,7 @@ function renderFolderBreadcrumbs() {
 function renderFilesList() {
   const container = $("filesList");
   const emptyState = $("filesEmpty");
+  pruneSelectedFileIds();
   container.innerHTML = "";
   show(emptyState, false);
 
@@ -552,6 +578,7 @@ function renderFilesList() {
     empty.textContent = "No files found in this vault.";
     container.appendChild(empty);
     show($("selectedCount"), false);
+    updateBatchDownloadButton();
     return;
   }
 
@@ -565,6 +592,7 @@ function renderFilesList() {
   if (folders.length === 0 && files.length === 0) {
     show(emptyState, true);
     show($("selectedCount"), false);
+    updateBatchDownloadButton();
     return;
   }
 
@@ -663,11 +691,13 @@ function updateSelectionCount() {
   const chip = $("selectedCount");
   if (!chip || state.tokenType !== "MAIN") {
     show(chip, false);
+    updateBatchDownloadButton();
     return;
   }
   const selected = state.selectedFileIds.size;
   chip.textContent = `${selected} file${selected === 1 ? "" : "s"} selected`;
   show(chip, true);
+  updateBatchDownloadButton();
 }
 
 function renderVaultView(data) {
@@ -730,6 +760,65 @@ async function downloadFile(f, button) {
   }
 }
 
+async function downloadSelectedBatch(button) {
+  const selected = Array.from(state.selectedFileIds);
+  if (state.tokenType !== "MAIN") {
+    setError("Batch download is available only for MAIN access.");
+    return;
+  }
+  if (selected.length === 0) {
+    setError("Select at least one file.");
+    return;
+  }
+
+  clearError();
+  setButtonBusy(button, true);
+  try {
+    const res = await fetch(`/api/files/download-batch`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        outerToken: state.outerToken,
+        innerToken: state.innerToken,
+        fileIds: selected
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      if (errData.captchaRequired) {
+        withCaptchaRetry(() => downloadSelectedBatch(button));
+        return;
+      }
+      throw new Error(errData.error || "Batch download failed");
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filenameFromDisposition(
+      res.headers.get("content-disposition"),
+      `ghostdrop-batch-${Date.now()}.zip`
+    );
+    anchor.click();
+    window.URL.revokeObjectURL(url);
+
+    state.selectedFileIds.clear();
+    const data = await fetchJson(
+      `/api/files/${encodeURIComponent(state.outerToken)}/list?innerToken=${encodeURIComponent(state.innerToken)}`
+    );
+    state.accessibleFiles = data.files;
+    renderFilesList();
+    showToast(`Batch download started (${selected.length} files)`);
+  } catch (err) {
+    setError(err.message, { securityAlert: err.payload?.securityAlert });
+  } finally {
+    setButtonBusy(button, false);
+    updateBatchDownloadButton();
+  }
+}
+
 async function loadSubTokens() {
   // Show skeleton placeholders while scoped-token metadata is loading.
   const list = $("subTokensList");
@@ -741,6 +830,7 @@ async function loadSubTokens() {
     );
     state.subTokens = (data.subTokens || []).map((st) => ({
       ...st,
+      hasSecret: Number(st.has_secret || 0) > 0,
       fileIds: st.file_ids ? String(st.file_ids).split(",").filter(Boolean) : []
     }));
     list.innerHTML = "";
@@ -761,9 +851,8 @@ async function loadSubTokens() {
       const info = document.createElement("div");
       info.className = "st-info";
       const title = document.createElement("strong");
-      const tokenValue = st.sub_inner_token || state.createdSubTokens[st.inner_token_id];
-      if (tokenValue) state.createdSubTokens[st.inner_token_id] = tokenValue;
-      title.textContent = tokenValue ? `Token: ${tokenValue}` : "Token: [Encrypted]";
+      const tokenValue = state.createdSubTokens[st.inner_token_id];
+      title.textContent = tokenValue ? `Token: ${tokenValue}` : "Token: [Hidden]";
       const files = document.createElement("span");
       files.className = "muted small";
       files.textContent = `Files: ${st.files || "No files mapped"}`;
@@ -775,7 +864,13 @@ async function loadSubTokens() {
       const editBtn = createButton({ text: "Edit Files", icon: "pencil", className: "btn btn-secondary btn-inline" });
       editBtn.onclick = () => openSubTokenEditor(st.inner_token_id);
 
-      if (!tokenValue) {
+      if (st.hasSecret) {
+        const revealBtn = createButton({ text: "Reveal", icon: "eye", className: "btn btn-secondary btn-inline" });
+        revealBtn.onclick = () => revealSubTokenValue(st.inner_token_id);
+        actions.appendChild(revealBtn);
+      }
+
+      if (!st.hasSecret) {
         const setValueBtn = createButton({ text: "Set Value", icon: "key-round", className: "btn btn-secondary btn-inline" });
         setValueBtn.onclick = () => setSubTokenValue(st.inner_token_id);
         actions.appendChild(setValueBtn);
@@ -799,6 +894,19 @@ async function loadSubTokens() {
   } catch {
     setError("Failed to load tokens");
     list.innerHTML = "";
+  }
+}
+
+async function revealSubTokenValue(tokenId) {
+  try {
+    const res = await fetchJson(
+      `/api/files/${encodeURIComponent(state.outerToken)}/sub-tokens/${encodeURIComponent(tokenId)}/reveal?mainInnerToken=${encodeURIComponent(state.innerToken)}`
+    );
+    state.createdSubTokens[tokenId] = res.subInnerToken;
+    showToast("Sub-token value revealed");
+    await loadSubTokens();
+  } catch (err) {
+    setError(err.message, { securityAlert: err.payload?.securityAlert });
   }
 }
 
@@ -836,7 +944,7 @@ function openSubTokenEditor(tokenId) {
   const picker = $("subTokenFilePicker");
   picker.innerHTML = "";
 
-  const tokenValue = token.sub_inner_token || state.createdSubTokens[token.inner_token_id] || "[Encrypted]";
+  const tokenValue = state.createdSubTokens[token.inner_token_id] || "[Hidden]";
   $("subTokenEditorMeta").textContent = `Editing token: ${tokenValue}`;
 
   if (!state.accessibleFiles.length) {
@@ -1098,7 +1206,7 @@ async function createSubTokenWithConflictHandling(subInnerToken, fileIds) {
     const conflictLines = err.payload.conflicts
       .slice(0, 6)
       .map((c) => {
-        const tokenLabel = c.current_sub_inner_token ? `token ${c.current_sub_inner_token}` : "another SUB token";
+        const tokenLabel = c.current_sub_token_id ? `token ${c.current_sub_token_id}` : "another SUB token";
         return `- ${c.original_filename || c.file_id} is already in ${tokenLabel}`;
       })
       .join("\n");
@@ -1125,6 +1233,32 @@ async function createSubTokenWithConflictHandling(subInnerToken, fileIds) {
 }
 
 function bindNavigation() {
+  const filesToolbar = document.querySelector("#subViewFiles .files-toolbar");
+  let actionsWrap = $("filesToolbarActions");
+  if (filesToolbar && !actionsWrap) {
+    actionsWrap = document.createElement("div");
+    actionsWrap.id = "filesToolbarActions";
+    actionsWrap.className = "files-toolbar-actions";
+    const selectedChip = $("selectedCount");
+    if (selectedChip) actionsWrap.appendChild(selectedChip);
+    filesToolbar.appendChild(actionsWrap);
+  }
+
+  if (actionsWrap && !$("batchDownloadBtn")) {
+    const batchBtn = createButton({
+      text: "Download Selected",
+      icon: "archive",
+      className: "btn btn-secondary btn-inline hidden"
+    });
+    batchBtn.id = "batchDownloadBtn";
+    batchBtn.dataset.loadingText = "Preparing ZIP...";
+    actionsWrap.appendChild(batchBtn);
+    prepareButtons();
+    initIcons();
+  }
+
+  if ($("batchDownloadBtn")) $("batchDownloadBtn").onclick = () => downloadSelectedBatch($("batchDownloadBtn"));
+
   $("brandLogo").onclick = () => switchView("viewLanding");
   $("scanOuterTokenBtn").onclick = () => openScanner();
   $("closeScannerBtn").onclick = () => closeScanner();

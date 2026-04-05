@@ -1,0 +1,15 @@
+{"type":"SCHEMA","table":"vaults","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.637336+00:00"}
+{"type":"SCHEMA","table":"inner_tokens","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.637920+00:00"}
+{"type":"SCHEMA","table":"files","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.638423+00:00"}
+{"type":"SCHEMA","table":"sessions","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.638906+00:00"}
+{"type":"SCHEMA","table":"download_logs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.639435+00:00"}
+{"type":"SCHEMA","table":"expiry_jobs","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.639902+00:00"}
+{"type":"SCHEMA","table":"portfolio_entries","index_type":"bplustree","order":4,"ts":"2026-04-05T12:20:36.640411+00:00"}
+{"type":"BEGIN","tx_id":"64fb72dc-4f88-431e-b7c8-c55381f9c831","ts":"2026-04-05T12:20:36.641183+00:00"}
+{"type":"OP","tx_id":"64fb72dc-4f88-431e-b7c8-c55381f9c831","op":"insert","table":"vaults","key":1,"value":{"outer_token":"OUTER001","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.641975+00:00"}
+{"type":"PREPARE","tx_id":"64fb72dc-4f88-431e-b7c8-c55381f9c831","ts":"2026-04-05T12:20:36.642700+00:00"}
+{"type":"COMMIT","tx_id":"64fb72dc-4f88-431e-b7c8-c55381f9c831","ts":"2026-04-05T12:20:36.643398+00:00"}
+{"type":"BEGIN","tx_id":"0dacf27b-e28b-4997-ad30-a7c0f3c79190","ts":"2026-04-05T12:20:36.644106+00:00"}
+{"type":"OP","tx_id":"0dacf27b-e28b-4997-ad30-a7c0f3c79190","op":"insert","table":"inner_tokens","key":101,"value":{"vault_id":1,"token_type":"MAIN","status":"ACTIVE"},"ts":"2026-04-05T12:20:36.644916+00:00"}
+{"type":"PREPARE","tx_id":"0dacf27b-e28b-4997-ad30-a7c0f3c79190","ts":"2026-04-05T12:20:36.645672+00:00"}
+{"type":"COMMIT","tx_id":"0dacf27b-e28b-4997-ad30-a7c0f3c79190","ts":"2026-04-05T12:20:36.646481+00:00"}

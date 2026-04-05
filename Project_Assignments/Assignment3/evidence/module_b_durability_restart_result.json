@@ -1,0 +1,11 @@
+{
+  "test": "module_b_durability_restart",
+  "base_url": "http://localhost:4000",
+  "outer_token": "Jt57HKW",
+  "file_id": "062d63d6-35d0-49f0-8d14-b8d30aee9ecb",
+  "first_download_status": 200,
+  "after_restart_download_status": 404,
+  "passed": true,
+  "interpretation": "State remained durable across restart if second status is 404/410.",
+  "response_preview": "{\"error\":\"File not found or access denied.\"}"
+}

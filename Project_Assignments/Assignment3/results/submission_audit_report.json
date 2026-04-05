@@ -1,0 +1,33 @@
+{
+  "summary": {
+    "total_files": 119,
+    "text_scanned": 96,
+    "decode_errors": 0,
+    "placeholders": 1,
+    "outdated": 1,
+    "mojibake": 1,
+    "missing_md_links": 0
+  },
+  "issues": {
+    "decode_errors": [],
+    "placeholders": [
+      {
+        "file": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment3\\report\\Dragons_Assignment3_Report.md",
+        "token": "<enter_video_url_after_recording>"
+      }
+    ],
+    "outdated": [
+      {
+        "file": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment3\\report\\Dragons_Assignment3_Report.md",
+        "token": "aries"
+      }
+    ],
+    "mojibake": [
+      {
+        "file": "F:\\SEM IV\\lessons\\DB\\Project\\Project_Assignments\\Assignment3\\module_b_stress_testing\\acid_verification_suite.py",
+        "token": "?"
+      }
+    ],
+    "missing_md_links": []
+  }
+}

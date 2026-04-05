@@ -1,0 +1,12 @@
+﻿Video Link: https://1drv.ms/v/c/c7916c8059fb0161/IQCj8sM9IqB1S4SQ5DXSIqQIAf8UvV8t5N24Wo0wDOHkgD8?e=ZFMJcQ
+
+Update required before final LMS/GitHub submission:
+1. Record demo: `python run_demo.py --quick`
+2. Upload (YouTube unlisted or Drive share link)
+3. Replace this line with final URL
+4. Keep same URL in:
+   - report/group_name_report.md
+   - report/Dragons_Assignment3_Report.md
+
+GitHub: https://github.com/Suchith2212/Privacy-Focused-File-Transferring-System
+

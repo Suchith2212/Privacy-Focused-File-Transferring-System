@@ -854,6 +854,13 @@ input:invalid:focus {
   margin-bottom: 0.7rem;
 }
 
+.files-toolbar-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.55rem;
+  margin-left: auto;
+}
+
 .folder-toolbar {
   align-items: center;
   display: flex;
@@ -1284,6 +1291,13 @@ hr {
   .files-toolbar {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .files-toolbar-actions {
+    align-items: stretch;
+    flex-direction: column;
+    margin-left: 0;
+    width: 100%;
   }
 
   .inline-input-actions {

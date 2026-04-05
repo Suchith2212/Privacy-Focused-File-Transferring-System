@@ -95,8 +95,9 @@ router.use(async (req, res, next) => {
   }
 });
 
-router.use(requireAuth, (req, res, next) => {
-  const rate = checkPrincipalRateLimit(portfolioPrincipalKey(req.authSession));
+router.use(requireAuth, async (req, res, next) => {
+  const principalKey = portfolioPrincipalKey(req.authSession);
+  const rate = await checkPrincipalRateLimit(principalKey);
   if (rate.overMinute || rate.overDay) {
     const retryAfter = Math.max(rate.resetMinuteSeconds, rate.resetDaySeconds, 1);
     res.set("Retry-After", String(retryAfter));
@@ -108,7 +109,7 @@ router.use(requireAuth, (req, res, next) => {
     });
   }
 
-  recordPrincipalAttempt(portfolioPrincipalKey(req.authSession));
+  await recordPrincipalAttempt(principalKey);
   return next();
 });
 
@@ -392,3 +393,4 @@ router.delete("/:entryId", requireAdmin, async (req, res) => {
 });
 
 module.exports = router;
+

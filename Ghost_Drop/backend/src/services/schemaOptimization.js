@@ -91,3 +91,4 @@ async function ensurePerformanceIndexes() {
 module.exports = {
   ensurePerformanceIndexes
 };
+  
