@@ -1,8 +1,0 @@
-{
-    "authenticated":  true,
-    "outerToken":  "OUTERDEMO7",
-    "vaultId":  "91ff4e74-f0c4-43b9-ae76-78e0713fa802",
-    "role":  "admin",
-    "tokenType":  "MAIN",
-    "remainingSeconds":  150928199
-}
