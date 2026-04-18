@@ -6,7 +6,7 @@
   "token_count": 20,
   "file_count": 20,
   "errors": [],
-  "elapsed_sec": 0.18,
-  "throughput_ops_per_sec": 110.93,
+  "elapsed_sec": 0.163,
+  "throughput_ops_per_sec": 122.33,
   "passed": true
 }
