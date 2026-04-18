@@ -1,0 +1,21 @@
+{
+  "name": "ghostdrop-sharding",
+  "version": "4.0.0",
+  "description": "GhostDrop · Dragon Team · CS432 Assignment 4 — Sharding",
+  "main": "router/shardRouter.js",
+  "scripts": {
+    "demo":     "node demo/shard_demo.js",
+    "migrate":  "node scripts/migrate_to_remote_shards.js",
+    "test":     "node node_modules/jest-cli/bin/jest.js --testPathPattern=shardRouter --forceExit --no-coverage",
+    "schema":   "echo Run: mysql -h 10.0.116.184 -P 3307 -u Dragon -p Dragon < sql/shard_schema_remote.sql"
+  },
+  "dependencies": {
+    "dotenv":  "^16.4.5",
+    "mysql2":  "^3.11.3",
+    "uuid":    "^10.0.0",
+    "qrcode":  "^1.5.4"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
