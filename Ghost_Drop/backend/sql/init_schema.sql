@@ -105,6 +105,27 @@ CREATE TABLE IF NOT EXISTS sessions (
   INDEX idx_sessions_ip_created (ip_address, created_at)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS auth_sessions (
+  session_token CHAR(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+  vault_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  outer_token VARCHAR(32) NOT NULL,
+  inner_token_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  token_type ENUM('MAIN', 'SUB') NOT NULL,
+  role ENUM('admin', 'user') NOT NULL,
+  issued_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_seen_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP NOT NULL,
+  revoked_at TIMESTAMP NULL,
+  CONSTRAINT fk_auth_sessions_vault
+    FOREIGN KEY (vault_id) REFERENCES vaults(vault_id) ON DELETE CASCADE,
+  CONSTRAINT fk_auth_sessions_token
+    FOREIGN KEY (inner_token_id) REFERENCES inner_tokens(inner_token_id) ON DELETE CASCADE,
+  INDEX idx_auth_sessions_vault (vault_id),
+  INDEX idx_auth_sessions_token (inner_token_id),
+  INDEX idx_auth_sessions_expires (expires_at),
+  INDEX idx_auth_sessions_revoked (revoked_at)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS auth_attempts (
   attempt_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
   session_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,

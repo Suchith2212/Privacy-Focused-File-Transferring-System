@@ -17,6 +17,9 @@ const state = {
   toastTimer: null,
   captchaRequestInFlight: false,
   captchaSolvedUntil: 0,
+  captchaInProgress: false,
+  _countdownTimer: null,
+  _errorCountdownTimer: null,
   scannerStream: null,
   scannerActive: false,
   scannerFrameId: 0,
@@ -61,7 +64,8 @@ function hardenSensitiveInputs() {
 
 function prepareButtons() {
   // Wrap button content once so loading states can swap in a spinner consistently.
-  document.querySelectorAll(".btn").forEach((btn) => {
+  // Only process actual <button> elements — <label> elements styled as buttons don't need spinners.
+  document.querySelectorAll("button.btn").forEach((btn) => {
     if (btn.dataset.prepared === "true") return;
     const wrapper = document.createElement("span");
     wrapper.className = "btn-content";
@@ -127,14 +131,73 @@ function animatePanel(el) {
 
 function setError(message, options = {}) {
   const box = $("globalError");
-  box.textContent = message;
-  box.classList.toggle("security-alert", Boolean(options.securityAlert));
-  show(box, true);
+  // Clear any existing countdown timer
+  if (state._errorCountdownTimer) {
+    clearInterval(state._errorCountdownTimer);
+    state._errorCountdownTimer = null;
+  }
+
+  const payload = options.payload || {};
+  const isBlock = payload.code === "TEMP_BLOCK" || payload.code === "RISK_BLOCK";
+  const isRateLimit = payload.code === "RATE_LIMIT" || payload.code === "ROUTE_RATE_LIMIT";
+  const blockedSec = Number(payload.blockedSeconds || payload.retryAfterSeconds || 0);
+
+  box.classList.toggle("security-alert", Boolean(options.securityAlert) || isBlock);
+
+  if ((isBlock || isRateLimit) && blockedSec > 0) {
+    // Rich block banner with live countdown
+    const renderBlock = (remaining) => {
+      const mins = Math.floor(remaining / 60);
+      const secs = remaining % 60;
+      const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+      const icon = isBlock ? "🛑" : "⏱️";
+      const title = isBlock ? "Temporarily Blocked" : "Rate Limited";
+      box.innerHTML = `<div class="block-banner">
+        <div class="block-banner-icon">${icon}</div>
+        <div class="block-banner-content">
+          <strong>${title}</strong>
+          <p>${message}</p>
+          <div class="block-countdown">Try again in <span class="block-time">${timeStr}</span></div>
+        </div>
+      </div>`;
+    };
+
+    let remaining = blockedSec;
+    renderBlock(remaining);
+    show(box, true);
+
+    state._errorCountdownTimer = setInterval(() => {
+      remaining--;
+      if (remaining <= 0) {
+        clearInterval(state._errorCountdownTimer);
+        state._errorCountdownTimer = null;
+        box.innerHTML = `<div class="block-banner">
+          <div class="block-banner-icon">✅</div>
+          <div class="block-banner-content">
+            <strong>Block Expired</strong>
+            <p>You can try again now.</p>
+          </div>
+        </div>`;
+        // Auto-dismiss after 5s
+        setTimeout(() => clearError(), 5000);
+        return;
+      }
+      renderBlock(remaining);
+    }, 1000);
+  } else {
+    box.textContent = message;
+    show(box, true);
+  }
 }
 
 function clearError() {
   const box = $("globalError");
+  if (state._errorCountdownTimer) {
+    clearInterval(state._errorCountdownTimer);
+    state._errorCountdownTimer = null;
+  }
   box.textContent = "";
+  box.innerHTML = "";
   box.classList.remove("security-alert");
   show(box, false);
 }
@@ -191,9 +254,41 @@ async function fetchJson(url, options = {}) {
   if (!res.ok) {
     const err = new Error(data.error || `Request failed (${res.status})`);
     err.payload = data;
+    err.httpStatus = res.status;
     throw err;
   }
   return data;
+}
+
+function loadScript(url, callback) {
+  const script = document.createElement("script");
+  script.type = "text/javascript";
+  script.src = url;
+  script.async = true;
+  script.defer = true;
+  script.onload = callback;
+  document.head.appendChild(script);
+}
+
+async function submitCaptchaToken(token) {
+  try {
+    await fetchJson(`/api/security/captcha/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ captchaToken: token })
+    });
+    state.captchaSolvedUntil = Date.now() + 9 * 60 * 1000;
+    state.captchaInProgress = false;
+    show($("captchaCard"), false);
+    if (state.pendingAction) {
+      const action = state.pendingAction;
+      state.pendingAction = null;
+      action();
+    }
+  } catch (err) {
+    state.captchaInProgress = false;
+    setError(err.message, { securityAlert: err.payload?.securityAlert });
+  }
 }
 
 async function requestCaptcha() {
@@ -202,24 +297,120 @@ async function requestCaptcha() {
   try {
     state.captchaRequestInFlight = true;
     const data = await fetchJson(`/api/security/captcha`);
-    $("captchaQuestion").textContent = `Anti-Brute Force Check: Solve ${data.question}`;
-    $("captchaCard").dataset.challengeId = data.challengeId;
-    $("captchaAnswer").value = "";
-    show($("captchaCard"), true);
-  } catch {
+    const provider = data.captchaProvider || "math";
+
+    const questionEl = $("captchaQuestion");
+    const containerEl = $("captchaWidgetContainer");
+    const answerRowEl = $("captchaAnswerRow");
+    const verifyBtnEl = $("captchaVerifyBtn");
+    const answerInput = $("captchaAnswer");
+
+    containerEl.innerHTML = "";
+
+    if (provider === "math") {
+      answerInput.required = true;
+      show(questionEl, true);
+      show(answerRowEl, true);
+      show(verifyBtnEl, true);
+      show(containerEl, false);
+      questionEl.textContent = `Anti-Brute Force Check: Solve ${data.question}`;
+      $("captchaCard").dataset.challengeId = data.challengeId;
+      $("captchaAnswer").value = "";
+      show($("captchaCard"), true);
+    } else {
+      answerInput.required = false;
+      show(questionEl, false);
+      show(answerRowEl, false);
+      show(verifyBtnEl, false);
+      show(containerEl, true);
+      show($("captchaCard"), true);
+
+      const widgetId = "captcha-widget-" + Date.now();
+      const widgetDiv = document.createElement("div");
+      widgetDiv.id = widgetId;
+      containerEl.appendChild(widgetDiv);
+
+      if (provider === "hcaptcha") {
+        const renderHCaptcha = () => {
+          try {
+            window.hcaptcha.render(widgetId, {
+              sitekey: data.siteKey,
+              callback: (token) => submitCaptchaToken(token)
+            });
+          } catch (err) {
+            console.error("hCaptcha render error:", err);
+          }
+        };
+        if (window.hcaptcha) {
+          renderHCaptcha();
+        } else {
+          loadScript("https://js.hcaptcha.com/1/api.js?render=explicit", renderHCaptcha);
+        }
+      } else if (provider === "recaptcha") {
+        const renderReCaptcha = () => {
+          try {
+            window.grecaptcha.render(widgetId, {
+              sitekey: data.siteKey,
+              callback: (token) => submitCaptchaToken(token)
+            });
+          } catch (err) {
+            console.error("reCAPTCHA render error:", err);
+          }
+        };
+        if (window.grecaptcha) {
+          renderReCaptcha();
+        } else {
+          loadScript("https://www.google.com/recaptcha/api.js?render=explicit", renderReCaptcha);
+        }
+      }
+    }
+  } catch (err) {
     setError("Failed to load security check.");
   } finally {
     state.captchaRequestInFlight = false;
   }
 }
 
+// Smart captcha retry: respects server-side captcha revocation.
+// If the server revoked captcha solved status (via recordFailure), the client-side
+// cache is stale. We detect this by checking the error payload from the failed request.
 function withCaptchaRetry(action) {
   if (Date.now() < state.captchaSolvedUntil) {
     action();
     return;
   }
+  if (state.captchaInProgress) return;
+  state.captchaInProgress = true;
   state.pendingAction = action;
   requestCaptcha();
+}
+
+// Called by error handlers when the server says captchaRequired — this invalidates
+// the client-side captcha cache so the next withCaptchaRetry actually shows the captcha.
+function handleSecurityError(err, retryAction) {
+  const payload = err.payload || {};
+  const code = payload.code || "";
+  const isBlock = code === "TEMP_BLOCK" || code === "RISK_BLOCK";
+  const isRateLimit = code === "RATE_LIMIT" || code === "ROUTE_RATE_LIMIT";
+
+  // Server revoked captcha status — invalidate client cache
+  if (payload.captchaRequired) {
+    state.captchaSolvedUntil = 0;
+  }
+
+  if (isBlock || isRateLimit) {
+    // Show rich block banner with countdown — don't retry
+    setError(err.message, { securityAlert: true, payload });
+    return;
+  }
+
+  if (payload.captchaRequired) {
+    withCaptchaRetry(retryAction);
+    return;
+  }
+
+  // Generic error
+  setError(err.message, { securityAlert: payload.securityAlert, payload });
 }
 
 $("captchaForm").onsubmit = async (e) => {
@@ -235,6 +426,8 @@ $("captchaForm").onsubmit = async (e) => {
       body: JSON.stringify({ challengeId, answer })
     });
     state.captchaSolvedUntil = Date.now() + 9 * 60 * 1000;
+    // Bug 4: Clear the lock so captcha can be triggered again in the future
+    state.captchaInProgress = false;
     show($("captchaCard"), false);
     if (state.pendingAction) {
       const action = state.pendingAction;
@@ -242,11 +435,17 @@ $("captchaForm").onsubmit = async (e) => {
       action();
     }
   } catch (err) {
+    // Bug 4: On failure, clear lock and pending action so the UI isn't stuck
+    state.captchaInProgress = false;
+    state.pendingAction = null;
     setError(err.message, { securityAlert: err.payload?.securityAlert });
   } finally {
     setButtonBusy(submitBtn, false);
   }
 };
+
+// NOTE: captchaCloseBtn handler is wired in bindNavigation() below
+// to avoid a null-reference crash (DOM doesn't exist at top-level parse time)
 
 function closeScanner(clearStatus = false) {
   state.scannerActive = false;
@@ -385,10 +584,8 @@ function setupDropzone({ zoneId, listId, stateKey, fileInputIds }) {
 }
 
 function initDropzones() {
-  $("pickFilesBtnNew").onclick = () => $("uploadFilesNew").click();
-  $("pickFolderBtnNew").onclick = () => $("uploadFolderNew").click();
-  $("pickFilesBtnMore").onclick = () => $("uploadFilesMore").click();
-  if ($("pickFolderBtnMore")) $("pickFolderBtnMore").onclick = () => $("uploadFolderMore").click();
+  // File picker buttons are now native <label for="..."> elements — no JS click() needed.
+  // setupDropzone still wires up drag-and-drop and the onchange handler.
 
   setupDropzone({
     zoneId: "dropzoneNew",
@@ -717,6 +914,65 @@ function renderVaultView(data) {
   show($("navUploadMore"), isMain);
   show($("selectedCount"), isMain);
 
+  // Live expiry countdown timer
+  if (state._countdownTimer) {
+    clearInterval(state._countdownTimer);
+    state._countdownTimer = null;
+  }
+  const countdownEl = $("vaultCountdown");
+  const countdownLabel = $("vaultCountdownLabel");
+  if (countdownEl && countdownLabel && data.remainingSeconds > 0) {
+    let remaining = data.remainingSeconds;
+    show(countdownEl, true);
+    function updateCountdown() {
+      if (remaining <= 0) {
+        countdownLabel.textContent = "Expired";
+        countdownEl.classList.add("expired");
+        clearInterval(state._countdownTimer);
+        return;
+      }
+      const h = Math.floor(remaining / 3600);
+      const m = Math.floor((remaining % 3600) / 60);
+      const s = remaining % 60;
+      const parts = [];
+      if (h > 0) parts.push(`${h}h`);
+      if (m > 0 || h > 0) parts.push(`${m}m`);
+      parts.push(`${s}s`);
+      countdownLabel.textContent = `Expires in ${parts.join(' ')}`;
+      // Warn when under 10 minutes
+      if (remaining <= 600) countdownEl.classList.add("expiring-soon");
+      remaining -= 1;
+    }
+    updateCountdown();
+    state._countdownTimer = setInterval(updateCountdown, 1000);
+  }
+
+  // Show QR button (MAIN token only — reveals vault QR code)
+  const showQrBtn = $("showVaultQrBtn");
+  if (showQrBtn) {
+    show(showQrBtn, isMain);
+    showQrBtn.onclick = async () => {
+      try {
+        const qr = await fetchJson(`/api/vaults/${encodeURIComponent(state.outerToken)}/qr`);
+        const modal = document.createElement("div");
+        modal.className = "qr-modal-overlay";
+        modal.innerHTML = `
+          <div class="qr-modal-box card">
+            <h3>Vault QR Code</h3>
+            <p class="muted">Share this QR code to let someone access your vault.</p>
+            <img src="${qr.qrDataUrl}" alt="Vault QR Code" style="width:200px;height:200px;border-radius:12px;" />
+            <p class="vault-code">${state.outerToken}</p>
+            <button class="btn btn-primary" id="closeQrModalBtn" type="button">Close</button>
+          </div>`;
+        document.body.appendChild(modal);
+        modal.querySelector("#closeQrModalBtn").onclick = () => modal.remove();
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+      } catch (err) {
+        setError(err.message || "Failed to load QR code");
+      }
+    };
+  }
+
   switchSubView("subViewFiles");
   renderFilesList();
 }
@@ -732,11 +988,11 @@ async function downloadFile(f, button) {
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      if (errData.captchaRequired) {
-        withCaptchaRetry(() => downloadFile(f, button));
-        return;
-      }
-      throw new Error(errData.error || "Download failed");
+      const err = new Error(errData.error || "Download failed");
+      err.payload = errData;
+      // Invalidate captcha cache and show block/captcha as needed
+      handleSecurityError(err, () => downloadFile(f, button));
+      return;
     }
 
     const blob = await res.blob();
@@ -748,13 +1004,18 @@ async function downloadFile(f, button) {
     window.URL.revokeObjectURL(url);
 
     const data = await fetchJson(
-      `/api/files/${encodeURIComponent(state.outerToken)}/list?innerToken=${encodeURIComponent(state.innerToken)}`
+      `/api/files/${encodeURIComponent(state.outerToken)}/list`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ innerToken: state.innerToken })
+      }
     );
     state.accessibleFiles = data.files;
     renderFilesList();
     showToast("File download started");
   } catch (err) {
-    setError(err.message, { securityAlert: err.payload?.securityAlert });
+    handleSecurityError(err, () => downloadFile(f, button));
   } finally {
     setButtonBusy(button, false);
   }
@@ -786,11 +1047,10 @@ async function downloadSelectedBatch(button) {
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      if (errData.captchaRequired) {
-        withCaptchaRetry(() => downloadSelectedBatch(button));
-        return;
-      }
-      throw new Error(errData.error || "Batch download failed");
+      const err = new Error(errData.error || "Batch download failed");
+      err.payload = errData;
+      handleSecurityError(err, () => downloadSelectedBatch(button));
+      return;
     }
 
     const blob = await res.blob();
@@ -806,7 +1066,12 @@ async function downloadSelectedBatch(button) {
 
     state.selectedFileIds.clear();
     const data = await fetchJson(
-      `/api/files/${encodeURIComponent(state.outerToken)}/list?innerToken=${encodeURIComponent(state.innerToken)}`
+      `/api/files/${encodeURIComponent(state.outerToken)}/list`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ innerToken: state.innerToken })
+      }
     );
     state.accessibleFiles = data.files;
     renderFilesList();
@@ -897,10 +1162,16 @@ async function loadSubTokens() {
   }
 }
 
+// Bug 14: reveal changed from GET with query param to POST with body
 async function revealSubTokenValue(tokenId) {
   try {
     const res = await fetchJson(
-      `/api/files/${encodeURIComponent(state.outerToken)}/sub-tokens/${encodeURIComponent(tokenId)}/reveal?mainInnerToken=${encodeURIComponent(state.innerToken)}`
+      `/api/files/${encodeURIComponent(state.outerToken)}/sub-tokens/${encodeURIComponent(tokenId)}/reveal`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mainInnerToken: state.innerToken })
+      }
     );
     state.createdSubTokens[tokenId] = res.subInnerToken;
     showToast("Sub-token value revealed");
@@ -1021,18 +1292,17 @@ $("uploadForm").onsubmit = async (e) => {
     state.innerToken = $("uploadInnerToken").value.trim();
     showToast("Vault created successfully");
   } catch (err) {
-    if (err.payload?.captchaRequired) {
-      withCaptchaRetry(() => $("uploadForm").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true })));
-    } else {
-      setError(err.message, { securityAlert: err.payload?.securityAlert });
-    }
+    handleSecurityError(err, () => $("uploadForm").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true })));
   } finally {
     show($("uploadProgressWrap"), false);
     setButtonBusy(submitBtn, false);
   }
 };
 
+// Bug 5: Only dispatch outerTokenForm here; let it trigger innerTokenForm upon success
+// to avoid a spurious 401 from submitting the inner form before the outer resolves.
 $("goToVaultBtn").onclick = () => {
+  switchView("viewAccess");
   $("accessOuterToken").value = state.outerToken;
   $("accessInnerToken").value = state.innerToken;
   $("outerTokenForm").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
@@ -1052,13 +1322,14 @@ $("outerTokenForm").onsubmit = async (e) => {
     renderStatusKV(data);
     state.outerToken = outerToken;
     clearError();
+    // Bug 5: After outer token resolves, auto-submit the inner token if pre-filled (from goToVaultBtn)
+    const prefilled = $("accessInnerToken").value.trim();
+    if (prefilled) {
+      $("innerTokenForm").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+    }
   } catch (err) {
     show($("publicVaultInfo"), false);
-    if (err.payload?.captchaRequired) {
-      withCaptchaRetry(() => $("outerTokenForm").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true })));
-    } else {
-      setError(err.message, { securityAlert: err.payload?.securityAlert });
-    }
+    handleSecurityError(err, () => $("outerTokenForm").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true })));
   } finally {
     setButtonBusy(submitBtn, false);
   }
@@ -1087,11 +1358,7 @@ $("innerTokenForm").onsubmit = async (e) => {
     switchView("viewVaultDetails");
     showToast("Vault unlocked");
   } catch (err) {
-    if (err.payload?.captchaRequired) {
-      withCaptchaRetry(() => $("innerTokenForm").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true })));
-    } else {
-      setError(err.message, { securityAlert: err.payload?.securityAlert });
-    }
+    handleSecurityError(err, () => $("innerTokenForm").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true })));
   } finally {
     setButtonBusy(submitBtn, false);
   }
@@ -1127,17 +1394,18 @@ $("uploadMoreForm").onsubmit = async (e) => {
     showToast("Files added successfully");
 
     const data = await fetchJson(
-      `/api/files/${encodeURIComponent(state.outerToken)}/list?innerToken=${encodeURIComponent(state.innerToken)}`
+      `/api/files/${encodeURIComponent(state.outerToken)}/list`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ innerToken: state.innerToken })
+      }
     );
     state.accessibleFiles = data.files;
     switchSubView("subViewFiles");
     renderFilesList();
   } catch (err) {
-    if (err.payload?.captchaRequired) {
-      withCaptchaRetry(() => $("uploadMoreForm").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true })));
-    } else {
-      setError(err.message, { securityAlert: err.payload?.securityAlert });
-    }
+    handleSecurityError(err, () => $("uploadMoreForm").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true })));
   } finally {
     show($("uploadMoreProgressWrap"), false);
     setButtonBusy(submitBtn, false);
@@ -1233,6 +1501,18 @@ async function createSubTokenWithConflictHandling(subInnerToken, fileIds) {
 }
 
 function bindNavigation() {
+  // Bug 18: Wire captcha close button here (DOM is guaranteed to exist inside bindNavigation)
+  const captchaCloseBtn = $("captchaCloseBtn");
+  if (captchaCloseBtn) {
+    captchaCloseBtn.onclick = () => {
+      state.captchaInProgress = false;
+      state.pendingAction = null;
+      show($("captchaCard"), false);
+      $("captchaAnswer").value = "";
+      $("captchaWidgetContainer").innerHTML = "";
+    };
+  }
+
   const filesToolbar = document.querySelector("#subViewFiles .files-toolbar");
   let actionsWrap = $("filesToolbarActions");
   if (filesToolbar && !actionsWrap) {
@@ -1300,6 +1580,11 @@ function bindNavigation() {
 
   $("logoutBtn").onclick = () => {
     closeScanner(true);
+    // Bug 19: Clear countdown timer to prevent memory leak and stale DOM updates
+    if (state._countdownTimer) {
+      clearInterval(state._countdownTimer);
+      state._countdownTimer = null;
+    }
     state.outerToken = "";
     state.innerToken = "";
     state.fileSearchQuery = "";
@@ -1343,6 +1628,8 @@ function bindNavigation() {
   });
 
   $("filesList").addEventListener("change", (e) => {
+    // Bug 17: Guard against stale checkboxes being checked by non-MAIN token sessions
+    if (state.tokenType !== "MAIN") return;
     if (e.target.classList.contains("file-sel")) {
       if (e.target.checked) state.selectedFileIds.add(e.target.value);
       else state.selectedFileIds.delete(e.target.value);

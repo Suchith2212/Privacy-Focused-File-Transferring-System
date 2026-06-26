@@ -42,7 +42,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid inner token." });
     }
 
-    const session = createSession({ vault, tokenRow, outerToken });
+    const session = await createSession({ vault, tokenRow, outerToken });
     await appendAuditLog({
       req,
       action: "auth.login.success",
@@ -62,7 +62,7 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/isAuth", async (req, res) => {
-  const session = getSession(getSessionTokenFromRequest(req));
+  const session = await getSession(getSessionTokenFromRequest(req));
   if (!session) {
     return res.status(401).json({ authenticated: false, error: "Session not found." });
   }

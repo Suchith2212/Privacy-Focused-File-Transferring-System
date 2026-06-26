@@ -1,0 +1,41 @@
+# Docker build context exclusions
+# This keeps the image small and avoids leaking secrets into layers
+
+# Dev dependencies & caches
+node_modules/
+npm-debug.log*
+.npm/
+
+# Git metadata
+.git/
+.gitignore
+
+# Credentials & secrets — NEVER include in image
+backend/.env
+backend/.env.*
+backend/oauth_credentials.json
+backend/service_account.json
+backend/service-account.json
+
+# Development/test files
+backend/test_*.js
+backend/get_refresh_token.js
+backend/trigger_audit_logs.js
+backend/database_export.json
+
+# Logs
+backend/logs/
+backend/server.*.log
+*.log
+
+# Documentation (not needed at runtime)
+docs/
+*.md
+Research*/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Project Assignments (dev-only)
+Project_Assignments/

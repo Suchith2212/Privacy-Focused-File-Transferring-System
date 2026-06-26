@@ -20,7 +20,7 @@ function mergePolicy(defaults, overrideRaw) {
   }
 }
 
-const BASE_RATE_LIMITS = {
+const BASE_RATE_LIMITS = { //This defines how many requests each route can receive.
   "vault.public-info": { minute: 25, day: 400 },
   "vault.access": { minute: 18, day: 240 },
   "vault.subtoken-create": { minute: 8, day: 80 },
@@ -33,7 +33,7 @@ const BASE_RATE_LIMITS = {
   "default": { minute: 30, day: 500 }
 };
 
-const BASE_RISK_POLICY = {
+const BASE_RISK_POLICY = {//Differnt routes have different risk levels, so they have different thresholds for when to show captcha and when to block outright. These values are in percentage and represent the risk score above which the action should be taken.
   "vault.public-info": { captchaThreshold: 50, blockThreshold: 95 },
   "vault.access": { captchaThreshold: 35, blockThreshold: 90 },
   "vault.subtoken-create": { captchaThreshold: 30, blockThreshold: 85 },

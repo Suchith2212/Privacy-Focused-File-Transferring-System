@@ -1,206 +1,271 @@
-# Ghost Drop API Requests Guide (Pro-Level)
+# GhostDrop — API Reference
 
-## 1) What this document explains
-
-This guide explains, end-to-end:
-
-- Request types used between client and server
-- JSON API structure
-- Which endpoints exist and what each one does
-- Request/response examples
-- How complete user flows move through multiple endpoints
-
-This content is based on the current backend route mounts in `backend/src/app.js`:
-
-- `/api/auth`
-- `/api/portfolio`
-- `/api/module-b`
-- `/api/vaults`
-- `/api/files`
-- `/api/security`
+> Complete request and response documentation for all GhostDrop API endpoints.  
+> For setup and configuration see [`../README.md`](../README.md). For the security architecture see [`SECURITY_LIMITS_REFERENCE.md`](SECURITY_LIMITS_REFERENCE.md).
 
 ---
 
-## 2) API communication model 
+## Table of Contents
 
-### 2.1 Protocol and style
+- [Communication Model](#communication-model)
+- [Authentication Model](#authentication-model)
+- [Common Response Shapes](#common-response-shapes)
+- [Health API](#health-api)
+- [Security API](#security-api)
+- [Vault API](#vault-api)
+- [File API](#file-api)
+- [Auth API](#auth-api)
+- [Portfolio API](#portfolio-api)
+- [Module B API](#module-b-api)
+- [End-to-End Flows](#end-to-end-flows)
+- [cURL Examples](#curl-examples)
 
-- Protocol: HTTP
-- API style: REST-like endpoints
-- Primary payload format: JSON
-- Frontend client: browser `fetch(...)` for most requests
-- Upload transport: `XMLHttpRequest` + `FormData` for progress bars
+---
 
-### 2.2 Request method types used
+## Communication Model
 
-- `GET`: read/fetch data
-- `POST`: create resources or execute actions
-- `PUT`: update existing resources
-- `DELETE`: revoke/remove resources (logical/soft in many cases)
+| Property | Value |
+|---|---|
+| Base URL | `http://localhost:4000/api` |
+| Protocol | HTTP (HTTPS enforced by reverse proxy in production) |
+| API style | REST-like JSON |
+| Upload transport | `multipart/form-data` (file endpoints) |
+| Download response | Binary stream (`Content-Disposition: attachment`) or `application/zip` |
+| JSON body size limit | 50 KB |
+| Request tracing | Every response includes `X-Request-ID` header |
 
-### 2.3 Content types used
+### Content-Type
 
-- JSON endpoints:
-  - Request header: `Content-Type: application/json`
-  - Body: `JSON.stringify({...})`
-- Upload endpoints:
-  - `multipart/form-data` (from `FormData`)
-  - Used for file binaries + metadata (`relativePaths`)
+- All JSON requests: `Content-Type: application/json`
+- File upload requests: `Content-Type: multipart/form-data` (set automatically by `FormData`)
 
-### 2.4 JSON error convention
+---
 
-Most failed responses follow:
+## Authentication Model
+
+### Layer 1 — Vault Credential Auth (token-based)
+
+Used for vault and file endpoints. The client sends `outerToken` and `innerToken` directly in the request body. No persistent session is created.
+
+- `MAIN innerToken` → admin privileges on the vault
+- `SUB innerToken` → access to specific files only
+
+### Layer 2 — Bearer Session Auth (portfolio and security endpoints)
+
+Obtained by calling `POST /api/auth/login`. Returns a `sessionToken` (UUID) valid for the duration of the vault session.
+
+Send the session token in one of three ways (checked in this order):
+
+```http
+Authorization: Bearer <sessionToken>
+x-session-token: <sessionToken>
+?sessionToken=<sessionToken>
+```
+
+---
+
+## Common Response Shapes
+
+### Success
+
+HTTP 2xx with a JSON body specific to each endpoint.
+
+### Error
 
 ```json
 {
-  "error": "Human readable error message"
+  "error": "Human-readable error description.",
+  "requestId": "uuid-for-log-correlation"
 }
 ```
 
-Some endpoints include additional fields, for example:
+Security-related errors include additional fields:
 
 ```json
 {
   "error": "Rate limit exceeded.",
   "code": "RATE_LIMIT",
-  "retryAfterSeconds": 60,
-  "captchaRequired": true
+  "minuteCount": 11,
+  "minuteLimit": 10,
+  "retryAfterSeconds": 42,
+  "captchaRequired": true,
+  "requestId": "uuid"
+}
+```
+
+### Common Error Codes
+
+| Code | HTTP | Meaning |
+|---|---|---|
+| `TEMP_BLOCK` | 429 | IP temporarily blocked |
+| `RISK_BLOCK` | 403 | IP risk score too high |
+| `CAPTCHA_REQUIRED` | 403 | Solve CAPTCHA before retrying |
+| `CAPTCHA_INVALID` | 403 | Wrong CAPTCHA answer |
+| `RATE_LIMIT` | 429 | Global IP rate limit exceeded |
+| `ROUTE_RATE_LIMIT` | 429 | Per-endpoint rate limit exceeded |
+| `PORTFOLIO_TOKEN_RATE_LIMIT` | 429 | Authenticated token rate limit exceeded |
+| `PORTFOLIO_TAMPER_DETECTED` | 409 | Row integrity check failed |
+
+---
+
+## Health API
+
+### `GET /api/health`
+
+Database connectivity check.
+
+**Response 200:**
+```json
+{ "status": "ok", "requestId": "uuid" }
+```
+
+**Response 500** (database down):
+```json
+{ "status": "error", "error": "Database health check failed.", "requestId": "uuid" }
+```
+
+---
+
+### `GET /api/ready`
+
+Full readiness check (database + Redis).
+
+**Response 200:**
+```json
+{
+  "status": "ready",
+  "database": "ok",
+  "securityStore": { "mode": "redis", "redisConnected": true },
+  "requestId": "uuid"
+}
+```
+
+**Response 503** (Redis not connected):
+```json
+{
+  "status": "not_ready",
+  "database": "ok",
+  "securityStore": { "mode": "redis", "redisConnected": false },
+  "requestId": "uuid"
 }
 ```
 
 ---
 
-## 3) Authentication and authorization model
-
-The system uses **two layers**:
-
-1. Vault credential layer (`outerToken` + `innerToken`)
-2. App session layer (`sessionToken`) for protected admin/user APIs like portfolio/module-b
-
-### 3.1 Vault credential layer
-
-- User sends `outerToken` and `innerToken` to vault/file endpoints.
-- Server validates against DB token hashes.
-- MAIN token gives admin-like vault privileges.
-- SUB token gives scoped file access.
-
-### 3.2 App session layer
-
-- `POST /api/auth/login` returns a `sessionToken`.
-- Protected routes use middleware `requireAuth` or `requireAdmin`.
-- Session token can be sent through:
-  - `Authorization: Bearer <sessionToken>`
-  - `x-session-token: <sessionToken>`
-  - `?sessionToken=<sessionToken>`
-
----
-
-## 4) Request method definitions (quick reference)
-
-### GET
-
-Used to retrieve data without changing server state.
-
-Examples:
-
-- `GET /api/vaults/:outerToken/public-info`
-- `GET /api/files/:outerToken/list?innerToken=...`
-
-### POST
-
-Use when creating something or executing an action.
-
-Examples:
-
-- `POST /api/vaults/` (create vault)
-- `POST /api/vaults/:outerToken/access` (verify inner token and fetch access view)
-- `POST /api/files/:fileId/download` (action endpoint)
-- `POST /api/files/download-batch` (batch action endpoint)
-
-### PUT
-
-Use when updating an existing entity/mapping.
-
-Examples:
-
-- `PUT /api/files/:outerToken/sub-tokens/:tokenId/files`
-- `PUT /api/files/:outerToken/sub-tokens/:tokenId/secret`
-- `PUT /api/portfolio/:entryId`
-
-### DELETE
-
-Use when revoking/deleting an entity.
-
-Examples:
-
-- `DELETE /api/files/:outerToken/sub-tokens/:tokenId`
-- `DELETE /api/portfolio/:entryId` (soft delete: status becomes `DELETED`)
-
----
-
-## 5) Endpoint catalog with examples
-
-## 5.1 Security API (`/api/security`)
+## Security API
 
 ### `GET /api/security/captcha`
-Purpose: create captcha challenge when brute-force protection is active.
 
-Success example:
+Generate a CAPTCHA challenge for the current IP.
 
+**Response 200 (math provider):**
 ```json
 {
   "captchaRequired": true,
-  "challengeId": "c7f6...",
+  "challengeId": "c7f6a1b2-...",
   "question": "8 + 6 = ?"
 }
 ```
 
-### `POST /api/security/captcha/verify`
-Purpose: validate captcha answer.
-
-Request:
-
+**Response 200 (hCaptcha / reCAPTCHA):**
 ```json
 {
-  "challengeId": "c7f6...",
+  "captchaRequired": true,
+  "provider": "hcaptcha",
+  "siteKey": "your-site-key"
+}
+```
+
+---
+
+### `POST /api/security/captcha/verify`
+
+Verify a math CAPTCHA answer.
+
+**Request:**
+```json
+{
+  "challengeId": "c7f6a1b2-...",
   "answer": "14"
 }
 ```
 
-Success:
-
+**Response 200:**
 ```json
-{
-  "message": "Captcha verified."
-}
+{ "message": "Captcha verified." }
 ```
 
-### `GET /api/security/captcha/required`
-Purpose: tells whether current client should solve captcha.
-
-Success:
-
+**Response 403:**
 ```json
-{
-  "captchaRequired": false
-}
+{ "error": "Wrong answer.", "code": "CAPTCHA_INVALID", "captchaRequired": true }
 ```
-
-### `GET /api/security/status`
-Purpose: returns current anti-abuse status (rate-limit/block state).
-
-### `GET /api/security/unauthorized-check` (admin session required)
-Purpose: integrity check for portfolio tampering evidence.
 
 ---
 
-## 5.2 Vault API (`/api/vaults`)
+### `GET /api/security/captcha/required`
 
-### `POST /api/vaults/`
-Purpose: create a vault with MAIN token (no file upload here).
+Check whether CAPTCHA is currently required for this IP.
 
-Request:
+**Response 200:**
+```json
+{ "captchaRequired": false }
+```
 
+---
+
+### `GET /api/security/status`
+
+Current anti-abuse state for the calling IP.
+
+**Response 200:**
+```json
+{
+  "ip": "127.0.0.1",
+  "blocked": false,
+  "captchaRequired": false,
+  "minuteCount": 2,
+  "dayCount": 7
+}
+```
+
+---
+
+### `GET /api/security/unauthorized-check` *(admin session required)*
+
+Scan all portfolio entries in the authenticated vault for rows whose integrity hash does not match the expected value. A mismatch indicates out-of-band database modification.
+
+**Response 200 (no tampering):**
+```json
+{
+  "tamperedCount": 0,
+  "tamperedEntries": []
+}
+```
+
+**Response 200 (tampering detected):**
+```json
+{
+  "tamperedCount": 1,
+  "tamperedEntries": [
+    {
+      "entryId": "uuid",
+      "ownerTokenId": "uuid",
+      "status": "ACTIVE",
+      "updatedAt": "2026-04-10T09:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+## Vault API
+
+### `POST /api/vaults`
+
+Create a new vault with a MAIN inner token.
+
+**Request:**
 ```json
 {
   "innerToken": "MainDemo1234",
@@ -208,8 +273,10 @@ Request:
 }
 ```
 
-Success:
+- `innerToken`: 10–20 base62 characters (`0-9`, `A-Z`, `a-z`), required
+- `expiresInDays`: integer 1–14, default `7`
 
+**Response 201:**
 ```json
 {
   "message": "Vault created.",
@@ -218,11 +285,13 @@ Success:
 }
 ```
 
+---
+
 ### `GET /api/vaults/:outerToken/public-info`
-Purpose: public vault status summary before authentication.
 
-Success:
+Vault status summary — safe to call before authentication.
 
+**Response 200:**
 ```json
 {
   "outerToken": "OUTERABC1",
@@ -234,19 +303,20 @@ Success:
 }
 ```
 
+`status` is `"ACTIVE"` or `"EXPIRED"`.
+
+---
+
 ### `POST /api/vaults/:outerToken/access`
-Purpose: verify inner token and return file visibility for that token.
 
-Request:
+Authenticate with an inner token and retrieve the list of accessible files.
 
+**Request:**
 ```json
-{
-  "innerToken": "MainDemo1234"
-}
+{ "innerToken": "MainDemo1234" }
 ```
 
-Success:
-
+**Response 200:**
 ```json
 {
   "outerToken": "OUTERABC1",
@@ -267,28 +337,68 @@ Success:
 }
 ```
 
-### `POST /api/vaults/:outerToken/sub-tokens`
-Purpose: legacy/simple sub-token creation path.
-
-### `GET /api/vaults/:outerToken/qr`
-Purpose: generates QR code data URL for outer token.
+Files shown are only those accessible to the provided `innerToken`.
 
 ---
 
-## 5.3 Files API (`/api/files`)
+### `POST /api/vaults/:outerToken/sub-tokens`
 
-### `POST /api/files/new-vault-upload` (multipart/form-data)
-Purpose: create a new vault and upload initial files in one operation.
+Create a scoped SUB token with access to specific files. **MAIN token required.**
 
-Form fields:
+**Request:**
+```json
+{
+  "mainInnerToken": "MainDemo1234",
+  "subInnerToken": "SubDemo12345",
+  "fileIds": ["file-uuid-1", "file-uuid-2"]
+}
+```
 
-- `innerToken`
-- `expiresInDays`
-- `files` (repeated)
-- `relativePaths` (repeated; aligned with files)
+- `subInnerToken` is optional; if omitted, a random 12-char base62 token is generated.
+- `fileIds`: all must belong to this vault and be `ACTIVE`.
 
-Success:
+**Response 201:**
+```json
+{
+  "message": "SUB token created.",
+  "subTokenId": "uuid",
+  "subInnerToken": "SubDemo12345",
+  "linkedFileCount": 2
+}
+```
 
+---
+
+### `GET /api/vaults/:outerToken/qr`
+
+Generate a QR code data URL encoding the outer token.
+
+**Response 200:**
+```json
+{
+  "outerToken": "OUTERABC1",
+  "qrDataUrl": "data:image/png;base64,..."
+}
+```
+
+---
+
+## File API
+
+### `POST /api/files/new-vault-upload` *(multipart/form-data)*
+
+Create a new vault and upload files in a single request.
+
+**Form fields:**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `innerToken` | string | Yes | MAIN inner token (10–20 base62 chars) |
+| `expiresInDays` | number | No | Default 7, max 14 |
+| `files` | file(s) | Yes | One or more file parts |
+| `relativePaths` | string(s) | No | Path strings aligned with `files` array |
+
+**Response 201:**
 ```json
 {
   "message": "Vault created and files uploaded.",
@@ -306,51 +416,90 @@ Success:
 }
 ```
 
-### `POST /api/files/:outerToken/upload` (multipart/form-data)
-Purpose: upload more files to existing vault (MAIN token only).
+---
 
-Form fields:
+### `POST /api/files/:outerToken/upload` *(multipart/form-data)*
 
-- `innerToken`
-- `files` (repeated)
-- `relativePaths` (repeated)
+Upload additional files to an existing vault. **MAIN token required.**
 
-### `GET /api/files/:outerToken/list?innerToken=...`
-Purpose: list files accessible by given token.
+**Form fields:**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `innerToken` | string | Yes | MAIN inner token |
+| `files` | file(s) | Yes | One or more file parts |
+| `relativePaths` | string(s) | No | Path strings aligned with `files` |
+
+**Response 201:** same shape as `new-vault-upload` (without `outerToken`).
+
+---
+
+### `GET /api/files/:outerToken/list`
+
+List files accessible to the provided token.
+
+**Query parameters:** `innerToken` (required)
+
+**Response 200:**
+```json
+{
+  "files": [
+    {
+      "file_id": "uuid",
+      "original_filename": "photo.jpg",
+      "relative_path": "images/photo.jpg",
+      "mime_type": "image/jpeg",
+      "file_size": 204800,
+      "created_at": "2026-04-05T08:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
 
 ### `POST /api/files/:outerToken/sub-tokens`
-Purpose: create scoped SUB token and map files (main endpoint used by UI).
 
-Request:
+Create a scoped SUB token (files route, used by the UI). Functionally equivalent to `POST /api/vaults/:outerToken/sub-tokens`.
 
+**Request:**
 ```json
 {
   "mainInnerToken": "MainDemo1234",
   "subInnerToken": "SubDemo12345",
-  "fileIds": ["file-uuid-1", "file-uuid-2"],
+  "fileIds": ["file-uuid-1"],
   "forceReassign": false
 }
 ```
 
-Success:
+---
 
+### `GET /api/files/:outerToken/sub-tokens`
+
+List all active SUB tokens for the vault. **MAIN token required.**
+
+**Query parameters:** `mainInnerToken` (required)
+
+**Response 200:**
 ```json
 {
-  "message": "Sub-token created successfully.",
-  "subTokenId": "token-uuid",
-  "subInnerToken": "SubDemo12345",
-  "reassignedConflicts": 0
+  "subTokens": [
+    {
+      "tokenId": "uuid",
+      "linkedFiles": ["file-uuid-1", "file-uuid-2"],
+      "createdAt": "2026-04-05T09:00:00.000Z"
+    }
+  ]
 }
 ```
 
-### `GET /api/files/:outerToken/sub-tokens?mainInnerToken=...`
-Purpose: list active sub-tokens and mapped files.
+---
 
 ### `PUT /api/files/:outerToken/sub-tokens/:tokenId/files`
-Purpose: replace file mapping set for a sub-token.
 
-Request:
+Replace the file access set for an existing SUB token. **MAIN token required.**
 
+**Request:**
 ```json
 {
   "mainInnerToken": "MainDemo1234",
@@ -358,11 +507,18 @@ Request:
 }
 ```
 
+**Response 200:**
+```json
+{ "message": "File mapping updated.", "linkedFileCount": 2 }
+```
+
+---
+
 ### `PUT /api/files/:outerToken/sub-tokens/:tokenId/secret`
-Purpose: store encrypted-at-rest recoverable value for sub-token.
 
-Request:
+Store the raw SUB token value encrypted at rest. **MAIN token required.**
 
+**Request:**
 ```json
 {
   "mainInnerToken": "MainDemo1234",
@@ -370,70 +526,82 @@ Request:
 }
 ```
 
-### `GET /api/files/:outerToken/sub-tokens/:tokenId/reveal?mainInnerToken=...`
-Purpose: reveal stored sub-token value (MAIN token only).
-
-Success:
-
+**Response 200:**
 ```json
-{
-  "subInnerToken": "SubDemo12345"
-}
+{ "message": "Sub-token secret stored." }
 ```
+
+---
+
+### `GET /api/files/:outerToken/sub-tokens/:tokenId/reveal`
+
+Retrieve the raw SUB token value. **MAIN token required.**
+
+**Query parameters:** `mainInnerToken` (required)
+
+**Response 200:**
+```json
+{ "subInnerToken": "SubDemo12345" }
+```
+
+---
 
 ### `DELETE /api/files/:outerToken/sub-tokens/:tokenId`
-Purpose: revoke sub-token.
 
-Request:
+Revoke a SUB token. Removes its `inner_tokens` record and all associated `file_key_access` rows. **MAIN token required.**
 
+**Request:**
 ```json
-{
-  "mainInnerToken": "MainDemo1234"
-}
+{ "mainInnerToken": "MainDemo1234" }
 ```
 
-### `POST /api/files/:fileId/download`
-Purpose: one-time file retrieval endpoint.
-
-Request:
-
+**Response 200:**
 ```json
-{
-  "outerToken": "OUTERXYZ9",
-  "innerToken": "MainDemo1234"
-}
+{ "message": "Sub-token revoked." }
 ```
 
-Success: binary file stream  
-Failure: JSON error (for example invalid token or file already consumed)
+---
 
-### `POST /api/files/download-batch`
-Purpose: download multiple files in one request as a ZIP archive.
+### `GET /api/files/:outerToken/download/:fileId`
 
-Request:
+Download and decrypt a single file. The file is marked `DELETED` after delivery (one-time semantics).
 
+**Query parameters:** `innerToken` (required)
+
+**Response 200:** Binary file stream  
+`Content-Type`: original MIME type  
+`Content-Disposition`: `attachment; filename="original_filename.ext"`
+
+**Response 404:** File not found, already consumed, or token lacks access.
+
+---
+
+### `POST /api/files/:outerToken/download-batch`
+
+Download up to `BATCH_DOWNLOAD_MAX_FILES` (default 10) files as a single ZIP archive. One-time semantics apply to each file.
+
+**Request:**
 ```json
 {
-  "outerToken": "OUTERXYZ9",
   "innerToken": "MainDemo1234",
   "fileIds": ["file-uuid-1", "file-uuid-2", "file-uuid-3"]
 }
 ```
 
-Notes:
-- Maximum file count per request is controlled by `BATCH_DOWNLOAD_MAX_FILES` (default: `10`).
-- Response is `application/zip` and contains the requested files.
-- One-time semantics still apply: each successfully delivered file is marked `DELETED`.
+**Response 200:** `application/zip` stream  
+`Content-Disposition`: `attachment; filename="ghostdrop_batch_<timestamp>.zip"`
+
+**Response 400:** If `fileIds.length > BATCH_DOWNLOAD_MAX_FILES`.
 
 ---
 
-## 5.4 Auth API (`/api/auth`)
+## Auth API
 
 ### `POST /api/auth/login`
-Purpose: creates in-memory session token for protected app APIs.
 
-Request:
+Authenticate with vault credentials and receive a Bearer session token.
 
+**Request:**
 ```json
 {
   "outerToken": "OUTERXYZ9",
@@ -441,8 +609,7 @@ Request:
 }
 ```
 
-Success:
-
+**Response 200:**
 ```json
 {
   "message": "Vault session established.",
@@ -452,168 +619,300 @@ Success:
   "tokenType": "MAIN",
   "role": "admin",
   "expiresAt": "2026-04-11T10:20:00.000Z",
-  "remainingSeconds": 600000
+  "remainingSeconds": 604800
 }
 ```
 
-### `GET /api/auth/isAuth`
-Purpose: checks whether provided session token is currently valid.
+`role` is `"admin"` for MAIN tokens and `"user"` for SUB tokens.
 
 ---
 
-## 5.5 Portfolio API (`/api/portfolio`) (session protected)
+### `GET /api/auth/isAuth`
 
-### Required auth
+Validate an existing session token.
 
-Send one of:
+**Header:** `Authorization: Bearer <sessionToken>`
 
-- `Authorization: Bearer <sessionToken>`
-- `x-session-token: <sessionToken>`
+**Response 200:**
+```json
+{
+  "authenticated": true,
+  "outerToken": "OUTERXYZ9",
+  "vaultId": "vault-uuid",
+  "role": "admin",
+  "tokenType": "MAIN",
+  "remainingSeconds": 598400
+}
+```
 
-### Endpoints
+**Response 401:**
+```json
+{ "authenticated": false, "error": "Session not found." }
+```
 
-- `GET /api/portfolio/` -> list entries visible to current role
-- `GET /api/portfolio/:entryId` -> get one entry
-- `POST /api/portfolio/` (admin only) -> create entry
-- `PUT /api/portfolio/:entryId` -> update entry
-- `DELETE /api/portfolio/:entryId` (admin only) -> soft-delete entry
+---
 
-Create request example:
+## Portfolio API
 
+All endpoints require `Authorization: Bearer <sessionToken>`.
+
+### `GET /api/portfolio`
+
+List portfolio entries visible to the current role.
+- `admin`: all active entries in the vault
+- `user`: only entries where `owner_token_id` matches this token
+
+**Response 200:**
+```json
+{
+  "entries": [
+    {
+      "entryId": "uuid",
+      "vaultId": "vault-uuid",
+      "ownerTokenId": "token-uuid",
+      "createdByTokenId": "token-uuid",
+      "title": "Security Note",
+      "content": "Token rotation completed on 2026-04-05.",
+      "status": "ACTIVE",
+      "createdAt": "2026-04-05T08:00:00.000Z",
+      "updatedAt": "2026-04-05T08:00:00.000Z"
+    }
+  ],
+  "tamperedCount": 0
+}
+```
+
+`tamperedCount` indicates how many rows were silently excluded due to integrity check failure (the details are logged to `audit.log`).
+
+---
+
+### `GET /api/portfolio/:entryId`
+
+Fetch a single portfolio entry. Returns `404` if not accessible to the current role.
+
+**Response 200:**
+```json
+{
+  "entry": {
+    "entryId": "uuid",
+    "vaultId": "vault-uuid",
+    "ownerTokenId": "token-uuid",
+    "createdByTokenId": "token-uuid",
+    "title": "Security Note",
+    "content": "Token rotation completed.",
+    "status": "ACTIVE",
+    "createdAt": "2026-04-05T08:00:00.000Z",
+    "updatedAt": "2026-04-05T08:00:00.000Z"
+  }
+}
+```
+
+**Response 409** (tampered):
+```json
+{
+  "error": "Portfolio entry integrity check failed.",
+  "code": "PORTFOLIO_TAMPER_DETECTED",
+  "securityAlert": true
+}
+```
+
+---
+
+### `POST /api/portfolio` *(admin only)*
+
+Create a new portfolio entry.
+
+**Request:**
 ```json
 {
   "title": "Security Note",
-  "content": "Token rotation completed.",
-  "ownerTokenId": "optional-owner-token-uuid"
+  "content": "Token rotation completed on 2026-04-05.",
+  "ownerTokenId": "optional-token-uuid"
+}
+```
+
+- `ownerTokenId`: if omitted, defaults to the creating token; must belong to this vault if provided.
+- `title`: max 120 characters.
+- Only `title`, `content`, `ownerTokenId` are accepted; extra fields return `400`.
+
+**Response 201:**
+```json
+{ "entry": { ... } }
+```
+
+---
+
+### `PUT /api/portfolio/:entryId`
+
+Update an existing entry.
+- `admin`: can update any active entry; can reassign `ownerTokenId`.
+- `user`: can update only entries they own; cannot reassign `ownerTokenId`.
+
+**Request:**
+```json
+{
+  "title": "Updated Title",
+  "content": "Updated content.",
+  "ownerTokenId": "optional-new-owner-token-uuid"
+}
+```
+
+All fields are optional; omitted fields retain their current values.
+
+**Response 200:**
+```json
+{ "entry": { ... } }
+```
+
+---
+
+### `DELETE /api/portfolio/:entryId` *(admin only)*
+
+Soft-delete an entry. Sets `status = 'DELETED'` and recomputes the integrity hash.
+
+**Response 200:**
+```json
+{ "message": "Portfolio entry deleted." }
+```
+
+---
+
+## Module B API
+
+### `GET /api/module-b/evidence` *(admin session required)*
+
+Returns a security and database evidence bundle for academic demonstration:
+
+- Index metadata from `SHOW INDEX`
+- Query execution plans from `EXPLAIN`
+- Portfolio integrity scan findings
+- Audit log summary
+
+**Response 200:**
+```json
+{
+  "indexes": [ ... ],
+  "queryPlans": [ ... ],
+  "integrityFindings": { "tamperedCount": 0, "entries": [] },
+  "auditSummary": { ... }
 }
 ```
 
 ---
 
-## 5.6 Module B API (`/api/module-b`)
+## End-to-End Flows
 
-### `GET /api/module-b/evidence` (admin only)
-Purpose: returns security evidence bundle:
+### Flow A — New vault with file upload
 
-- index metadata (`SHOW INDEX`)
-- query plan (`EXPLAIN`)
-- integrity findings
-- audit summary
-
----
-
-## 6) End-to-end flows (how requests chain together)
-
-## Flow A: New vault + first upload + QR
-
-1. Frontend calls `POST /api/files/new-vault-upload` with multipart form.
-2. Server creates vault, main token, file rows, metadata rows, access mappings.
-3. Client receives `outerToken`.
-4. Client calls `GET /api/vaults/:outerToken/qr`.
-5. UI displays token and QR for sharing.
-
-## Flow B: Recipient access and file listing
-
-1. Client calls `GET /api/vaults/:outerToken/public-info`.
-2. User enters inner token.
-3. Client calls `POST /api/vaults/:outerToken/access`.
-4. Server validates token and returns only accessible files.
-
-## Flow C: Scoped sub-token lifecycle
-
-1. Admin calls `POST /api/files/:outerToken/sub-tokens`.
-2. Server creates SUB token + file mappings.
-3. Optional: `PUT /.../secret` to store recoverable sub-token value.
-4. Optional: `PUT /.../files` to remap accessible files.
-5. Optional: `DELETE /.../:tokenId` to revoke.
-
-## Flow D: One-time download semantics
-
-1. Client calls `POST /api/files/:fileId/download`.
-2. Server verifies token-file mapping.
-3. Server returns file bytes.
-4. Server marks file `DELETED`, removes key mappings, logs download event.
-5. Next download attempt returns gone/not found behavior.
-
-## Flow D2: Batch download semantics
-
-1. Client calls `POST /api/files/download-batch`.
-2. Server verifies token access for all requested file IDs.
-3. Server decrypts/validates each file and packages them into one ZIP response.
-4. Server marks each delivered file `DELETED`, removes key mappings, and logs download events.
-5. Any later download attempt for those same files returns gone/not found behavior.
-
-## Flow E: Session-based admin portfolio APIs
-
-1. Call `POST /api/auth/login` to get `sessionToken`.
-2. Call protected APIs with bearer/session header.
-3. Portfolio CRUD and module evidence endpoints enforce role checks.
-
----
-
-## 7) Client implementation notes (frontend behavior)
-
-- `fetchJson(...)` helper throws on non-2xx and propagates server error message.
-- Upload uses `XMLHttpRequest` to expose `upload.onprogress`.
-- Captcha retry flow wraps sensitive actions and replays pending action after success.
-- MAIN users can multi-select files in the Files view and use `Download Selected` (batch ZIP endpoint).
-- Download API returns blob (single-file) or ZIP blob (batch), then frontend triggers browser download.
-
----
-
-## 8) Practical cURL examples
-
-### 8.1 Access vault
-
-```bash
-curl -X POST "http://localhost:4000/api/vaults/OUTERXYZ9/access" \
-  -H "Content-Type: application/json" \
-  -d "{\"innerToken\":\"MainDemo1234\"}"
+```
+POST /api/files/new-vault-upload   → { outerToken }
+GET  /api/vaults/:outerToken/qr    → { qrDataUrl }
 ```
 
-### 8.2 Create sub-token
+### Flow B — Recipient accesses vault
 
-```bash
-curl -X POST "http://localhost:4000/api/files/OUTERXYZ9/sub-tokens" \
-  -H "Content-Type: application/json" \
-  -d "{\"mainInnerToken\":\"MainDemo1234\",\"subInnerToken\":\"SubDemo12345\",\"fileIds\":[\"file-uuid-1\"]}"
+```
+GET  /api/vaults/:outer/public-info     → check vault is ACTIVE
+POST /api/vaults/:outer/access          → { files[] }
+GET  /api/files/:outer/download/:fileId → binary stream (file marked DELETED)
 ```
 
-### 8.3 Batch download (ZIP)
+### Flow C — Batch download
 
-```bash
-curl -X POST "http://localhost:4000/api/files/download-batch" \
-  -H "Content-Type: application/json" \
-  -d "{\"outerToken\":\"OUTERXYZ9\",\"innerToken\":\"MainDemo1234\",\"fileIds\":[\"file-uuid-1\",\"file-uuid-2\"]}"
+```
+POST /api/vaults/:outer/access          → { files[] }
+POST /api/files/:outer/download-batch   → ZIP stream (each file marked DELETED)
 ```
 
-### 8.4 Login + call admin evidence endpoint
+### Flow D — SUB token sharing lifecycle
 
-```bash
-curl -X POST "http://localhost:4000/api/auth/login" \
-  -H "Content-Type: application/json" \
-  -d "{\"outerToken\":\"OUTERXYZ9\",\"innerToken\":\"MainDemo1234\"}"
+```
+POST /api/files/:outer/sub-tokens              → { subTokenId, subInnerToken }
+PUT  /api/files/:outer/sub-tokens/:id/secret   → store encrypted secret
+PUT  /api/files/:outer/sub-tokens/:id/files    → remap accessible files
+GET  /api/files/:outer/sub-tokens/:id/reveal   → recover raw sub token
+DELETE /api/files/:outer/sub-tokens/:id        → revoke
 ```
 
-Then:
+### Flow E — Portfolio admin workflow
 
-```bash
-curl "http://localhost:4000/api/module-b/evidence" \
-  -H "Authorization: Bearer <sessionToken>"
+```
+POST /api/auth/login                    → { sessionToken, role: "admin" }
+POST /api/portfolio                     → create entry
+GET  /api/portfolio                     → list all vault entries
+PUT  /api/portfolio/:entryId            → update entry
+GET  /api/security/unauthorized-check   → scan for tampered rows
+DELETE /api/portfolio/:entryId          → soft-delete
 ```
 
 ---
 
-## 9) Summary
+## cURL Examples
 
-This system uses a mixed API model:
+### Create vault
 
-- JSON REST requests for control/auth/metadata operations
-- multipart upload requests for file ingestion
-- binary stream response for single download
-- ZIP stream response for batch download
-- layered security with captcha/rate-limit, token verification, scoped access, and role-based session APIs
+```bash
+curl -X POST http://localhost:4000/api/vaults \
+  -H "Content-Type: application/json" \
+  -d '{"innerToken":"MainDemo1234","expiresInDays":7}'
+```
 
-This design is suitable for production-style API documentation and repository publication.
+### Access vault
 
+```bash
+curl -X POST http://localhost:4000/api/vaults/OUTERABC1/access \
+  -H "Content-Type: application/json" \
+  -d '{"innerToken":"MainDemo1234"}'
+```
 
+### Upload file (single)
+
+```bash
+curl -X POST http://localhost:4000/api/files/OUTERABC1/upload \
+  -F "innerToken=MainDemo1234" \
+  -F "files=@/path/to/document.pdf" \
+  -F "relativePaths=docs/document.pdf"
+```
+
+### Download file
+
+```bash
+curl -O -J "http://localhost:4000/api/files/OUTERABC1/download/FILE-UUID?innerToken=MainDemo1234"
+```
+
+### Batch download (ZIP)
+
+```bash
+curl -X POST http://localhost:4000/api/files/OUTERABC1/download-batch \
+  -H "Content-Type: application/json" \
+  -d '{"innerToken":"MainDemo1234","fileIds":["uuid-1","uuid-2"]}' \
+  -o batch_download.zip
+```
+
+### Login and call portfolio API
+
+```bash
+# Step 1: login
+SESSION=$(curl -s -X POST http://localhost:4000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"outerToken":"OUTERABC1","innerToken":"MainDemo1234"}' \
+  | jq -r '.sessionToken')
+
+# Step 2: create portfolio entry
+curl -X POST http://localhost:4000/api/portfolio \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $SESSION" \
+  -d '{"title":"Security Note","content":"Rotation complete."}'
+
+# Step 3: tamper check
+curl -H "Authorization: Bearer $SESSION" \
+  http://localhost:4000/api/security/unauthorized-check
+```
+
+### Create sub-token
+
+```bash
+curl -X POST http://localhost:4000/api/vaults/OUTERABC1/sub-tokens \
+  -H "Content-Type: application/json" \
+  -d '{"mainInnerToken":"MainDemo1234","fileIds":["file-uuid-1"]}'
+```

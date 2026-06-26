@@ -1,0 +1,112 @@
+version: "3.9"
+
+services:
+  # ─── MySQL Database ─────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-ghostdrop_proto}
+      MYSQL_USER: ${DB_USER:-ghostdrop}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/sql/init_schema.sql:/docker-entrypoint-initdb.d/01_init_schema.sql:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - ghostdrop_net
+
+  # ─── Redis (rate limiting + security store) ──────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-ghostdrop_redis}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-ghostdrop_redis}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - ghostdrop_net
+
+  # ─── GhostDrop Application ────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      TRUST_PROXY: "true"
+
+      # Database
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-ghostdrop}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-ghostdrop_proto}
+      DB_CONNECTION_LIMIT: 20
+
+      # Redis
+      SECURITY_STORE: redis
+      REDIS_URL: redis://:${REDIS_PASSWORD:-ghostdrop_redis}@redis:6379
+
+      # Security secrets — set these in .env, never hardcode
+      SUB_TOKEN_SECRET_KEY: ${SUB_TOKEN_SECRET_KEY}
+      TOKEN_LOOKUP_SECRET: ${TOKEN_LOOKUP_SECRET}
+
+      # Google Drive
+      GOOGLE_DRIVE_FOLDER_ID: ${GOOGLE_DRIVE_FOLDER_ID}
+      GOOGLE_SERVICE_ACCOUNT_KEY_FILE: ${GOOGLE_SERVICE_ACCOUNT_KEY_FILE:-./service_account.json}
+
+      # Upload limits
+      MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-10}
+      MAX_FILES_PER_UPLOAD: ${MAX_FILES_PER_UPLOAD:-20}
+      MAX_VAULT_SIZE_MB: ${MAX_VAULT_SIZE_MB:-250}
+      MAX_TOTAL_SYSTEM_SIZE_MB: ${MAX_TOTAL_SYSTEM_SIZE_MB:-14336}
+      BATCH_DOWNLOAD_MAX_FILES: ${BATCH_DOWNLOAD_MAX_FILES:-10}
+
+      # CAPTCHA
+      CAPTCHA_PROVIDER: ${CAPTCHA_PROVIDER:-math}
+      CAPTCHA_ALLOW_MATH_FALLBACK: ${CAPTCHA_ALLOW_MATH_FALLBACK:-true}
+      HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY:-}
+      HCAPTCHA_SECRET_KEY: ${HCAPTCHA_SECRET_KEY:-}
+      RECAPTCHA_SITE_KEY: ${RECAPTCHA_SITE_KEY:-}
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-}
+
+      # CORS — set to your frontend domain
+      CORS_ORIGIN: ${CORS_ORIGIN:-}
+
+      PBKDF2_ITERATIONS: ${PBKDF2_ITERATIONS:-250000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+
+    volumes:
+      - ./backend/logs:/app/logs
+    ports:
+      - "4000:4000"
+    networks:
+      - ghostdrop_net
+
+networks:
+  ghostdrop_net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:

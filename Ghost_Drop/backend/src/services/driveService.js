@@ -1,8 +1,16 @@
 const path = require("path");
 const { Readable } = require("stream");
+const { LRUCache } = require("lru-cache");
 const { getDriveClient } = require("../config/drive");
 
-const folderCache = new Map();
+// LRU cache for resolved Drive folder IDs.
+// max: 500 unique folder paths, ttl: 30 minutes
+// Prevents unbounded memory growth on long-running servers.
+const folderCache = new LRUCache({
+  max: 500,
+  ttl: 1000 * 60 * 30
+});
+
 
 function getFolderId() {
   const value = process.env.GOOGLE_DRIVE_FOLDER_ID;
@@ -81,6 +89,15 @@ async function ensureFolderPath(drive, baseFolderId, relativePath) {
 }
 
 async function uploadBuffer({ buffer, fileName, mimeType, relativePath }) {
+  return uploadStream({
+    body: Readable.from(buffer),
+    fileName,
+    mimeType,
+    relativePath
+  });
+}
+
+async function uploadStream({ body, fileName, mimeType, relativePath }) {
   const drive = getDriveClient();
   const folderId = getFolderId();
   const parentFolderId = await ensureFolderPath(drive, folderId, relativePath);
@@ -93,7 +110,7 @@ async function uploadBuffer({ buffer, fileName, mimeType, relativePath }) {
     },
     media: {
       mimeType,
-      body: Readable.from(buffer)
+      body
     },
     fields: "id,name,mimeType,size,webViewLink",
     supportsAllDrives: true
@@ -111,6 +128,15 @@ async function downloadBuffer(fileId) {
   return Buffer.from(res.data);
 }
 
+async function downloadStream(fileId) {
+  const drive = getDriveClient();
+  const res = await drive.files.get(
+    { fileId, alt: "media", supportsAllDrives: true },
+    { responseType: "stream" }
+  );
+  return res.data;
+}
+
 async function deleteFile(fileId) {
   const drive = getDriveClient();
   await drive.files.delete({ fileId, supportsAllDrives: true });
@@ -118,6 +144,8 @@ async function deleteFile(fileId) {
 
 module.exports = {
   uploadBuffer,
+  uploadStream,
   downloadBuffer,
+  downloadStream,
   deleteFile
 };

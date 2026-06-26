@@ -24,3 +24,13 @@ Project_Assignments/**/logs/
 *.bz2
 *.7z
 *.rar
+
+# Credentials and secrets
+.env
+.env.*
+oauth_credentials.json
+service_account.json
+service-account.json
+database_export.json
+*.key
+*.pem

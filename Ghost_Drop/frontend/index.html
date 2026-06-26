@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GhostDrop</title>
+    <title>GhostDrop — Secure Temporary File Transfer</title>
+  <meta name="description" content="GhostDrop is a secure, temporary file transfer service using dual-token vault access, scoped permissions, and end-to-end encryption." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -238,17 +239,11 @@
               <div id="dropzoneNew" class="dropzone" role="group" aria-label="Upload files and folders">
                 <p>Drag files/folders here or select manually.</p>
                 <div class="dropzone-actions">
-                  <button id="pickFilesBtnNew" type="button" class="btn btn-secondary">
-                    <i data-lucide="file-up"></i>
-                    <span>Choose Files</span>
-                  </button>
-                  <button id="pickFolderBtnNew" type="button" class="btn btn-secondary">
-                    <i data-lucide="folder-open"></i>
-                    <span>Choose Folder</span>
-                  </button>
+                  <label for="uploadFilesNew" class="btn btn-secondary" role="button" tabindex="0"><i data-lucide="file-up"></i><span>Choose Files</span></label>
+                  <label for="uploadFolderNew" class="btn btn-secondary" role="button" tabindex="0"><i data-lucide="folder-open"></i><span>Choose Folder</span></label>
                 </div>
-                <input id="uploadFilesNew" type="file" multiple class="hidden" />
-                <input id="uploadFolderNew" type="file" webkitdirectory directory multiple class="hidden" />
+                <input id="uploadFilesNew" type="file" multiple style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;" />
+                <input id="uploadFolderNew" type="file" webkitdirectory directory multiple style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;" />
               </div>
               <ul id="selectedFilesNew" class="simple-list file-pill-list"></ul>
             </div>
@@ -460,17 +455,11 @@
                   <div id="dropzoneMore" class="dropzone">
                     <p>Drag files here or choose manually. Use Choose Folder to keep folder structure.</p>
                     <div class="dropzone-actions">
-                      <button id="pickFilesBtnMore" type="button" class="btn btn-secondary">
-                        <i data-lucide="plus-circle"></i>
-                        <span>Choose Files</span>
-                      </button>
-                      <button id="pickFolderBtnMore" type="button" class="btn btn-secondary">
-                        <i data-lucide="folder-open"></i>
-                        <span>Choose Folder</span>
-                      </button>
+                      <label for="uploadFilesMore" class="btn btn-secondary" role="button" tabindex="0"><i data-lucide="plus-circle"></i><span>Choose Files</span></label>
+                      <label for="uploadFolderMore" class="btn btn-secondary" role="button" tabindex="0"><i data-lucide="folder-open"></i><span>Choose Folder</span></label>
                     </div>
-                    <input id="uploadFilesMore" type="file" multiple class="hidden" />
-                    <input id="uploadFolderMore" type="file" webkitdirectory directory multiple class="hidden" />
+                    <input id="uploadFilesMore" type="file" multiple style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;" />
+                    <input id="uploadFolderMore" type="file" webkitdirectory directory multiple style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;" />
                   </div>
                 </div>
                 <ul id="selectedFilesMore" class="simple-list file-pill-list"></ul>
@@ -489,14 +478,22 @@
 
       <article id="captchaCard" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="captchaTitle">
         <div class="card panel modal-content">
-          <h3 id="captchaTitle">Security Check</h3>
+          <div class="panel-head-inline">
+            <h3 id="captchaTitle">Security Check</h3>
+            <!-- Bug 18: Added close button so users can dismiss if captcha fails to load -->
+            <button id="captchaCloseBtn" type="button" class="btn btn-ghost btn-inline" aria-label="Close security check">
+              <i data-lucide="x"></i>
+              <span>Close</span>
+            </button>
+          </div>
           <p id="captchaQuestion"></p>
+          <div id="captchaWidgetContainer" style="margin: 15px 0; display: flex; justify-content: center;"></div>
           <form id="captchaForm" class="form-grid">
-            <div class="field-row">
+            <div id="captchaAnswerRow" class="field-row">
               <label for="captchaAnswer">Answer</label>
               <input id="captchaAnswer" required placeholder="Enter answer" />
             </div>
-            <button type="submit" class="btn btn-primary" data-loading-text="Verifying...">
+            <button id="captchaVerifyBtn" type="submit" class="btn btn-primary" data-loading-text="Verifying...">
               <i data-lucide="shield"></i>
               <span>Verify</span>
             </button>
@@ -521,12 +518,12 @@
         </div>
       </article>
 
-      <pre id="globalError" class="error-box hidden" role="alert" aria-live="assertive"></pre>
+      <div id="globalError" class="error-box hidden" role="alert" aria-live="assertive"></div>
     </main>
 
     <section id="toast" class="toast hidden" aria-live="polite"></section>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="./lucide.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>

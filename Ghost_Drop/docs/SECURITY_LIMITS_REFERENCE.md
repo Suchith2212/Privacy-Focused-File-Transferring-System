@@ -1,484 +1,360 @@
-# 🛡 Ghost Drop Security Architecture
+# GhostDrop — Security Architecture Reference
 
-## Rate Limiting, Risk Control & Adaptive Abuse Prevention
-
----
-
-# 1. 🧭 Overview
-
-This document defines the **multi-layer security system** used to protect the backend from:
-
-* Unauthorized access attempts
-* Automated abuse (bots/scripts)
-* Data scraping and bulk extraction
-* Resource exhaustion attacks
-* Token compromise impact
+> Rate limiting, IP risk control, adaptive blocking, and CAPTCHA system.  
+> For the encryption design see [`ENCRYPTION_REFERENCE.md`](ENCRYPTION_REFERENCE.md). For the full architecture see [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ---
 
-## 🔥 Core Security Philosophy
+## Table of Contents
 
-```text
-Authentication verifies identity.
-Security controls regulate behavior.
+- [Security Layers Overview](#security-layers-overview)
+- [Security Gate Pipeline](#security-gate-pipeline)
+- [IP-Based Rate Limiting](#ip-based-rate-limiting)
+- [Principal-Based Rate Limiting](#principal-based-rate-limiting)
+- [Per-Route Rate Limiting](#per-route-rate-limiting)
+- [Failure Tracking and Weighted Scoring](#failure-tracking-and-weighted-scoring)
+- [CAPTCHA System](#captcha-system)
+- [Adaptive Temporary Blocking](#adaptive-temporary-blocking)
+- [IP Risk Scoring](#ip-risk-scoring)
+- [Security Store (Memory vs Redis)](#security-store-memory-vs-redis)
+- [Configuration Reference](#configuration-reference)
+- [Error Response Codes](#error-response-codes)
+
+---
+
+## Security Layers Overview
+
+The system applies **seven independent security layers** before any route handler executes.
+
+```
+Layer 1 → Temporary IP block check
+Layer 2 → IP risk evaluation (TOR / VPN / bad-IP scoring)
+Layer 3 → CAPTCHA gate (triggered by failure accumulation or high risk)
+Layer 4 → Global IP rate limiting (per-minute + per-day sliding windows)
+Layer 5 → Per-route rate limiting (separate counters per endpoint)
+Layer 6 → Adaptive block escalation (strike-based, capped at 24 h)
+Layer 7 → Principal rate limiting (per authenticated vault:token pair)
+```
+
+Layers 1–6 are enforced by `middleware/securityGate.js` on every public request.  
+Layer 7 is enforced separately in `routes/portfolio.js` for authenticated API calls.
+
+---
+
+## Security Gate Pipeline
+
+```
+Request
+│
+▼ ① Temporary block check
+   isBlocked(ip)?
+   └─ yes → 429 { code: "TEMP_BLOCK", blockedSeconds, Retry-After header }
+
+▼ ② IP risk evaluation
+   evaluateIpRisk(routeKey, ip, captchaSolved)
+   ├─ score threshold exceeded → 403 { code: "RISK_BLOCK" }
+   └─ moderate risk → captcha required flag set
+
+▼ ③ CAPTCHA gate (if required and not already solved)
+   ├─ no challenge in request → 403 { code: "CAPTCHA_REQUIRED" }
+   └─ challenge present → verifyCaptcha(...)
+        ├─ fail → 403 { code: "CAPTCHA_INVALID" }
+        └─ pass → captchaSolved = true
+
+▼ ④ Record attempt counters
+   recordAttempt(ip)
+   recordRouteAttempt(routeKey, ip)
+
+▼ ⑤ Global IP rate limit check
+   checkRateLimit(ip)
+   └─ over limit AND not captchaSolved → 429 { code: "RATE_LIMIT", Retry-After }
+
+▼ ⑥ Per-route rate limit check
+   checkRouteRateLimit(routeKey, ip)
+   └─ over limit AND not captchaSolved → 429 { code: "ROUTE_RATE_LIMIT", Retry-After }
+
+▼ Attach req.securityContext = { ok: true, ip, risk, captchaSolved }
+   call next()
+```
+
+A solved CAPTCHA exempts the request from rate limit enforcement for the current action, but does **not** reset failure counters or remove blocks.
+
+---
+
+## IP-Based Rate Limiting
+
+Sliding window counters per IP address:
+
+| Window | Default Limit | Env Variable |
+|---|---|---|
+| Per minute | 10 requests | `ROUTE_RATE_LIMITS_JSON` |
+| Per day | 100 requests | `ROUTE_RATE_LIMITS_JSON` |
+
+Counters are stored in the security store (in-memory Map in dev; Redis in production).
+
+When either limit is exceeded without a solved CAPTCHA, the response is:
+
+```json
+{
+  "error": "Rate limit exceeded.",
+  "code": "RATE_LIMIT",
+  "minuteCount": 11,
+  "minuteLimit": 10,
+  "dayCount": 45,
+  "dayLimit": 100,
+  "retryAfterSeconds": 42,
+  "captchaRequired": true
+}
+```
+
+The `Retry-After` header is also set.
+
+---
+
+## Principal-Based Rate Limiting
+
+Applied after authentication for portfolio API calls, keyed on `portfolio:{vaultId}:{innerTokenId}`:
+
+| Window | Default Limit |
+|---|---|
+| Per minute | 60 requests |
+| Per day | 600 requests |
+
+When exceeded:
+
+```json
+{
+  "error": "Portfolio rate limit exceeded for this authenticated token.",
+  "code": "PORTFOLIO_TOKEN_RATE_LIMIT",
+  "retryAfterSeconds": 38,
+  "securityAlert": true
+}
 ```
 
 ---
 
-## 🧠 Design Principles
+## Per-Route Rate Limiting
 
-### 1. Defense in Depth
+Each endpoint group has its own counters, configured via `config/securityPolicies.js` and overridable via `ROUTE_RATE_LIMITS_JSON`.
 
-Multiple independent layers protect the system.
+Route keys used internally:
 
-### 2. Separation of Concerns
+| Route Key | Endpoint |
+|---|---|
+| `vault.access` | `POST /api/vaults/:outerToken/access` |
+| `vault.public-info` | `GET /api/vaults/:outerToken/public-info` |
+| `vault.subtoken-create` | `POST /api/vaults/:outerToken/sub-tokens` |
+| `files.new-vault-upload` | `POST /api/files/new-vault-upload` |
+| `files.upload` | `POST /api/files/:outerToken/upload` |
+| `files.download` | `GET /api/files/:outerToken/download/:fileId` |
+| `files.download-batch` | `POST /api/files/:outerToken/download-batch` |
+| `default` | All other routes |
 
-* IP limits → infrastructure protection
-* Principal limits → identity protection
+Override example (in `.env`):
 
-### 3. Damage Containment
-
-Even if a token is compromised, damage is limited.
-
----
-
-# 2. 🧠 Security Layers (High-Level)
-
-```text
-Layer 1 → IP-based rate limiting
-Layer 2 → Principal (innerToken) rate limiting
-Layer 3 → Per-route rate limiting
-Layer 4 → Failure tracking + weighted scoring
-Layer 5 → CAPTCHA challenge system
-Layer 6 → Adaptive temporary blocking
-Layer 7 → Risk scoring (IP intelligence)
+```env
+ROUTE_RATE_LIMITS_JSON={"files.download":{"minute":15,"day":200},"default":{"minute":20,"day":300}}
 ```
 
 ---
 
-# 3. 🌐 IP-Based Rate Limiting
+## Failure Tracking and Weighted Scoring
 
-## Purpose
+Not all failures are equal. Each failure type contributes a **weight** to a sliding-window score:
 
-Protects system from **network-level abuse**.
+| Failure Reason | Weight | Examples |
+|---|---|---|
+| Default | 1 | General auth failure |
+| `VAULT_NOT_FOUND` | 2 | Token enumeration attempt |
+| `INVALID_INNER_TOKEN` | 2 | Brute-force attempt |
+| `INVALID_MAIN_TOKEN` | 2 | Privilege escalation attempt |
+| `VAULT_EXPIRED` | 1 | Minor — accessing expired vault |
+
+The system maintains two windows:
+- **1-minute window**: raw failure count
+- **10-minute window**: weighted score sum
+
+Thresholds (all configurable via `ROUTE_RISK_POLICY_JSON`):
+
+| Threshold | Default | Effect |
+|---|---|---|
+| Failures/min before CAPTCHA | 8 | CAPTCHA gate triggers |
+| Weighted score/10 min before CAPTCHA | 10 | CAPTCHA gate triggers |
+| Failures/min before temp block | 20 | IP temporarily blocked |
+| Weighted score/10 min before block | 22 | IP temporarily blocked |
 
 ---
 
-## Limits
+## CAPTCHA System
 
-* 10 requests / minute
-* 100 requests / day
+### Providers
 
----
+| Provider | Value | Notes |
+|---|---|---|
+| Built-in math | `math` | Default; suitable for development only |
+| hCaptcha | `hcaptcha` | Requires `HCAPTCHA_SITE_KEY` + `HCAPTCHA_SECRET_KEY` |
+| reCAPTCHA | `recaptcha` | Requires `RECAPTCHA_SITE_KEY` + `RECAPTCHA_SECRET_KEY` |
 
-## What it protects
+Set via `CAPTCHA_PROVIDER`. `CAPTCHA_ALLOW_MATH_FALLBACK=true` allows fallback to math if a third-party provider is misconfigured.
 
-* Bot traffic
-* Burst traffic spikes
-* Infrastructure overload
+### Challenge Lifecycle
 
----
+```
+1. Client calls GET /api/security/captcha
+   → { captchaRequired, challengeId, question }  (math provider)
+   → { captchaRequired, siteKey }                (hCaptcha / reCAPTCHA)
 
-## Limitation
+2. Client presents CAPTCHA to user; user solves it
 
-```text
-IP addresses can be rotated (VPNs, botnets)
+3. Client includes in next request body:
+   Math:      { captchaChallengeId, captchaAnswer }
+   Provider:  { providerToken }   (hCaptcha h-captcha-response / reCAPTCHA token)
+
+4. securityGate calls verifyCaptcha(...)
+   → marks IP as solved for CAPTCHA_SOLVE_TTL_MS (default: 10 minutes)
+   → pending action proceeds without re-prompting
+```
+
+### Timing Parameters
+
+| Parameter | Default | Description |
+|---|---|---|
+| `CAPTCHA_SOLVE_TTL_MS` | 600 000 (10 min) | How long a solved CAPTCHA exempts the IP |
+| `CAPTCHA_CHALLENGE_TTL_MS` | 300 000 (5 min) | Math challenge expiry |
+| `CAPTCHA_MAX_ATTEMPTS` | 5 | Max wrong attempts before challenge is invalidated |
+
+### CAPTCHA API Endpoints
+
+```http
+GET  /api/security/captcha              Generate a new challenge
+POST /api/security/captcha/verify       Verify a challenge/answer pair
+GET  /api/security/captcha/required     Check whether CAPTCHA is currently required for this IP
+GET  /api/security/status               Current rate-limit and block state for this IP
 ```
 
 ---
 
-# 4. 👤 Principal (innerToken) Rate Limiting
+## Adaptive Temporary Blocking
 
-## Definition
+When failure thresholds are exceeded, the IP is blocked for an escalating duration:
 
-```text
-Principal = authenticated identity (innerToken)
+```
+Strike 1: 15 minutes
+Strike 2: 30 minutes
+Strike 3: 60 minutes
+...
+Cap:      24 hours
+```
+
+Block duration = `min(TEMP_BLOCK_BASE_MS × 2^(strikes - 1), TEMP_BLOCK_MAX_MS)`
+
+Strike history is tracked within a 24-hour window (`BLOCK_STRIKE_WINDOW_MS`). Strikes outside this window are not counted.
+
+While blocked, requests receive:
+
+```json
+{
+  "error": "Temporarily blocked due to repeated failures.",
+  "code": "TEMP_BLOCK",
+  "blockedSeconds": 900,
+  "captchaRequired": true
+}
+```
+
+`Retry-After` is set to `blockedSeconds`.
+
+---
+
+## IP Risk Scoring
+
+Each request is scored based on IP intelligence signals. The score and resulting action depend on the route's risk policy.
+
+### Signal Weights
+
+| Signal | Score Added | Source |
+|---|---|---|
+| IP on `RISK_BAD_IPS` list | 80 | `RISK_BAD_IPS` env var (comma-separated) |
+| IP on `RISK_TOR_IPS` list | 60 | `RISK_TOR_IPS` env var |
+| IP on `RISK_VPN_IPS` list | 40 | `RISK_VPN_IPS` env var |
+| Accumulated failures in window | variable | From failure tracker |
+
+### Risk Policy Actions (by score)
+
+| Score Range | Action |
+|---|---|
+| 0–44 | Allow |
+| 45–89 | Require CAPTCHA |
+| 90+ | Block (403 RISK_BLOCK) |
+
+Override thresholds per route via `ROUTE_RISK_POLICY_JSON`:
+
+```env
+ROUTE_RISK_POLICY_JSON={"vault.access":{"captchaThreshold":30,"blockThreshold":85},"default":{"captchaThreshold":45,"blockThreshold":90}}
+```
+
+### Populating IP Lists
+
+Set comma-separated IP addresses in `.env`:
+
+```env
+RISK_BAD_IPS=1.2.3.4,5.6.7.8
+RISK_TOR_IPS=9.10.11.12
+RISK_VPN_IPS=13.14.15.16
 ```
 
 ---
 
-## Limits
+## Security Store (Memory vs Redis)
 
-* 60 requests / minute
-* 600 requests / day
+| Mode | When Used | Characteristics |
+|---|---|---|
+| `memory` | Development (`NODE_ENV != production`) | In-process Map; resets on restart; not shared across instances |
+| `redis` | Production (enforced) | Persistent across restarts; shared across scaled instances; requires `REDIS_URL` |
 
----
+The server **refuses to start** in production with `SECURITY_STORE=memory`:
 
-## Purpose
+```
+Error: SECURITY_STORE=redis is required in production.
+```
 
-Controls **how a single identity behaves**, independent of IP.
+Configure Redis connection:
 
----
-
-## Why this is critical
-
-### Without principal limits:
-
-```text
-Same token used across 100 IPs → bypass IP limits ❌
+```env
+SECURITY_STORE=redis
+REDIS_URL=redis://:your_redis_password@127.0.0.1:6379
 ```
 
 ---
 
-### With principal limits:
+## Configuration Reference
 
-```text
-Total usage per token is capped ✔
-```
-
----
-
-## 🔥 Key Insight
-
-```text
-IP = where request comes from  
-Token = who is making the request  
-```
-
----
-
-# 5. 🔐 Post-Authentication Protection
-
-Even after login, the system must protect:
+| Variable | Default | Description |
+|---|---|---|
+| `SECURITY_STORE` | `memory` | `memory` or `redis` |
+| `REDIS_URL` | — | Redis connection URL (required in prod) |
+| `CAPTCHA_PROVIDER` | `math` | `math`, `hcaptcha`, `recaptcha` |
+| `CAPTCHA_ALLOW_MATH_FALLBACK` | `true` | Fall back to math if provider is unavailable |
+| `HCAPTCHA_SITE_KEY` | — | Required when `CAPTCHA_PROVIDER=hcaptcha` |
+| `HCAPTCHA_SECRET_KEY` | — | Required when `CAPTCHA_PROVIDER=hcaptcha` |
+| `RECAPTCHA_SITE_KEY` | — | Required when `CAPTCHA_PROVIDER=recaptcha` |
+| `RECAPTCHA_SECRET_KEY` | — | Required when `CAPTCHA_PROVIDER=recaptcha` |
+| `RISK_BAD_IPS` | — | Comma-separated IP list; score += 80 |
+| `RISK_TOR_IPS` | — | Comma-separated IP list; score += 60 |
+| `RISK_VPN_IPS` | — | Comma-separated IP list; score += 40 |
+| `ROUTE_RATE_LIMITS_JSON` | — | Per-route rate limit overrides (JSON) |
+| `ROUTE_RISK_POLICY_JSON` | — | Per-route risk policy overrides (JSON) |
+| `TRUST_PROXY` | `false` | Set `true` to trust `x-forwarded-for` |
 
 ---
 
-## 5.1 Data Protection
-
-```text
-Prevent bulk file downloads (data scraping)
-```
-
----
-
-## 5.2 Infrastructure Protection
-
-```text
-Prevent a single user from exhausting resources
-```
-
----
-
-## 5.3 Damage Containment
-
-```text
-Limit impact if token is compromised
-```
-
----
-
-## 5.4 API Abuse Prevention
-
-```text
-Prevent excessive usage of sensitive endpoints
-```
-
----
-
-## 🎯 Core Insight
-
-```text
-Rate limiting after login = damage control
-```
-
----
-
-# 6. 📊 Per-Route Rate Limiting
-
-Each route has tailored limits based on sensitivity.
-
----
-
-## Examples
-
-| Route             | Purpose         | Strictness  |
-| ----------------- | --------------- | ----------- |
-| `vault.access`    | authentication  | strict      |
-| `files.upload`    | heavy operation | medium      |
-| `files.download`  | frequent usage  | moderate    |
-| `subtoken-create` | sensitive       | very strict |
-
----
-
-## Why per-route?
-
-Different endpoints have:
-
-* different cost
-* different risk
-* different abuse patterns
-
----
-
-# 7. ⚠️ Failure Tracking & Weighted Risk
-
-## Purpose
-
-Detect **malicious behavior patterns**
-
----
-
-## Thresholds
-
-* ≥ 20 failures/min → block
-* ≥ 22 weighted score (10 min) → block
-
----
-
-## Weighted Model
-
-| Event           | Weight |
-| --------------- | ------ |
-| Normal failure  | 1      |
-| CAPTCHA failure | 2      |
-| Max attempts    | 4      |
-
----
-
-## Why weighted?
-
-```text
-Not all failures are equal
-```
-
-Detects:
-
-* brute force attacks
-* intelligent slow attacks
-
----
-
-# 8. 🤖 CAPTCHA System
-
-## Trigger Conditions
-
-* ≥ 8 failures/min
-* OR weighted score ≥ 10
-
----
-
-## Purpose
-
-```text
-Differentiate human users from automated systems
-```
-
----
-
-## Modes
-
-* Math (fallback)
-* hCaptcha
-* reCAPTCHA
-
----
-
-## Behavior
-
-* Valid for 10 minutes after solving
-* Max 5 attempts
-* Failure increases risk score
-
----
-
-# 9. 🚫 Adaptive Blocking
-
-## Trigger
-
-* excessive failures
-* high weighted risk
-
----
-
-## Block Duration
-
-```text
-Base: 15 minutes
-Escalation: exponential per strike
-Max: 24 hours
-```
-
----
-
-## Example
-
-| Strike | Block Time |
-| ------ | ---------- |
-| 1      | 15 min     |
-| 2      | 30 min     |
-| 3      | 1 hour     |
-| 4      | 2 hours    |
-
----
-
-## Purpose
-
-```text
-Punish repeated attackers while allowing recovery
-```
-
----
-
-# 10. 📊 IP Risk Scoring
-
-## Inputs
-
-* Known bad IPs
-* TOR exit nodes
-* VPN/datacenter IPs
-
----
-
-## Scoring
-
-| Source | Score |
-| ------ | ----- |
-| Bad IP | +95   |
-| TOR    | +60   |
-| VPN    | +40   |
-
----
-
-## Decision
-
-* ≥ block threshold → block
-* ≥ captcha threshold → require CAPTCHA
-
----
-
-# 11. 🔄 Security Pipeline (Request Flow)
-
-```text
-Incoming Request
-   ↓
-Resolve IP
-   ↓
-Check temporary block
-   ↓
-Evaluate IP risk score
-   ↓
-Check failure thresholds
-   ↓
-Require CAPTCHA if needed
-   ↓
-Verify CAPTCHA
-   ↓
-Apply IP + route rate limits
-   ↓
-Apply principal rate limits
-   ↓
-Allow request
-```
-
----
-
-# 12. ⚖️ Combined Protection Model
-
-```text
-Request allowed ONLY if:
-✔ IP limit passes
-✔ Principal limit passes
-✔ Risk checks pass
-✔ CAPTCHA (if required) is solved
-```
-
----
-
-# 13. ⚠️ Real Attack Scenarios
-
----
-
-## Scenario 1: Token Theft
-
-```text
-Attacker obtains innerToken
-→ acts as valid user
-```
-
-Protection:
-
-* principal rate limit
-* adaptive blocking
-
----
-
-## Scenario 2: Bot Scraping
-
-```text
-Automated script downloads all files
-```
-
-Protection:
-
-* route limits
-* principal limits
-* CAPTCHA escalation
-
----
-
-## Scenario 3: Distributed Attack
-
-```text
-Same token across multiple IPs
-```
-
-Protection:
-
-* principal limit aggregates usage
-
----
-
-# 14. 🧰 Storage Model
-
-## Modes
-
-* `memory` → simple, non-persistent
-* `redis` → distributed, production-ready
-
----
-
-## Recommendation
-
-```text
-Use Redis for production deployments
-```
-
----
-
-# 15. ⚙️ Operational Notes
-
-* Use Redis for scaling
-* Use real CAPTCHA provider
-* Tune limits per route
-* Monitor false positives
-
----
-
-# 16. 🔐 Security Guarantees
-
-This system ensures:
-
-* Controlled API usage
-* Resistance to brute-force attacks
-* Protection against distributed abuse
-* Limited impact of compromised tokens
-* Fair resource usage across users
-
----
-
-# 17. 🔥 Final Insight
-
-```text
-Login grants access.
-Security limits control how that access is used.
-```
-
----
-
-# 18. 🧪 One-Line Summary
-
-```text
-A multi-layer adaptive security system that prevents abuse before and after authentication.
-```
-
----
+## Error Response Codes
+
+| Code | HTTP Status | Meaning |
+|---|---|---|
+| `TEMP_BLOCK` | 429 | IP is in a temporary block period |
+| `RISK_BLOCK` | 403 | IP risk score exceeded block threshold |
+| `CAPTCHA_REQUIRED` | 403 | CAPTCHA challenge must be solved before proceeding |
+| `CAPTCHA_INVALID` | 403 | CAPTCHA answer or token was rejected |
+| `RATE_LIMIT` | 429 | Global IP rate limit exceeded |
+| `ROUTE_RATE_LIMIT` | 429 | Per-route rate limit exceeded |
+| `PORTFOLIO_TOKEN_RATE_LIMIT` | 429 | Principal (authenticated token) rate limit exceeded |

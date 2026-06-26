@@ -1,5 +1,28 @@
 node_modules/
+
+# Environment & secrets — NEVER commit these
 .env
+.env.local
+.env.production
+.env.staging
 oauth_credentials.json
 service-account.json
 service_account.json
+
+# Database exports — may contain live data
+database_export.json
+*.sql.bak
+
+# Logs
+logs/
+*.log
+server.err.log
+server.out.log
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/

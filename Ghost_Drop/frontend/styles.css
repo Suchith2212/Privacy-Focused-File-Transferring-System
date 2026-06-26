@@ -1172,18 +1172,80 @@ input:invalid:focus {
 }
 
 .error-box.security-alert {
-  background: rgba(245, 158, 11, 0.14);
-  border-color: rgba(217, 119, 6, 0.42);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(225, 29, 72, 0.08) 100%);
+  border-color: rgba(217, 119, 6, 0.38);
   color: #92400e;
-  padding-left: 1.1rem;
+  padding: 0;
+  white-space: normal;
+}
+
+.error-box.security-alert .block-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+}
+
+.block-banner-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+  padding-top: 0.1rem;
+}
+
+.block-banner-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.block-banner-content strong {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.block-banner-content p {
+  font-size: 0.88rem;
+  margin: 0;
+  color: #a16207;
+  line-height: 1.4;
+}
+
+.block-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #78350f;
+}
+
+.block-time {
+  display: inline-block;
+  background: rgba(120, 53, 15, 0.12);
+  border: 1px solid rgba(120, 53, 15, 0.2);
+  border-radius: 8px;
+  padding: 0.22rem 0.55rem;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #78350f;
+  letter-spacing: 0.04em;
+  min-width: 4.5rem;
+  text-align: center;
+  animation: blockTimePulse 1s ease infinite;
+}
+
+@keyframes blockTimePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .error-box.security-alert::before {
-  content: "[Security Alert]\A";
-  display: block;
-  font-weight: 700;
-  margin-bottom: 0.2rem;
-  white-space: pre;
+  display: none;
 }
 
 .toast {
@@ -1351,4 +1413,83 @@ hr {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ── Vault Expiry Countdown ─────────────────────────────────────────── */
+.vault-countdown {
+  align-items: center;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  border-radius: 999px;
+  color: #1d4ed8;
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 700;
+  gap: 0.35rem;
+  padding: 0.34rem 0.7rem;
+  transition: background 300ms, color 300ms, border-color 300ms;
+}
+
+.vault-countdown i {
+  height: 0.9rem;
+  width: 0.9rem;
+}
+
+.vault-countdown.expiring-soon {
+  animation: pulse-warn 1.4s ease infinite;
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(217, 119, 6, 0.4);
+  color: #92400e;
+}
+
+.vault-countdown.expired {
+  background: rgba(225, 29, 72, 0.1);
+  border-color: rgba(225, 29, 72, 0.3);
+  color: #9f1239;
+}
+
+@keyframes pulse-warn {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ── QR Code Modal ──────────────────────────────────────────────────── */
+.qr-modal-overlay {
+  align-items: center;
+  backdrop-filter: blur(8px);
+  background: rgba(10, 18, 40, 0.48);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1.5rem;
+  position: fixed;
+  z-index: 50;
+}
+
+.qr-modal-box {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: 340px;
+  padding: 1.5rem;
+  text-align: center;
+  width: 100%;
+}
+
+.qr-modal-box h3 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.vault-code {
+  background: #eef3fb;
+  border: 1px solid #d2e0f5;
+  border-radius: 10px;
+  color: #1d3c65;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0.9rem;
 }

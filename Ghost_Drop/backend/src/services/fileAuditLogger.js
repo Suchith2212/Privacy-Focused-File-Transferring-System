@@ -89,8 +89,6 @@ async function buildAuditPayload(entry) {
     ...out
   };
 
-  delete payload.severity;
-  payload.severity = out.severity || "INFO";
   return payload;
 }
 

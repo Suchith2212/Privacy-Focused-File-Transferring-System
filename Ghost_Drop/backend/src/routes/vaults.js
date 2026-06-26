@@ -11,24 +11,18 @@ const {
   isBase62
 } = require("../services/crypto");
 const {
-  checkRateLimit,
-  checkRouteRateLimit,
-  recordAttempt,
   recordFailure,
-  recordRouteAttempt,
   clearFailure,
-  isBlocked,
-  blockedRemainingSeconds,
   shouldRequireCaptcha,
-  verifyCaptcha,
-  isCaptchaSolved,
-  getClientIp,
-  evaluateIpRisk
+  isCaptchaSolved
 } = require("../services/security");
+const securityGate = require("../middleware/securityGate");
 const { logAuthAttempt, upsertExpiryJob } = require("../services/auditService");
 const { ensureRelativePathColumn } = require("../services/filePathSchema");
+const logger = require("../config/logger");
 
 const router = express.Router();
+
 
 function validateInnerToken(innerToken) {
   if (typeof innerToken !== "string") return false;
@@ -50,102 +44,12 @@ function getRemainingSeconds(expiresAt) {
   return Math.max(0, remaining);
 }
 
-async function precheckSecurity(req, res, routeKey = "default") {
-  const ip = getClientIp(req);
-  let captchaSolved = await isCaptchaSolved(ip);
-
-  if (await isBlocked(ip)) {
-    const blockedSeconds = await blockedRemainingSeconds(ip);
-    if (blockedSeconds > 0) {
-      res.set("Retry-After", String(blockedSeconds));
-    }
-    res.status(429).json({
-      error: "Temporarily blocked due to repeated failures.",
-      code: "TEMP_BLOCK",
-      blockedSeconds,
-      captchaRequired: true
-    });
-    return { ok: false, ip };
-  }
-
-  const risk = await evaluateIpRisk({ routeKey, ip, captchaSolved });
-  if (risk.blocked) {
-    res.status(403).json({
-      error: "Request blocked by risk policy.",
-      code: "RISK_BLOCK",
-      captchaRequired: true,
-      riskScore: risk.risk.score,
-      riskSignals: risk.risk.reasons
-    });
-    return { ok: false, ip };
-  }
-
-  const captchaNeededByFailures = await shouldRequireCaptcha(ip);
-  if ((captchaNeededByFailures || risk.requireCaptcha) && !captchaSolved) {
-    const challengeId = req.body?.captchaChallengeId || req.query?.captchaChallengeId;
-    const captchaAnswer = req.body?.captchaAnswer || req.query?.captchaAnswer;
-    const providerToken = req.body?.providerToken || req.body?.captchaToken || req.query?.captchaToken;
-
-    if ((!challengeId || !captchaAnswer) && !providerToken) {
-      res.status(403).json({
-        error: "Captcha required.",
-        code: "CAPTCHA_REQUIRED",
-        captchaRequired: true,
-        riskScore: risk.risk.score,
-        riskSignals: risk.risk.reasons
-      });
-      return { ok: false, ip };
-    }
-
-    const out = await verifyCaptcha({ ip, challengeId, answer: captchaAnswer, providerToken });
-    if (!out.ok) {
-      res.status(403).json({
-        error: out.reason,
-        code: "CAPTCHA_INVALID",
-        captchaRequired: true,
-        retryAfterSeconds: out.retryAfterSeconds || 0
-      });
-      return { ok: false, ip };
-    }
-
-    captchaSolved = true;
-  }
-
-  await recordAttempt(ip);
-  await recordRouteAttempt(routeKey, ip);
-
-  const rate = await checkRateLimit(ip);
-  const routeRate = await checkRouteRateLimit(routeKey, ip);
-  if ((rate.overMinute || rate.overDay || routeRate.overMinute || routeRate.overDay) && !captchaSolved) {
-    const retryAfter = Math.max(
-      rate.resetMinuteSeconds,
-      rate.resetDaySeconds,
-      routeRate.resetMinuteSeconds,
-      routeRate.resetDaySeconds,
-      1
-    );
-    res.set("Retry-After", String(retryAfter));
-    res.status(429).json({
-      error: "Rate limit exceeded.",
-      code: routeRate.overMinute || routeRate.overDay ? "ROUTE_RATE_LIMIT" : "RATE_LIMIT",
-      minuteCount: rate.minuteCount,
-      dayCount: rate.dayCount,
-      minuteLimit: rate.minuteLimit,
-      dayLimit: rate.dayLimit,
-      routeMinuteCount: routeRate.minuteCount,
-      routeDayCount: routeRate.dayCount,
-      routeMinuteLimit: routeRate.minuteLimit,
-      routeDayLimit: routeRate.dayLimit,
-      retryAfterSeconds: retryAfter,
-      captchaRequired: true
-    });
-    return { ok: false, ip };
-  }
-
-  return { ok: true, ip, risk };
-}
 
 async function resolveVault(outerToken) {
+  // Bug 15: Reject obviously malformed tokens before hitting the DB
+  if (!outerToken || typeof outerToken !== "string" || outerToken.length > 50 || !/^[A-Za-z0-9]+$/.test(outerToken)) {
+    return null;
+  }
   const rows = await query(
     `
     SELECT vault_id, outer_token, status, created_at, expires_at
@@ -158,6 +62,7 @@ async function resolveVault(outerToken) {
   return rows[0];
 }
 
+
 router.post("/", async (req, res) => {
   try {
     const { innerToken, expiresInDays = 7 } = req.body;
@@ -165,8 +70,7 @@ router.post("/", async (req, res) => {
     if (!validateInnerToken(innerToken)) {
       await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
       return res.status(400).json({
-        error:
-          "Invalid innerToken. It must be 10-20 chars, base62 only (0-9, A-Z, a-z)."
+        error: "Invalid innerToken. It must be 10-20 chars, base62 only (0-9, A-Z, a-z)."
       });
     }
 
@@ -179,7 +83,8 @@ router.post("/", async (req, res) => {
     const vaultId = uuidv4();
     const outerToken = await generateUniqueOuterToken();
     const mainTokenId = uuidv4();
-    const { tokenHash, salt, iterations } = hashInnerToken(innerToken);
+    // hashInnerToken is now async — await to avoid blocking event loop
+    const { tokenHash, salt, iterations } = await hashInnerToken(innerToken);
     const tokenLookupHash = computeTokenLookupHash(innerToken);
 
     await query(
@@ -209,22 +114,24 @@ router.post("/", async (req, res) => {
       expiresInDays: days
     });
   } catch (err) {
+    logger.error({ err }, "Failed to create vault");
     await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
     return res.status(500).json({ error: err.message || "Failed to create vault." });
   }
 });
 
-router.get("/:outerToken/public-info", async (req, res) => {
+
+router.get("/:outerToken/public-info", securityGate("vault.public-info"), async (req, res) => {
   try {
-    const sec = await precheckSecurity(req, res, "vault.public-info");
-    if (!sec.ok) return;
+    const sec = req.securityContext;
 
     const { outerToken } = req.params;
     const vault = await resolveVault(outerToken);
     if (!vault) {
-      await recordFailure(sec.ip);
+      // Bug 12: weight:2 for vault enumeration; Bug 7: don't leak captcha status in 404
+      await recordFailure(sec.ip, { weight: 2, reason: "VAULT_NOT_FOUND" });
       await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
-      return res.status(404).json({ error: "Vault not found.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
+      return res.status(404).json({ error: "Vault not found." });
     }
 
     const activeFiles = await query(
@@ -252,10 +159,9 @@ router.get("/:outerToken/public-info", async (req, res) => {
   }
 });
 
-router.post("/:outerToken/access", async (req, res) => {
+router.post("/:outerToken/access", securityGate("vault.access"), async (req, res) => {
   try {
-    const sec = await precheckSecurity(req, res, "vault.access");
-    if (!sec.ok) return;
+    const sec = req.securityContext;
     await ensureRelativePathColumn();
 
     const { outerToken } = req.params;
@@ -267,16 +173,17 @@ router.post("/:outerToken/access", async (req, res) => {
 
     const vault = await resolveVault(outerToken);
     if (!vault) {
-      await recordFailure(sec.ip);
+      // Bug 12: weight:2 for vault enumeration; Bug 7: no captcha info leak
+      await recordFailure(sec.ip, { weight: 2, reason: "VAULT_NOT_FOUND" });
       await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
-      return res.status(404).json({ error: "Vault not found.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
+      return res.status(404).json({ error: "Vault not found." });
     }
 
     const isActive = vault.status === "ACTIVE" && new Date(vault.expires_at) > new Date();
     if (!isActive) {
-      await recordFailure(sec.ip);
+      await recordFailure(sec.ip, { weight: 1, reason: "VAULT_EXPIRED" });
       await logAuthAttempt({ req, vaultId: vault.vault_id, success: false }).catch(() => {});
-      return res.status(403).json({ error: "Vault expired or inactive.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
+      return res.status(403).json({ error: "Vault expired or inactive." });
     }
 
     const tokenRows = await query(
@@ -291,7 +198,7 @@ router.post("/:outerToken/access", async (req, res) => {
     let matchedToken = null;
     for (const tokenRow of tokenRows) {
       if (
-        verifyInnerToken(innerToken, tokenRow.token_hash, tokenRow.salt, tokenRow.key_iterations)
+        await verifyInnerToken(innerToken, tokenRow.token_hash, tokenRow.salt, tokenRow.key_iterations)
       ) {
         matchedToken = tokenRow;
         break;
@@ -304,13 +211,15 @@ router.post("/:outerToken/access", async (req, res) => {
         SELECT inner_token_id, token_type, token_hash, salt, key_iterations, status, token_lookup_hash
         FROM inner_tokens
         WHERE vault_id = ? AND status = 'ACTIVE'
+        LIMIT 20
         `,
         [vault.vault_id]
       );
 
+      // Bug 11: Limit fallback iteration to prevent timing oracle with many tokens
       for (const tokenRow of fallbackRows) {
         if (
-          verifyInnerToken(innerToken, tokenRow.token_hash, tokenRow.salt, tokenRow.key_iterations)
+          await verifyInnerToken(innerToken, tokenRow.token_hash, tokenRow.salt, tokenRow.key_iterations)
         ) {
           matchedToken = tokenRow;
           if (!tokenRow.token_lookup_hash) {
@@ -329,9 +238,10 @@ router.post("/:outerToken/access", async (req, res) => {
     }
 
     if (!matchedToken) {
-      await recordFailure(sec.ip);
+      await recordFailure(sec.ip, { weight: 2, reason: "INVALID_INNER_TOKEN" });
       await logAuthAttempt({ req, vaultId: vault.vault_id, success: false }).catch(() => {});
-      return res.status(401).json({ error: "Invalid inner token.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
+      const captchaRequired = await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip);
+      return res.status(401).json({ error: "Invalid inner token.", captchaRequired });
     }
 
     const files = await query(
@@ -369,11 +279,10 @@ router.post("/:outerToken/access", async (req, res) => {
   }
 });
 
-router.post("/:outerToken/sub-tokens", async (req, res) => {
+router.post("/:outerToken/sub-tokens", securityGate("vault.subtoken-create"), async (req, res) => {
   const conn = await getConnection();
   try {
-    const sec = await precheckSecurity(req, res, "vault.subtoken-create");
-    if (!sec.ok) return;
+    const sec = req.securityContext;
 
     const { outerToken } = req.params;
     const { mainInnerToken, subInnerToken, fileIds = [] } = req.body;
@@ -399,15 +308,15 @@ router.post("/:outerToken/sub-tokens", async (req, res) => {
     const vaultRows = await resolveVault(outerToken);
 
     if (!vaultRows) {
-      await recordFailure(sec.ip);
+      await recordFailure(sec.ip, { weight: 2, reason: "VAULT_NOT_FOUND" });
       await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
-      return res.status(404).json({ error: "Vault not found.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
+      return res.status(404).json({ error: "Vault not found." });
     }
     const vault = vaultRows;
     if (vault.status !== "ACTIVE" || new Date(vault.expires_at) <= new Date()) {
-      await recordFailure(sec.ip);
+      await recordFailure(sec.ip, { weight: 1, reason: "VAULT_EXPIRED" });
       await logAuthAttempt({ req, vaultId: vault.vault_id, success: false }).catch(() => {});
-      return res.status(403).json({ error: "Vault expired or inactive.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
+      return res.status(403).json({ error: "Vault expired or inactive." });
     }
 
     const mainRows = await query(
@@ -424,10 +333,11 @@ router.post("/:outerToken/sub-tokens", async (req, res) => {
     }
 
     const main = mainRows[0];
-    if (!verifyInnerToken(mainInnerToken, main.token_hash, main.salt, main.key_iterations)) {
-      await recordFailure(sec.ip);
+    if (!await verifyInnerToken(mainInnerToken, main.token_hash, main.salt, main.key_iterations)) {
+      await recordFailure(sec.ip, { weight: 2, reason: "INVALID_MAIN_TOKEN" });
       await logAuthAttempt({ req, vaultId: vault.vault_id, success: false }).catch(() => {});
-      return res.status(401).json({ error: "Invalid MAIN token.", captchaRequired: await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip) });
+      const captchaRequired = await shouldRequireCaptcha(sec.ip) && !await isCaptchaSolved(sec.ip);
+      return res.status(401).json({ error: "Invalid MAIN token.", captchaRequired });
     }
 
     const placeholders = fileIds.map(() => "?").join(",");
@@ -454,7 +364,8 @@ router.post("/:outerToken/sub-tokens", async (req, res) => {
     await conn.beginTransaction();
 
     const subTokenId = uuidv4();
-    const { tokenHash, salt, iterations } = hashInnerToken(selectedSubInnerToken);
+    // hashInnerToken is now async
+    const { tokenHash, salt, iterations } = await hashInnerToken(selectedSubInnerToken);
     const tokenLookupHash = computeTokenLookupHash(selectedSubInnerToken);
     await conn.execute(
       `

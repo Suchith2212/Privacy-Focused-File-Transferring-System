@@ -6,17 +6,23 @@ const TEN_MINUTES = 10 * MINUTE;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * 60 * 60 * 1000;
 
+//IP based Rate Limiting
 const RATE_LIMIT_MINUTE = 10;
 const RATE_LIMIT_DAY = 100;
+//Principal (e.g. API key or user account) based Rate Limiting
 const PRINCIPAL_RATE_LIMIT_MINUTE = 60;
 const PRINCIPAL_RATE_LIMIT_DAY = 600;
+//Adaptive blocking thresholds
 const CAPTCHA_REQUIRED_FAILED_MINUTE = 8;
 const CAPTCHA_REQUIRED_WEIGHT_10M = 10;
+//Failure thresholds for imposing blocks
 const BLOCK_FAILED_MINUTE = 20;
 const BLOCK_WEIGHT_10M = 22;
+//Captcha parameters
 const CAPTCHA_SOLVE_TTL_MS = 10 * MINUTE;
 const CAPTCHA_CHALLENGE_TTL_MS = 5 * MINUTE;
 const CAPTCHA_MAX_ATTEMPTS = 5;
+//Adaptive block parameters
 const TEMP_BLOCK_BASE_MS = 15 * MINUTE;
 const TEMP_BLOCK_MAX_MS = 24 * HOUR;
 const BLOCK_STRIKE_WINDOW_MS = DAY;
@@ -56,7 +62,28 @@ function getCaptchaProvider() {
 }
 
 function shouldUseRedis() {
-  return String(process.env.SECURITY_STORE || "memory").trim().toLowerCase() === "redis";
+  const env = String(process.env.NODE_ENV || "development").toLowerCase();
+  const fallback = env === "production" ? "redis" : "memory";
+  return String(process.env.SECURITY_STORE || fallback).trim().toLowerCase() === "redis";
+}
+
+async function assertSecurityStoreSafe() {
+  const env = String(process.env.NODE_ENV || "development").toLowerCase();
+  if (env !== "production") return;
+
+  if (!shouldUseRedis()) {
+    throw new Error("SECURITY_STORE=redis is required in production.");
+  }
+
+  const redisUrl = String(process.env.REDIS_URL || "").trim();
+  if (!redisUrl) {
+    throw new Error("REDIS_URL must be configured in production when SECURITY_STORE=redis.");
+  }
+
+  const redis = await getRedisClient();
+  if (!redis) {
+    throw new Error("Unable to connect to Redis in production.");
+  }
 }
 
 async function getRedisClient() {
@@ -296,6 +323,9 @@ async function recordFailure(ip, options = {}) {
     weight = 1,
     reason = "GENERIC_FAILURE"
   } = options;
+
+  // Revoke captcha solved status immediately on failure to prevent brute force attempts during the solved window
+  await delValue("captchaSolvedUntilByIp", ip);
 
   const minuteFailures = await incrWindow("failedMinute", ip, MINUTE, 1);
   await incrWindow("failedWeighted", ip, TEN_MINUTES, Math.max(1, Number(weight) || 1));
@@ -584,10 +614,11 @@ async function evaluateIpRisk({ routeKey = "default", ip, captchaSolved = false 
   };
 }
 
+// Bug 6 FIX: renamed local var to weight10m to avoid shadowing the failureWeight10m function
 async function getSecurityStatus(ip) {
   const rate = await checkRateLimit(ip);
   const failureCountMinute = await getWindowCount("failedMinute", ip, MINUTE);
-  const failureWeight10m = await failureWeight10m(ip);
+  const weight10m = await failureWeight10m(ip);
 
   const blocked = await isBlocked(ip);
   const captchaSolved = await isCaptchaSolved(ip);
@@ -599,7 +630,7 @@ async function getSecurityStatus(ip) {
     captchaRequired,
     captchaSolved,
     failureCountMinute,
-    failureWeight10m,
+    failureWeight10m: weight10m,
     lastFailureReason: (await getValue("lastFailureReason", ip)) || null,
     rate,
     captchaProvider: getCaptchaPublicConfig().provider,
@@ -687,6 +718,14 @@ async function inspectSecurityCounters({
   return diagnostics;
 }
 
+async function getSecurityStoreHealth() {
+  const redis = await getRedisClient();
+  return {
+    mode: shouldUseRedis() ? "redis" : "memory",
+    redisConnected: Boolean(redis)
+  };
+}
+
 function getClientIp(req) {
   const xff = req.headers["x-forwarded-for"];
   const trustProxy = typeof req.app?.get === "function" ? req.app.get("trust proxy") : false;
@@ -697,6 +736,7 @@ function getClientIp(req) {
 }
 
 module.exports = {
+  assertSecurityStoreSafe,
   checkRateLimit,
   checkPrincipalRateLimit,
   checkRouteRateLimit,
@@ -716,5 +756,6 @@ module.exports = {
   getCaptchaPublicConfig,
   getIpRiskScore,
   evaluateIpRisk,
-  inspectSecurityCounters
+  inspectSecurityCounters,
+  getSecurityStoreHealth
 };

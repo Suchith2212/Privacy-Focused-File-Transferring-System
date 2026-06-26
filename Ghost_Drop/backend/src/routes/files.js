@@ -126,6 +126,10 @@ async function getActiveVaultUsageBytes(vaultId) {
 }
 
 async function resolveVaultByOuterToken(outerToken) {
+  // Bug 15: Reject malformed outer tokens immediately
+  if (!outerToken || typeof outerToken !== "string" || outerToken.length > 50 || !/^[A-Za-z0-9]+$/.test(outerToken)) {
+    return null;
+  }
   const rows = await query(
     `
     SELECT vault_id, status, expires_at
@@ -167,6 +171,12 @@ function securityErrorPayload(message, extra = {}) {
     error: message,
     ...extra
   };
+}
+
+// Bug 9: RFC 5987-compliant Content-Disposition filename encoding
+function buildContentDisposition(filename) {
+  const safe = String(filename || "file").replace(/["\\]/g, "_");
+  return `attachment; filename="${safe}"; filename*=UTF-8''${encodeURIComponent(filename || "file")}`;
 }
 
 function sanitizeArchiveFilename(filename, fallback = "file.bin") {
@@ -533,7 +543,7 @@ async function verifyTokenForVault(vaultId, innerToken) {
   );
 
   for (const tokenRow of indexedRows) {
-    const ok = verifyInnerToken(
+    const ok = await verifyInnerToken(
       innerToken,
       tokenRow.token_hash,
       tokenRow.salt,
@@ -552,7 +562,7 @@ async function verifyTokenForVault(vaultId, innerToken) {
   );
 
   for (const tokenRow of fallbackRows) {
-    const ok = verifyInnerToken(
+    const ok = await verifyInnerToken(
       innerToken,
       tokenRow.token_hash,
       tokenRow.salt,
@@ -630,7 +640,7 @@ router.post("/new-vault-upload", upload.array("files"), async (req, res) => {
     const outerToken = await generateUniqueOuterToken();
     const vaultId = uuidv4();
     const mainTokenId = uuidv4();
-    const { tokenHash, salt, iterations } = hashInnerToken(innerToken);
+    const { tokenHash, salt, iterations } = await hashInnerToken(innerToken);
     const tokenLookupHash = computeTokenLookupHash(innerToken);
     uploadedDriveFiles = await mapWithConcurrency(files, UPLOAD_CONCURRENCY, async (file, index) => {
       const validation = await validateUploadFile(file);
@@ -993,19 +1003,34 @@ router.post("/:outerToken/upload", upload.array("files"), async (req, res) => {
   }
 });
 
-router.get("/:outerToken/list", async (req, res) => {
+// Bug 13: Support both GET (query param, backward compat) and POST (body, no token in URL)
+async function handleListFiles(req, res) {
   try {
     await ensureRelativePathColumn();
     const { outerToken } = req.params;
-    const innerToken = req.query.innerToken;
+    // Bug 13: Read innerToken from body (POST) first, then query param (GET), then Authorization header
+    const innerToken = req.body?.innerToken ||
+      req.query.innerToken ||
+      (req.headers.authorization?.startsWith("Bearer ") ? req.headers.authorization.slice(7) : null);
 
-    if (!innerToken) return res.status(400).json({ error: "innerToken query parameter is required." });
+    if (!innerToken) return res.status(400).json({ error: "innerToken is required." });
+
+    // Apply rate limiting and brute-force protection to the list endpoint
+    const sec = await precheckSecurity(req, res, "files.download");
+    if (!sec.ok) return;
 
     const vault = await resolveVaultByOuterToken(outerToken);
-    if (!vault) return res.status(404).json({ error: "Active vault not found." });
+    if (!vault) {
+      await recordFailure(sec.ip, { weight: 2, reason: "VAULT_NOT_FOUND" });
+      return res.status(404).json({ error: "Active vault not found." });
+    }
 
     const token = await verifyTokenForVault(vault.vault_id, innerToken);
-    if (!token) return res.status(401).json({ error: "Invalid inner token." });
+    if (!token) {
+      await recordFailure(sec.ip, { weight: 2, reason: "INVALID_INNER_TOKEN" });
+      const captchaRequired = await shouldRequireCaptcha(sec.ip);
+      return res.status(401).json({ error: "Invalid inner token.", captchaRequired });
+    }
 
     const files = await query(
       `
@@ -1027,6 +1052,7 @@ router.get("/:outerToken/list", async (req, res) => {
       [vault.vault_id, token.inner_token_id]
     );
 
+    await clearFailure(sec.ip);
     return res.json({ 
       files, 
       tokenType: token.token_type, 
@@ -1036,11 +1062,19 @@ router.get("/:outerToken/list", async (req, res) => {
   } catch (err) {
     return res.status(500).json({ error: err.message || "Failed to fetch file list." });
   }
-});
+}
+
+router.get("/:outerToken/list", handleListFiles);
+router.post("/:outerToken/list", handleListFiles);
+
 
 router.post("/:outerToken/sub-tokens", async (req, res) => {
   const conn = await getConnection();
   try {
+    // Bug 3: Apply security gate to sub-token creation
+    const sec = await precheckSecurity(req, res, "files.subtoken-create");
+    if (!sec.ok) return;
+
     await ensureSubTokenSecretsTable();
     await ensureRelativePathColumn();
     await ensureFileCryptoColumns();
@@ -1067,21 +1101,18 @@ router.post("/:outerToken/sub-tokens", async (req, res) => {
       return res.status(403).json({ error: "Only the main token can create sub-tokens." });
     }
 
-    // Check if sub-token already exists for this vault
-    const existing = await query(
-      "SELECT inner_token_id FROM inner_tokens WHERE vault_id = ? AND status = 'ACTIVE'",
-      [vault.vault_id]
+    // Bug 8: O(1) duplicate check via lookup hash instead of N+1 PBKDF2 iteration
+    const lookupHash = computeTokenLookupHash(subInnerToken);
+    const existingDup = await query(
+      "SELECT inner_token_id FROM inner_tokens WHERE token_lookup_hash = ? AND vault_id = ? AND status = 'ACTIVE' LIMIT 1",
+      [lookupHash, vault.vault_id]
     );
-    
-    for (const row of existing) {
-      const tokenRow = (await query("SELECT token_hash, salt, key_iterations FROM inner_tokens WHERE inner_token_id = ?", [row.inner_token_id]))[0];
-      if (verifyInnerToken(subInnerToken, tokenRow.token_hash, tokenRow.salt, tokenRow.key_iterations)) {
-        return res.status(409).json({ error: "This sub-token already exists for this vault." });
-      }
+    if (existingDup.length > 0) {
+      return res.status(409).json({ error: "This sub-token already exists for this vault." });
     }
 
     const subTokenId = uuidv4();
-    const { tokenHash, salt, iterations } = hashInnerToken(subInnerToken);
+    const { tokenHash, salt, iterations } = await hashInnerToken(subInnerToken);
     const tokenLookupHash = computeTokenLookupHash(subInnerToken);
 
     await conn.beginTransaction();
@@ -1195,6 +1226,10 @@ router.post("/:outerToken/sub-tokens", async (req, res) => {
 
 router.get("/:outerToken/sub-tokens", async (req, res) => {
   try {
+    // Bug 3: Apply security gate to sub-token listing
+    const sec = await precheckSecurity(req, res, "files.subtoken-create");
+    if (!sec.ok) return;
+
     await ensureSubTokenSecretsTable();
     const { outerToken } = req.params;
     const { mainInnerToken } = req.query;
@@ -1204,6 +1239,7 @@ router.get("/:outerToken/sub-tokens", async (req, res) => {
 
     const mainToken = await verifyTokenForVault(vault.vault_id, mainInnerToken);
     if (!mainToken || mainToken.token_type !== 'MAIN') {
+      await recordFailure(sec.ip, { weight: 2, reason: "INVALID_MAIN_TOKEN" });
       return res.status(403).json({ error: "Access denied." });
     }
 
@@ -1235,6 +1271,10 @@ router.get("/:outerToken/sub-tokens", async (req, res) => {
 router.put("/:outerToken/sub-tokens/:tokenId/files", async (req, res) => {
   const conn = await getConnection();
   try {
+    // Bug 3: Apply security gate to sub-token file updates
+    const sec = await precheckSecurity(req, res, "files.subtoken-update");
+    if (!sec.ok) return;
+
     await ensureFileCryptoColumns();
     const { outerToken, tokenId } = req.params;
     const { mainInnerToken, fileIds } = req.body;
@@ -1248,6 +1288,7 @@ router.put("/:outerToken/sub-tokens/:tokenId/files", async (req, res) => {
 
     const mainToken = await verifyTokenForVault(vault.vault_id, mainInnerToken);
     if (!mainToken || mainToken.token_type !== "MAIN") {
+      await recordFailure(sec.ip, { weight: 2, reason: "INVALID_MAIN_TOKEN" });
       return res.status(403).json({ error: "Access denied." });
     }
 
@@ -1381,7 +1422,7 @@ router.put("/:outerToken/sub-tokens/:tokenId/secret", async (req, res) => {
     }
 
     const subToken = subRows[0];
-    const ok = verifyInnerToken(subInnerToken, subToken.token_hash, subToken.salt, subToken.key_iterations);
+    const ok = await verifyInnerToken(subInnerToken, subToken.token_hash, subToken.salt, subToken.key_iterations);
     if (!ok) {
       return res.status(401).json({ error: "Provided sub token value does not match this token." });
     }
@@ -1398,11 +1439,12 @@ router.put("/:outerToken/sub-tokens/:tokenId/secret", async (req, res) => {
   }
 });
 
-router.get("/:outerToken/sub-tokens/:tokenId/reveal", async (req, res) => {
+// Bug 14: Changed from GET with query param to POST with body to avoid token-in-URL
+router.post("/:outerToken/sub-tokens/:tokenId/reveal", async (req, res) => {
   try {
     await ensureSubTokenSecretsTable();
     const { outerToken, tokenId } = req.params;
-    const mainInnerToken = String(req.query?.mainInnerToken || "");
+    const mainInnerToken = String(req.body?.mainInnerToken || "");
 
     if (!mainInnerToken) {
       return res.status(400).json({ error: "mainInnerToken is required." });
@@ -1809,25 +1851,15 @@ router.post("/:fileId/download", async (req, res) => {
     await clearFailure(sec.ip);
 
     deleteFile(dbFile.drive_file_id).catch(() => {
-      // Best-effort cleanup for prototype.
+      // Best-effort cleanup.
     });
 
+    // Bug 9: Use RFC 5987 Content-Disposition encoding
     res.setHeader("Content-Type", dbFile.mime_type || "application/octet-stream");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${encodeURIComponent(dbFile.original_filename)}"`
-    );
+    res.setHeader("Content-Disposition", buildContentDisposition(dbFile.original_filename));
     return res.send(responseBuffer);
   } catch (err) {
-    if (err.code === "FILE_VALIDATION_FAILED" || err.statusCode === 400) {
-      await recordFailure(sec?.ip || getClientIp(req));
-      for (const item of uploadedDriveFiles) {
-        if (item?.drive?.id) {
-          await deleteFile(item.drive.id).catch(() => {});
-        }
-      }
-      return res.status(400).json({ error: err.message, code: "FILE_VALIDATION_FAILED" });
-    }
+    // Bug 1: Removed invalid reference to uploadedDriveFiles (not in scope here)
     await logAuthAttempt({ req, vaultId: null, success: false }).catch(() => {});
     await conn.rollback();
     return res.status(500).json({ error: err.message || "Download failed." });

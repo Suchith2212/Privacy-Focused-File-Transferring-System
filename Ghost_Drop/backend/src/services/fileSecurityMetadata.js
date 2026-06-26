@@ -3,8 +3,11 @@ const {
   randomBytes,
   createCipheriv,
   createDecipheriv,
-  pbkdf2Sync
+  pbkdf2
 } = require("crypto");
+const { promisify } = require("util");
+
+const pbkdf2Async = promisify(pbkdf2);
 
 const DEFAULT_FILE_KEY_WRAP_ITERATIONS = 200000;
 const FILE_KEY_WRAP_VERSION = 1;
@@ -19,17 +22,17 @@ function buildFileIv() {
   return randomBytes(12).toString("hex");
 }
 
-function buildFileHmac(buffer, saltInput) {
-  const salt = typeof saltInput === "string" ? saltInput : String(saltInput || "");
-  return createHash("sha256").update(buffer).update(":").update(salt).digest("hex");
-}
-
 function buildPlainFileHash(buffer) {
   return createHash("sha256").update(buffer).digest("hex");
 }
 
 function generateFileKey() {
   return randomBytes(32);
+}
+
+function buildFileHmac(buffer, saltInput) {
+  const salt = typeof saltInput === "string" ? saltInput : String(saltInput || "");
+  return createHash("sha256").update(buffer).update(":").update(salt).digest("hex");
 }
 
 function encryptFileBuffer(buffer, fileKey) {
@@ -51,8 +54,8 @@ function decryptFileBuffer(ciphertext, fileKey, ivHex, authTagHex) {
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
 }
 
-function deriveWrappingKey(tokenValue, wrapSaltHex, iterations) {
-  return pbkdf2Sync(
+async function deriveWrappingKey(tokenValue, wrapSaltHex, iterations) {
+  return pbkdf2Async(
     String(tokenValue),
     Buffer.from(wrapSaltHex, "hex"),
     Number(iterations),
@@ -61,11 +64,11 @@ function deriveWrappingKey(tokenValue, wrapSaltHex, iterations) {
   );
 }
 
-function wrapFileKeyForToken(fileKey, tokenValue) {
+async function wrapFileKeyForToken(fileKey, tokenValue) {
   const wrapIterations = Number(process.env.FILE_KEY_WRAP_ITERATIONS || DEFAULT_FILE_KEY_WRAP_ITERATIONS);
   const wrapSaltHex = randomBytes(16).toString("hex");
   const wrapIvHex = buildFileIv();
-  const wrappingKey = deriveWrappingKey(tokenValue, wrapSaltHex, wrapIterations);
+  const wrappingKey = await deriveWrappingKey(tokenValue, wrapSaltHex, wrapIterations);
 
   const cipher = createCipheriv("aes-256-gcm", wrappingKey, Buffer.from(wrapIvHex, "hex"));
   const wrappedFileKeyHex = Buffer.concat([cipher.update(fileKey), cipher.final()]).toString("hex");
@@ -81,12 +84,12 @@ function wrapFileKeyForToken(fileKey, tokenValue) {
   };
 }
 
-function unwrapFileKeyForToken(wrappedFileKeyHex, tokenValue, wrapMeta) {
+async function unwrapFileKeyForToken(wrappedFileKeyHex, tokenValue, wrapMeta) {
   if (!wrappedFileKeyHex || !wrapMeta?.wrapIvHex || !wrapMeta?.wrapTagHex || !wrapMeta?.wrapSaltHex) {
     throw new Error("Wrapped file key metadata is incomplete.");
   }
 
-  const wrappingKey = deriveWrappingKey(
+  const wrappingKey = await deriveWrappingKey(
     tokenValue,
     wrapMeta.wrapSaltHex,
     Number(wrapMeta.wrapIterations || DEFAULT_FILE_KEY_WRAP_ITERATIONS)
